@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 const SHEET_URL =
   "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/App%20Feed";
@@ -16,9 +16,7 @@ function tierClass(rank) {
 
 function moveBadge(move) {
   const n = Number(move);
-  if (Number.isNaN(n)) {
-    return { label: String(move ?? "•"), className: "move move-flat" };
-  }
+  if (Number.isNaN(n)) return { label: String(move ?? "•"), className: "move move-flat" };
   if (n > 0) return { label: `▲ ${n}`, className: "move move-up" };
   if (n < 0) return { label: `▼ ${Math.abs(n)}`, className: "move move-down" };
   return { label: "•", className: "move move-flat" };
@@ -109,8 +107,6 @@ export default function Home() {
     };
   }, []);
 
-  const topPlayers = useMemo(() => players.slice(0, 16), [players]);
-
   return (
     <main className="app-shell">
       <div className="bg-glow bg-glow-1" />
@@ -123,7 +119,12 @@ export default function Home() {
             <h1 className="title">Live Rankings</h1>
             <p className="subtitle">Hybrid esports UI powered by your Google Sheet</p>
           </div>
-          <div className="hero-chip">Top 16</div>
+          <div style={{ display: "flex", gap: 10 }}>
+            <div className="hero-chip">Top 16</div>
+            <a href="/match-center" className="hero-chip" style={{ textDecoration: "none" }}>
+              Match Center
+            </a>
+          </div>
         </div>
 
         {loading ? (
@@ -142,7 +143,7 @@ export default function Home() {
           </div>
         ) : (
           <div className="list">
-            {topPlayers.map((player, index) => (
+            {players.map((player, index) => (
               <PlayerCard key={`${player.PLAYER}-${player.RANK}-${index}`} player={player} index={index} />
             ))}
           </div>
