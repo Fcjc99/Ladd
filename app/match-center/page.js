@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 
 const SHEET_URL =
-  "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/CHALLENGE%20MATCHES";
+  "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/Match%20Feed";
 
 function fallbackAvatar(name = "") {
   const letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
@@ -20,7 +20,7 @@ function fallbackAvatar(name = "") {
 function statusClass(status = "") {
   const s = String(status).toLowerCase();
   if (s.includes("active")) return "mc-status mc-active";
-  if (s.includes("scheduled")) return "mc-status mc-scheduled"; 
+  if (s.includes("scheduled")) return "mc-status mc-scheduled";
   if (s.includes("completed")) return "mc-status mc-completed";
   return "mc-status mc-default";
 }
@@ -36,12 +36,7 @@ export default function MatchCenterPage() {
         const res = await fetch(SHEET_URL, { cache: "no-store" });
         const data = await res.json();
         if (!mounted) return;
-
-        const clean = Array.isArray(data)
-          ? data.filter((m) => (m.Challenger || m.CHALLENGER || m["Challenger"] || m["CHALLENGER"]))
-          : [];
-
-        setMatches(clean);
+        setMatches(Array.isArray(data) ? data : []);
       } catch {
         if (mounted) setMatches([]);
       }
@@ -74,17 +69,15 @@ export default function MatchCenterPage() {
 
         <div className="list">
           {matches.map((m, i) => {
-            const challenger =
-              m.Challenger || m.CHALLENGER || m["Challenger"] || m["CHALLENGER"] || "Challenger";
-            const opponent =
-              m.Opponent || m.OPPONENT || m["Opponent"] || m["OPPONENT"] || "Opponent";
-            const status = m.Status || m.STATUS || "Pending";
-            const approval = m.Approval || m.APPROVAL || "";
-            const eligible = m["Eligible?"] || m.Eligible || "";
-            const winner = m["ENTER WINNER"] || m.Winner || "";
-            const score = m["ENTER SCORE"] || m.Score || "";
-            const date = m["ENTER DATE"] || m.Date || "";
-            const time = m["ENTER TIME"] || m.Time || "";
+            const challenger = m.CHALLENGER || "Challenger";
+            const opponent = m.OPPONENT || "Opponent";
+            const status = m.STATUS || "Pending";
+            const approval = m.APPROVAL || "-";
+            const eligible = m.ELIGIBLE || "-";
+            const winner = m.WINNER || "-";
+            const score = m.SCORE || "-";
+            const date = m.DATE || "-";
+            const time = m.TIME || "-";
 
             return (
               <div
@@ -118,27 +111,27 @@ export default function MatchCenterPage() {
                 <div className="mc-grid">
                   <div className="mc-chip">
                     <div className="mc-label">Approval</div>
-                    <div className="mc-value">{approval || "-"}</div>
+                    <div className="mc-value">{approval}</div>
                   </div>
                   <div className="mc-chip">
                     <div className="mc-label">Eligible</div>
-                    <div className="mc-value">{eligible || "-"}</div>
+                    <div className="mc-value">{eligible}</div>
                   </div>
                   <div className="mc-chip">
                     <div className="mc-label">Date</div>
-                    <div className="mc-value">{date || "-"}</div>
+                    <div className="mc-value">{date}</div>
                   </div>
                   <div className="mc-chip">
                     <div className="mc-label">Time</div>
-                    <div className="mc-value">{time || "-"}</div>
+                    <div className="mc-value">{time}</div>
                   </div>
                   <div className="mc-chip">
                     <div className="mc-label">Winner</div>
-                    <div className="mc-value">{winner || "-"}</div>
+                    <div className="mc-value">{winner}</div>
                   </div>
                   <div className="mc-chip">
                     <div className="mc-label">Score</div>
-                    <div className="mc-value">{score || "-"}</div>
+                    <div className="mc-value">{score}</div>
                   </div>
                 </div>
               </div>
