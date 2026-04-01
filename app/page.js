@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [players,setPlayers]=useState([]);
-  const SHEET_URL="https://docs.google.com/spreadsheets/d/1OkaDVGt1ZO79V1FNmTUP1st-cNiiTBZn/edit?gid=26052738#gid=26052738";
+  const SHEET_URL="const SHEET_URL = "https://opensheet.elk.sh/1OkaDVGt1ZO79V1FNmTUP1st-cNiiTBZn/Live%20Ranking";";
 
   useEffect(()=>{
     fetch(SHEET_URL).then(r=>r.json()).then(setPlayers);
