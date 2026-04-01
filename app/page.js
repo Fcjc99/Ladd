@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 
 export default function Home() {
   const [players,setPlayers]=useState([]);
-const SHEET_URL = "https://opensheet.elk.sh/1RFCQrPj8Jfvr8QILT8ss2vldVZccXbSjiJolOYW3i5A/App%20Data";
+const SHEET_URL = "https://opensheet.elk.sh/1zoH3KnR8sAh51XwOo5rDdK51OqcI5SXG1F_LTvtmTGk/App%20Data";
   useEffect(()=>{
     fetch(SHEET_URL).then(r=>r.json()).then(setPlayers);
   },[]);
