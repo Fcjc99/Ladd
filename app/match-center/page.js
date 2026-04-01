@@ -20,7 +20,7 @@ function fallbackAvatar(name = "") {
 function statusClass(status = "") {
   const s = String(status).toLowerCase();
   if (s.includes("active")) return "mc-status mc-active";
-  if (s.includes("scheduled")) return "mc-status mc-scheduled";
+  if (s.includes("scheduled")) return "mc-status mc-scheduled"; 
   if (s.includes("completed")) return "mc-status mc-completed";
   return "mc-status mc-default";
 }
