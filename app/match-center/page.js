@@ -196,12 +196,19 @@ export default function Page() {
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
-          <input
-            placeholder="Winner"
-            value={resultForm.winner}
-            onChange={(e) => setResultForm({ ...resultForm, winner: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
+          <select
+  value={resultForm.winner}
+  onChange={(e) => setResultForm({ ...resultForm, winner: e.target.value })}
+  style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+>
+  <option value="">Select winner</option>
+  {resultForm.challenger && (
+    <option value={resultForm.challenger}>{resultForm.challenger}</option>
+  )}
+  {resultForm.opponent && (
+    <option value={resultForm.opponent}>{resultForm.opponent}</option>
+  )}
+</select>
 
           <input
             placeholder="Score"
