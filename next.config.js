@@ -1,1 +1,4 @@
-NEXT_PUBLIC_GOOGLE_SHEET_ID=1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ
+/** @type {import('next').NextConfig} */
+const nextConfig = {}
+
+module.exports = nextConfig
