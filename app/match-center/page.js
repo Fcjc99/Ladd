@@ -26,7 +26,6 @@ export default function Page() {
   const [scoreForms, setScoreForms] = useState({})
 
   const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
-  const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
   function normalize(value) {
     return String(value || '').trim().toLowerCase()
@@ -38,10 +37,6 @@ export default function Page() {
     if (Number.isNaN(date.getTime())) return ''
     date.setDate(date.getDate() + days)
     return date.toISOString().split('T')[0]
-  }
-
-  function pairKey(a, b) {
-    return [normalize(a), normalize(b)].sort().join('__')
   }
 
   async function loadData() {
@@ -127,7 +122,7 @@ export default function Page() {
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action: 'challenge',
@@ -146,12 +141,7 @@ export default function Page() {
         throw new Error(data.error || 'Challenge submit failed')
       }
 
-      if (data.approval === 'Denied') {
-        setChallengeMessage(data.eligible || 'Challenge denied')
-      } else {
-        setChallengeMessage('Challenge submitted successfully')
-      }
-
+      setChallengeMessage('Challenge submitted successfully')
       setChallengeForm({
         challenger: '',
         challenger_rank: '',
@@ -184,10 +174,11 @@ export default function Page() {
 
   async function handleResultSubmit(e, match) {
     e.preventDefault()
-    setSubmittingResultId(match.match_id || match.challenger + match.opponent)
+    const id = match.match_id || `${match.challenger}-${match.opponent}`
+    setSubmittingResultId(id)
     setResultMessage('')
 
-    const form = scoreForms[match.match_id || match.challenger + match.opponent] || {
+    const form = scoreForms[id] || {
       winner: '',
       score: '',
       submitted_by: '',
@@ -197,7 +188,7 @@ export default function Page() {
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: {
-          'Content-Type': 'text/plain;charset=utf-8',
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           action: 'match',
