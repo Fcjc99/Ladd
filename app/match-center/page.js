@@ -74,9 +74,9 @@ export default function Page() {
       setError('')
 
       const res = await fetch(
-        `https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`,
-        { cache: 'no-store' }
-      )
+  `https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`,
+  { cache: 'no-store' }
+)
 
       if (!res.ok) throw new Error(`Failed to fetch CHALLENGE MATCHES (${res.status})`)
 
