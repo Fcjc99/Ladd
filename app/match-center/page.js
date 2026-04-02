@@ -2,9 +2,27 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
+const PLAYERS = [
+  { player: 'Sophia', rank: '1' },
+  { player: 'Skye', rank: '2' },
+  { player: 'Viv', rank: '3' },
+  { player: 'Julia', rank: '4' },
+  { player: 'Clara', rank: '5' },
+  { player: 'Caroline', rank: '6' },
+  { player: 'Christi', rank: '7' },
+  { player: 'Logan', rank: '8' },
+  { player: 'Ella', rank: '9' },
+  { player: 'Elizabeth', rank: '10' },
+  { player: 'Karen', rank: '11' },
+  { player: 'Aislinn', rank: '12' },
+  { player: 'Christyc', rank: '13' },
+  { player: 'Bree', rank: '14' },
+  { player: 'Ellie', rank: '15' },
+  { player: 'Julianna', rank: '16' },
+]
+
 export default function Page() {
   const [matches, setMatches] = useState([])
-  const [players, setPlayers] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -53,39 +71,29 @@ export default function Page() {
     return date.toISOString().split('T')[0]
   }
 
+  async function tryFetchJson(url) {
+    const res = await fetch(`${url}?t=${Date.now()}`, { cache: 'no-store' })
+    if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`)
+    return res.json()
+  }
+
   async function loadData() {
     try {
       setLoading(true)
+      setError('')
 
-      const [matchesRes, playersRes] = await Promise.all([
-        fetch(
-          `https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`,
-          { cache: 'no-store' }
-        ),
-        fetch(
-          `https://opensheet.elk.sh/${sheetId}/PlayersFeed?t=${Date.now()}`,
-          { cache: 'no-store' }
-        ),
-      ])
+      let matchesData = []
 
-      if (!matchesRes.ok) {
-        throw new Error(`Failed to fetch CHALLENGE MATCHES (${matchesRes.status})`)
+      try {
+        matchesData = await tryFetchJson(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
+      } catch {
+        matchesData = await tryFetchJson(`https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES`)
       }
-
-      if (!playersRes.ok) {
-        throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
-      }
-
-      const [matchesData, playersData] = await Promise.all([
-        matchesRes.json(),
-        playersRes.json(),
-      ])
 
       setMatches(matchesData)
-      setPlayers(playersData)
-      setError('')
     } catch (err) {
-      setError(err.message || 'Unknown error')
+      setMatches([])
+      setError(err.message || 'Failed to fetch matches')
     } finally {
       setLoading(false)
     }
@@ -95,27 +103,21 @@ export default function Page() {
     loadData()
   }, [])
 
-  const playerNames = useMemo(() => {
-    return players
-      .map((p) => String(getField(p, 'player') || '').trim())
-      .filter(Boolean)
-  }, [players])
-
+  const playerNames = useMemo(() => PLAYERS.map((p) => p.player), [])
   const playerRankMap = useMemo(() => {
     const map = {}
-    players.forEach((p) => {
-      const name = String(getField(p, 'player') || '').trim()
-      if (name) map[name] = String(getField(p, 'rank') || '').trim()
+    PLAYERS.forEach((p) => {
+      map[p.player] = p.rank
     })
     return map
-  }, [players])
+  }, [])
 
   const activeMatches = useMemo(() => {
     return matches.filter((m) => {
-      const eligible = normalize(getField(m, 'Eligible?', 'eligible'))
-      const approval = normalize(getField(m, 'Approval', 'approval'))
-      const status = normalize(getField(m, 'Status', 'status'))
-      const active = normalize(getField(m, 'Active?', 'active'))
+      const eligible = normalize(getField(m, 'eligible', 'eligible?', 'Eligible?'))
+      const approval = normalize(getField(m, 'approval', 'Approval'))
+      const status = normalize(getField(m, 'status', 'Status'))
+      const active = normalize(getField(m, 'active', 'active?', 'Active?'))
 
       return (
         eligible === 'eligible' &&
@@ -129,8 +131,8 @@ export default function Page() {
   const busyPlayers = useMemo(() => {
     const set = new Set()
     activeMatches.forEach((m) => {
-      const challenger = String(getField(m, 'Challenger', 'challenger') || '').trim()
-      const opponent = String(getField(m, 'Opponent', 'opponent') || '').trim()
+      const challenger = String(getField(m, 'challenger', 'Challenger') || '').trim()
+      const opponent = String(getField(m, 'opponent', 'Opponent') || '').trim()
       if (challenger) set.add(challenger)
       if (opponent) set.add(opponent)
     })
@@ -143,7 +145,7 @@ export default function Page() {
   )
 
   const completedMatches = useMemo(() => {
-    return matches.filter((m) => normalize(getField(m, 'Status', 'status')) === 'completed')
+    return matches.filter((m) => normalize(getField(m, 'status', 'Status')) === 'completed')
   }, [matches])
 
   async function handleChallengeSubmit(e) {
@@ -154,9 +156,7 @@ export default function Page() {
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'challenge',
           challenger: challengeForm.challenger,
@@ -209,7 +209,7 @@ export default function Page() {
     e.preventDefault()
     const id =
       getField(match, 'match_id') ||
-      `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+      `${getField(match, 'challenger', 'Challenger')}-${getField(match, 'opponent', 'Opponent')}`
 
     setSubmittingResultId(id)
     setResultMessage('')
@@ -223,13 +223,11 @@ export default function Page() {
     try {
       const res = await fetch('/api/submit', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'match',
-          challenger: getField(match, 'Challenger', 'challenger'),
-          opponent: getField(match, 'Opponent', 'opponent'),
+          challenger: getField(match, 'challenger', 'Challenger'),
+          opponent: getField(match, 'opponent', 'Opponent'),
           winner: form.winner,
           score: form.score,
           submitted_by: form.submitted_by,
@@ -388,7 +386,7 @@ export default function Page() {
                 {activeMatches.map((match) => {
                   const id =
                     getField(match, 'match_id') ||
-                    `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+                    `${getField(match, 'challenger', 'Challenger')}-${getField(match, 'opponent', 'Opponent')}`
 
                   const form = scoreForms[id] || {
                     winner: '',
@@ -409,32 +407,32 @@ export default function Page() {
                       >
                         <div>
                           <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                            {getField(match, 'Challenger', 'challenger')}{' '}
+                            {getField(match, 'challenger', 'Challenger')}{' '}
                             <span style={{ color: '#6b7280' }}>vs</span>{' '}
-                            {getField(match, 'Opponent', 'opponent')}
+                            {getField(match, 'opponent', 'Opponent')}
                           </div>
                           <div style={detailStyle}>
-                            Date: {getField(match, 'ENTER DATE', 'match_date') || '—'}
+                            Date: {getField(match, 'enter date', 'match_date', 'ENTER DATE') || '—'}
                           </div>
                           <div style={detailStyle}>
-                            Deadline: {getField(match, 'Deadline', 'deadline') || '—'}
+                            Deadline: {getField(match, 'deadline', 'Deadline') || '—'}
                           </div>
                           <div style={detailStyle}>
                             Challenger Rank:{' '}
-                            {getField(match, 'Challenger Rank', 'challenger_rank') || '—'}
+                            {getField(match, 'challenger rank', 'challenger_rank', 'Challenger Rank') || '—'}
                           </div>
                           <div style={detailStyle}>
                             Opponent Rank:{' '}
-                            {getField(match, 'Opponent Rank', 'opponent_rank') || '—'}
+                            {getField(match, 'opponent rank', 'opponent_rank', 'Opponent Rank') || '—'}
                           </div>
                           <div style={detailStyle}>
-                            Approval: {getField(match, 'Approval', 'approval') || '—'}
+                            Approval: {getField(match, 'approval', 'Approval') || '—'}
                           </div>
                           <div style={detailStyle}>
-                            Eligible: {getField(match, 'Eligible?', 'eligible') || '—'}
+                            Eligible: {getField(match, 'eligible', 'eligible?', 'Eligible?') || '—'}
                           </div>
                           <div style={detailStyle}>
-                            Status: {getField(match, 'Status', 'status') || '—'}
+                            Status: {getField(match, 'status', 'Status') || '—'}
                           </div>
                         </div>
 
@@ -462,11 +460,11 @@ export default function Page() {
                               style={inputStyle}
                             >
                               <option value="">Select winner</option>
-                              <option value={getField(match, 'Challenger', 'challenger')}>
-                                {getField(match, 'Challenger', 'challenger')}
+                              <option value={getField(match, 'challenger', 'Challenger')}>
+                                {getField(match, 'challenger', 'Challenger')}
                               </option>
-                              <option value={getField(match, 'Opponent', 'opponent')}>
-                                {getField(match, 'Opponent', 'opponent')}
+                              <option value={getField(match, 'opponent', 'Opponent')}>
+                                {getField(match, 'opponent', 'Opponent')}
                               </option>
                             </select>
 
@@ -513,23 +511,23 @@ export default function Page() {
                 {completedMatches.map((match) => {
                   const id =
                     getField(match, 'match_id') ||
-                    `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+                    `${getField(match, 'challenger', 'Challenger')}-${getField(match, 'opponent', 'Opponent')}`
 
                   return (
                     <div key={id} style={cardStyle}>
                       <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                        {getField(match, 'Challenger', 'challenger')}{' '}
+                        {getField(match, 'challenger', 'Challenger')}{' '}
                         <span style={{ color: '#6b7280' }}>vs</span>{' '}
-                        {getField(match, 'Opponent', 'opponent')}
+                        {getField(match, 'opponent', 'Opponent')}
                       </div>
                       <div style={detailStyle}>
-                        Date: {getField(match, 'ENTER DATE', 'match_date') || '—'}
+                        Date: {getField(match, 'enter date', 'match_date', 'ENTER DATE') || '—'}
                       </div>
                       <div style={detailStyle}>
-                        Winner: {getField(match, 'ENTER WINNER', 'winner') || '—'}
+                        Winner: {getField(match, 'enter winner', 'winner', 'ENTER WINNER') || '—'}
                       </div>
                       <div style={detailStyle}>
-                        Score: {getField(match, 'ENTER SCORE', 'score') || '—'}
+                        Score: {getField(match, 'enter score', 'score', 'ENTER SCORE') || '—'}
                       </div>
                     </div>
                   )
