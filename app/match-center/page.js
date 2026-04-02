@@ -138,7 +138,7 @@ export default function Page() {
       const data = await res.json()
 
       if (!data.success) {
-        throw new Error(data.error || 'Challenge submit failed')
+        throw new Error(data.error || data.raw || 'Challenge submit failed')
       }
 
       setChallengeMessage('Challenge submitted successfully')
@@ -203,7 +203,7 @@ export default function Page() {
       const data = await res.json()
 
       if (!data.success) {
-        throw new Error(data.error || 'Result submit failed')
+        throw new Error(data.error || data.raw || 'Result submit failed')
       }
 
       setResultMessage('Result submitted successfully')
