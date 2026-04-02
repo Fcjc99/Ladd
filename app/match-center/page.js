@@ -1,5 +1,4 @@
-import { getChallengeMatches } from '@/lib/sheets'
-
+import { getChallengeMatches } from '../../lib/sheets'
 export default async function Page() {
   const matches = await getChallengeMatches()
 
