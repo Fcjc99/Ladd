@@ -20,6 +20,7 @@ export default function Page() {
     opponent: '',
     opponent_rank: '',
     match_date: '',
+    deadline: '',
   })
 
   const [resultForm, setResultForm] = useState({
@@ -88,16 +89,25 @@ export default function Page() {
     )
   }, [players])
 
+  function addDays(dateString, days) {
+    if (!dateString) return ''
+    const date = new Date(dateString + 'T00:00:00')
+    if (Number.isNaN(date.getTime())) return ''
+    date.setDate(date.getDate() + days)
+    return date.toISOString().split('T')[0]
+  }
+
   async function handleChallengeSubmit(e) {
     e.preventDefault()
     setSubmittingChallenge(true)
     setChallengeMessage('')
 
     try {
-      const res = await fetch(submitUrl, {
+      await fetch(submitUrl, {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify({
           action: 'challenge',
@@ -108,16 +118,12 @@ export default function Page() {
           approval: 'Pending',
           eligible: 'Eligible',
           match_date: challengeForm.match_date,
-          deadline: '',
+          deadline: challengeForm.deadline,
           winner: '',
           score: '',
           status: 'Scheduled',
         }),
       })
-
-      if (!res.ok) {
-        throw new Error(`Challenge submit failed (${res.status})`)
-      }
 
       setChallengeMessage('Challenge submitted successfully')
       setChallengeForm({
@@ -126,7 +132,12 @@ export default function Page() {
         opponent: '',
         opponent_rank: '',
         match_date: '',
+        deadline: '',
       })
+
+      setTimeout(() => {
+        loadData()
+      }, 1500)
     } catch (err) {
       setChallengeMessage(err.message || 'Challenge submit failed')
     } finally {
@@ -140,20 +151,17 @@ export default function Page() {
     setResultMessage('')
 
     try {
-      const res = await fetch(submitUrl, {
+      await fetch(submitUrl, {
         method: 'POST',
+        mode: 'no-cors',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'text/plain;charset=utf-8',
         },
         body: JSON.stringify({
           action: 'match',
           ...resultForm,
         }),
       })
-
-      if (!res.ok) {
-        throw new Error(`Result submit failed (${res.status})`)
-      }
 
       setResultMessage('Result submitted successfully')
       setResultForm({
@@ -163,6 +171,10 @@ export default function Page() {
         score: '',
         submitted_by: '',
       })
+
+      setTimeout(() => {
+        loadData()
+      }, 1500)
     } catch (err) {
       setResultMessage(err.message || 'Result submit failed')
     } finally {
@@ -240,11 +252,22 @@ export default function Page() {
           <input
             type="date"
             value={challengeForm.match_date}
-            onChange={(e) =>
-              setChallengeForm({ ...challengeForm, match_date: e.target.value })
-            }
+            onChange={(e) => {
+              const matchDate = e.target.value
+              setChallengeForm({
+                ...challengeForm,
+                match_date: matchDate,
+                deadline: addDays(matchDate, 7),
+              })
+            }}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
+
+          {challengeForm.deadline && (
+            <div style={{ fontSize: 14, color: '#aaa' }}>
+              Deadline: {challengeForm.deadline}
+            </div>
+          )}
 
           <button
             type="submit"
