@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Page() {
   const [matches, setMatches] = useState([])
-  const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -36,10 +35,8 @@ export default function Page() {
 
   async function loadData() {
     try {
-      const [matchesRes, playersRes] = await Promise.all([
-        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
-        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
-      ])
+      const matchesRes = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
+      const playersRes = await fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`)
 
       if (!matchesRes.ok) {
         throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
@@ -53,7 +50,16 @@ export default function Page() {
       const playersData = await playersRes.json()
 
       setMatches(matchesData)
-      setPlayers(playersData)
+
+      const playerMap = {}
+      playersData.forEach((p) => {
+        if (p.player) {
+          playerMap[p.player.trim()] = p.rank || ''
+        }
+      })
+
+      window.playerRankMap = playerMap
+      window.playerNames = playersData.map((p) => p.player).filter(Boolean)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -66,23 +72,6 @@ export default function Page() {
     loadData()
   }, [])
 
-  const playerNames = useMemo(() => {
-    return players
-      .map((p) => (p.player || '').trim())
-      .filter(Boolean)
-  }, [players])
-
-  const playerMap = useMemo(() => {
-    return Object.fromEntries(
-      players.map((p) => [
-        (p.player || '').trim(),
-        {
-          rank: p.rank || '',
-        },
-      ])
-    )
-  }, [players])
-
   function addDays(dateString, days) {
     if (!dateString) return ''
     const date = new Date(dateString + 'T00:00:00')
@@ -90,6 +79,9 @@ export default function Page() {
     date.setDate(date.getDate() + days)
     return date.toISOString().split('T')[0]
   }
+
+  const playerNames = window.playerNames || []
+  const playerRankMap = window.playerRankMap || {}
 
   async function handleChallengeSubmit(e) {
     e.preventDefault()
@@ -109,7 +101,7 @@ export default function Page() {
           challenger_rank: challengeForm.challenger_rank,
           opponent: challengeForm.opponent,
           opponent_rank: challengeForm.opponent_rank,
-          approval: 'Pending',
+          approval: 'Approved',
           eligible: 'Eligible',
           match_date: challengeForm.match_date,
           deadline: challengeForm.deadline,
@@ -176,8 +168,17 @@ export default function Page() {
     }
   }
 
-  const activeMatches = matches.filter((m) => (m.active || '').trim() === 'Active')
-  const completedMatches = matches.filter((m) => (m.status || '').trim() === 'Completed')
+  const activeMatches = matches.filter((m) => {
+    const eligible = (m.eligible || '').trim().toLowerCase()
+    const approval = (m.approval || '').trim().toLowerCase()
+    const status = (m.status || '').trim().toLowerCase()
+
+    return eligible === 'eligible' && approval === 'approved' && status !== 'completed'
+  })
+
+  const completedMatches = matches.filter(
+    (m) => (m.status || '').trim().toLowerCase() === 'completed'
+  )
 
   return (
     <div style={{ padding: 24, color: 'white', background: 'black', minHeight: '100vh' }}>
@@ -194,7 +195,7 @@ export default function Page() {
               setChallengeForm({
                 ...challengeForm,
                 challenger: name,
-                challenger_rank: playerMap[name]?.rank || '',
+                challenger_rank: playerRankMap[name] || '',
                 opponent: challengeForm.opponent === name ? '' : challengeForm.opponent,
                 opponent_rank: challengeForm.opponent === name ? '' : challengeForm.opponent_rank,
               })
@@ -222,7 +223,7 @@ export default function Page() {
               setChallengeForm({
                 ...challengeForm,
                 opponent: name,
-                opponent_rank: playerMap[name]?.rank || '',
+                opponent_rank: playerRankMap[name] || '',
               })
             }}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
