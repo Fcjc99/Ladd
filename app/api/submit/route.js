@@ -1,5 +1,5 @@
 export async function POST(request) {
-  try {
+  try { 
     const body = await request.json()
     const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
