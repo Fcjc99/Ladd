@@ -5,15 +5,11 @@ async function getSheet(tab: string) {
     throw new Error('Missing NEXT_PUBLIC_GOOGLE_SHEET_ID')
   }
 
-  const res = await fetch(
-    `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(tab)}`,
-    {
-      next: { revalidate: 30 },
-    }
-  )
+  const url = `https://opensheet.elk.sh/${SHEET_ID}/${encodeURIComponent(tab)}`
+  const res = await fetch(url, { cache: 'no-store' })
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch sheet: ${tab}`)
+    throw new Error(`Failed to fetch sheet: ${tab} (${res.status})`)
   }
 
   return res.json()
