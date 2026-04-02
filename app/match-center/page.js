@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 export default function Page() {
   const [matches, setMatches] = useState([])
+  const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -35,15 +36,24 @@ export default function Page() {
 
   async function loadData() {
     try {
-      const matchesRes = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
+      const [matchesRes, playersRes] = await Promise.all([
+        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
+        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
+      ])
 
       if (!matchesRes.ok) {
         throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
       }
 
+      if (!playersRes.ok) {
+        throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
+      }
+
       const matchesData = await matchesRes.json()
+      const playersData = await playersRes.json()
 
       setMatches(matchesData)
+      setPlayers(playersData)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -57,35 +67,21 @@ export default function Page() {
   }, [])
 
   const playerNames = useMemo(() => {
-    const names = new Set()
-
-    matches.forEach((m) => {
-      if (m.challenger) names.add(m.challenger.trim())
-      if (m.opponent) names.add(m.opponent.trim())
-    })
-
-    return Array.from(names).filter(Boolean).sort()
-  }, [matches])
+    return players
+      .map((p) => (p.player || '').trim())
+      .filter(Boolean)
+  }, [players])
 
   const playerMap = useMemo(() => {
-    const map = {}
-
-    matches.forEach((m) => {
-      if (m.challenger) {
-        map[m.challenger.trim()] = {
-          rank: m.challenger_rank || map[m.challenger.trim()]?.rank || '',
-        }
-      }
-
-      if (m.opponent) {
-        map[m.opponent.trim()] = {
-          rank: m.opponent_rank || map[m.opponent.trim()]?.rank || '',
-        }
-      }
-    })
-
-    return map
-  }, [matches])
+    return Object.fromEntries(
+      players.map((p) => [
+        (p.player || '').trim(),
+        {
+          rank: p.rank || '',
+        },
+      ])
+    )
+  }, [players])
 
   function addDays(dateString, days) {
     if (!dateString) return ''
