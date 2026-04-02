@@ -1,8 +1,8 @@
-'use client' 
+use client'
 
 import { useEffect, useMemo, useState } from 'react'
 
-const PLAYERS = [ 
+const PLAYERS = [
   { player: 'Sophia', rank: '1' },
   { player: 'Skye', rank: '2' },
   { player: 'Viv', rank: '3' },
@@ -62,10 +62,10 @@ export default function Page() {
       setLoading(true)
       setError('')
 
-const res = await fetch(
-  `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`,
-  { cache: 'no-store' }
-)
+      const res = await fetch(
+        `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`,
+        { cache: 'no-store' }
+      )
 
       if (!res.ok) {
         throw new Error(`Failed to fetch ChallengeFeed (${res.status})`)
