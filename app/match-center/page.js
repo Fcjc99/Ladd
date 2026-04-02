@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react'
 
 export default function Page() {
   const [matches, setMatches] = useState([])
-  const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -36,24 +35,15 @@ export default function Page() {
 
   async function loadData() {
     try {
-      const [matchesRes, playersRes] = await Promise.all([
-        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
-        fetch(`https://opensheet.elk.sh/${sheetId}/App%20Feed`),
-      ])
+      const matchesRes = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
 
       if (!matchesRes.ok) {
         throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
       }
 
-      if (!playersRes.ok) {
-        throw new Error(`Failed to fetch App Feed (${playersRes.status})`)
-      }
-
       const matchesData = await matchesRes.json()
-      const playersData = await playersRes.json()
 
       setMatches(matchesData)
-      setPlayers(playersData)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -66,45 +56,36 @@ export default function Page() {
     loadData()
   }, [])
 
-  function getPlayerName(row) {
-    return (
-      row.player ||
-      row.name ||
-      row.Player ||
-      row.Name ||
-      row.player_name ||
-      row.PlayerName ||
-      Object.values(row).find(
-        (v) => typeof v === 'string' && v.trim() && isNaN(Number(v.trim()))
-      ) ||
-      ''
-    ).trim()
-  }
-
-  function getPlayerRank(row) {
-    return row.rank || row.Rank || ''
-  }
-
   const playerNames = useMemo(() => {
-    return players.map((p) => getPlayerName(p)).filter(Boolean)
-  }, [players])
+    const names = new Set()
+
+    matches.forEach((m) => {
+      if (m.challenger) names.add(m.challenger.trim())
+      if (m.opponent) names.add(m.opponent.trim())
+    })
+
+    return Array.from(names).filter(Boolean).sort()
+  }, [matches])
 
   const playerMap = useMemo(() => {
-    return Object.fromEntries(
-      players.map((p) => {
-        const name = getPlayerName(p)
-        return [
-          name,
-          {
-            rank: getPlayerRank(p),
-            photo: p.photo || '',
-            flag: p.flag || '',
-            status: p.status || '',
-          },
-        ]
-      })
-    )
-  }, [players])
+    const map = {}
+
+    matches.forEach((m) => {
+      if (m.challenger) {
+        map[m.challenger.trim()] = {
+          rank: m.challenger_rank || map[m.challenger.trim()]?.rank || '',
+        }
+      }
+
+      if (m.opponent) {
+        map[m.opponent.trim()] = {
+          rank: m.opponent_rank || map[m.opponent.trim()]?.rank || '',
+        }
+      }
+    })
+
+    return map
+  }, [matches])
 
   function addDays(dateString, days) {
     if (!dateString) return ''
