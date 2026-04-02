@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-const SHEET_URL =
-  "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/Match%20Feed";
+const SHEET_URL = "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/Match%20Feed";
 
 function fallbackAvatar(name = "") {
   const letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
