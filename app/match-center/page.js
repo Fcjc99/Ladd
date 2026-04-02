@@ -31,6 +31,20 @@ export default function Page() {
     return String(value || '').trim().toLowerCase()
   }
 
+  function getField(row, ...names) {
+    if (!row) return ''
+
+    for (const name of names) {
+      if (row[name] !== undefined) return row[name]
+
+      const target = normalize(name)
+      const foundKey = Object.keys(row).find((key) => normalize(key) === target)
+      if (foundKey) return row[foundKey]
+    }
+
+    return ''
+  }
+
   function addDays(dateString, days) {
     if (!dateString) return ''
     const date = new Date(dateString + 'T00:00:00')
@@ -43,21 +57,31 @@ export default function Page() {
     try {
       setLoading(true)
 
-      const [feedRes, playersRes] = await Promise.all([
-        fetch(`https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`, {
-          cache: 'no-store',
-        }),
-        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed?t=${Date.now()}`, {
-          cache: 'no-store',
-        }),
+      const [matchesRes, playersRes] = await Promise.all([
+        fetch(
+          `https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`,
+          { cache: 'no-store' }
+        ),
+        fetch(
+          `https://opensheet.elk.sh/${sheetId}/PlayersFeed?t=${Date.now()}`,
+          { cache: 'no-store' }
+        ),
       ])
 
-      if (!feedRes.ok) throw new Error(`Failed to fetch ChallengeFeed (${feedRes.status})`)
-      if (!playersRes.ok) throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
+      if (!matchesRes.ok) {
+        throw new Error(`Failed to fetch CHALLENGE MATCHES (${matchesRes.status})`)
+      }
 
-      const [feedData, playersData] = await Promise.all([feedRes.json(), playersRes.json()])
+      if (!playersRes.ok) {
+        throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
+      }
 
-      setMatches(feedData)
+      const [matchesData, playersData] = await Promise.all([
+        matchesRes.json(),
+        playersRes.json(),
+      ])
+
+      setMatches(matchesData)
       setPlayers(playersData)
       setError('')
     } catch (err) {
@@ -73,33 +97,42 @@ export default function Page() {
 
   const playerNames = useMemo(() => {
     return players
-      .map((p) => String(p.player || '').trim())
+      .map((p) => String(getField(p, 'player') || '').trim())
       .filter(Boolean)
   }, [players])
 
   const playerRankMap = useMemo(() => {
     const map = {}
     players.forEach((p) => {
-      const name = String(p.player || '').trim()
-      if (name) map[name] = p.rank || ''
+      const name = String(getField(p, 'player') || '').trim()
+      if (name) map[name] = String(getField(p, 'rank') || '').trim()
     })
     return map
   }, [players])
 
   const activeMatches = useMemo(() => {
     return matches.filter((m) => {
-      const eligible = normalize(m.eligible)
-      const approval = normalize(m.approval)
-      const status = normalize(m.status)
-      return eligible === 'eligible' && approval === 'approved' && status !== 'completed'
+      const eligible = normalize(getField(m, 'Eligible?', 'eligible'))
+      const approval = normalize(getField(m, 'Approval', 'approval'))
+      const status = normalize(getField(m, 'Status', 'status'))
+      const active = normalize(getField(m, 'Active?', 'active'))
+
+      return (
+        eligible === 'eligible' &&
+        approval === 'approved' &&
+        status !== 'completed' &&
+        active !== 'inactive'
+      )
     })
   }, [matches])
 
   const busyPlayers = useMemo(() => {
     const set = new Set()
     activeMatches.forEach((m) => {
-      if (m.challenger) set.add(m.challenger)
-      if (m.opponent) set.add(m.opponent)
+      const challenger = String(getField(m, 'Challenger', 'challenger') || '').trim()
+      const opponent = String(getField(m, 'Opponent', 'opponent') || '').trim()
+      if (challenger) set.add(challenger)
+      if (opponent) set.add(opponent)
     })
     return set
   }, [activeMatches])
@@ -110,7 +143,7 @@ export default function Page() {
   )
 
   const completedMatches = useMemo(() => {
-    return matches.filter((m) => normalize(m.status) === 'completed')
+    return matches.filter((m) => normalize(getField(m, 'Status', 'status')) === 'completed')
   }, [matches])
 
   async function handleChallengeSubmit(e) {
@@ -174,7 +207,10 @@ export default function Page() {
 
   async function handleResultSubmit(e, match) {
     e.preventDefault()
-    const id = match.match_id || `${match.challenger}-${match.opponent}`
+    const id =
+      getField(match, 'match_id') ||
+      `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+
     setSubmittingResultId(id)
     setResultMessage('')
 
@@ -192,8 +228,8 @@ export default function Page() {
         },
         body: JSON.stringify({
           action: 'match',
-          challenger: match.challenger,
-          opponent: match.opponent,
+          challenger: getField(match, 'Challenger', 'challenger'),
+          opponent: getField(match, 'Opponent', 'opponent'),
           winner: form.winner,
           score: form.score,
           submitted_by: form.submitted_by,
@@ -350,7 +386,10 @@ export default function Page() {
 
               <div style={{ display: 'grid', gap: 18 }}>
                 {activeMatches.map((match) => {
-                  const id = match.match_id || `${match.challenger}-${match.opponent}`
+                  const id =
+                    getField(match, 'match_id') ||
+                    `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+
                   const form = scoreForms[id] || {
                     winner: '',
                     score: '',
@@ -370,20 +409,33 @@ export default function Page() {
                       >
                         <div>
                           <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                            {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
-                            {match.opponent}
-                          </div>
-                          <div style={detailStyle}>Date: {match.match_date || '—'}</div>
-                          <div style={detailStyle}>Deadline: {match.deadline || '—'}</div>
-                          <div style={detailStyle}>
-                            Challenger Rank: {match.challenger_rank || '—'}
+                            {getField(match, 'Challenger', 'challenger')}{' '}
+                            <span style={{ color: '#6b7280' }}>vs</span>{' '}
+                            {getField(match, 'Opponent', 'opponent')}
                           </div>
                           <div style={detailStyle}>
-                            Opponent Rank: {match.opponent_rank || '—'}
+                            Date: {getField(match, 'ENTER DATE', 'match_date') || '—'}
                           </div>
-                          <div style={detailStyle}>Approval: {match.approval || '—'}</div>
-                          <div style={detailStyle}>Eligible: {match.eligible || '—'}</div>
-                          <div style={detailStyle}>Status: {match.status || '—'}</div>
+                          <div style={detailStyle}>
+                            Deadline: {getField(match, 'Deadline', 'deadline') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Challenger Rank:{' '}
+                            {getField(match, 'Challenger Rank', 'challenger_rank') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Opponent Rank:{' '}
+                            {getField(match, 'Opponent Rank', 'opponent_rank') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Approval: {getField(match, 'Approval', 'approval') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Eligible: {getField(match, 'Eligible?', 'eligible') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Status: {getField(match, 'Status', 'status') || '—'}
+                          </div>
                         </div>
 
                         <div
@@ -410,8 +462,12 @@ export default function Page() {
                               style={inputStyle}
                             >
                               <option value="">Select winner</option>
-                              <option value={match.challenger}>{match.challenger}</option>
-                              <option value={match.opponent}>{match.opponent}</option>
+                              <option value={getField(match, 'Challenger', 'challenger')}>
+                                {getField(match, 'Challenger', 'challenger')}
+                              </option>
+                              <option value={getField(match, 'Opponent', 'opponent')}>
+                                {getField(match, 'Opponent', 'opponent')}
+                              </option>
                             </select>
 
                             <input
@@ -455,16 +511,26 @@ export default function Page() {
 
               <div style={{ display: 'grid', gap: 18 }}>
                 {completedMatches.map((match) => {
-                  const id = match.match_id || `${match.challenger}-${match.opponent}`
+                  const id =
+                    getField(match, 'match_id') ||
+                    `${getField(match, 'Challenger', 'challenger')}-${getField(match, 'Opponent', 'opponent')}`
+
                   return (
                     <div key={id} style={cardStyle}>
                       <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                        {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
-                        {match.opponent}
+                        {getField(match, 'Challenger', 'challenger')}{' '}
+                        <span style={{ color: '#6b7280' }}>vs</span>{' '}
+                        {getField(match, 'Opponent', 'opponent')}
                       </div>
-                      <div style={detailStyle}>Date: {match.match_date || '—'}</div>
-                      <div style={detailStyle}>Winner: {match.winner || '—'}</div>
-                      <div style={detailStyle}>Score: {match.score || '—'}</div>
+                      <div style={detailStyle}>
+                        Date: {getField(match, 'ENTER DATE', 'match_date') || '—'}
+                      </div>
+                      <div style={detailStyle}>
+                        Winner: {getField(match, 'ENTER WINNER', 'winner') || '—'}
+                      </div>
+                      <div style={detailStyle}>
+                        Score: {getField(match, 'ENTER SCORE', 'score') || '—'}
+                      </div>
                     </div>
                   )
                 })}
