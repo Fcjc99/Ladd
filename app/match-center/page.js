@@ -1,19 +1,24 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 export default function Page() {
   const [matches, setMatches] = useState([])
+  const [players, setPlayers] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
+
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
   const [challengeMessage, setChallengeMessage] = useState('')
+
   const [submittingResult, setSubmittingResult] = useState(false)
   const [resultMessage, setResultMessage] = useState('')
 
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
+    challenger_rank: '',
     opponent: '',
+    opponent_rank: '',
     match_date: '',
   })
 
@@ -28,12 +33,26 @@ export default function Page() {
   const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
   const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
-  async function loadMatches() {
+  async function loadData() {
     try {
-      const res = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
-      if (!res.ok) throw new Error(`Failed to fetch ChallengeFeed (${res.status})`)
-      const data = await res.json()
-      setMatches(data)
+      const [matchesRes, playersRes] = await Promise.all([
+        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
+        fetch(`https://opensheet.elk.sh/${sheetId}/App%20Feed`),
+      ])
+
+      if (!matchesRes.ok) {
+        throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
+      }
+
+      if (!playersRes.ok) {
+        throw new Error(`Failed to fetch App Feed (${playersRes.status})`)
+      }
+
+      const matchesData = await matchesRes.json()
+      const playersData = await playersRes.json()
+
+      setMatches(matchesData)
+      setPlayers(playersData)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -43,8 +62,31 @@ export default function Page() {
   }
 
   useEffect(() => {
-    loadMatches()
+    loadData()
   }, [])
+
+  const playerNames = useMemo(() => {
+    return players
+      .map((p) => (p.player || p.name || '').trim())
+      .filter(Boolean)
+  }, [players])
+
+  const playerMap = useMemo(() => {
+    return Object.fromEntries(
+      players.map((p) => {
+        const name = (p.player || p.name || '').trim()
+        return [
+          name,
+          {
+            rank: p.rank || '',
+            photo: p.photo || '',
+            flag: p.flag || '',
+            status: p.status || '',
+          },
+        ]
+      })
+    )
+  }, [players])
 
   async function handleChallengeSubmit(e) {
     e.preventDefault()
@@ -60,12 +102,12 @@ export default function Page() {
         body: JSON.stringify({
           action: 'challenge',
           challenger: challengeForm.challenger,
+          challenger_rank: challengeForm.challenger_rank,
           opponent: challengeForm.opponent,
-          match_date: challengeForm.match_date,
-          challenger_rank: '',
-          opponent_rank: '',
+          opponent_rank: challengeForm.opponent_rank,
           approval: 'Pending',
           eligible: 'Eligible',
+          match_date: challengeForm.match_date,
           deadline: '',
           winner: '',
           score: '',
@@ -80,7 +122,9 @@ export default function Page() {
       setChallengeMessage('Challenge submitted successfully')
       setChallengeForm({
         challenger: '',
+        challenger_rank: '',
         opponent: '',
+        opponent_rank: '',
         match_date: '',
       })
     } catch (err) {
@@ -137,26 +181,70 @@ export default function Page() {
         <h2 style={{ fontSize: 28, marginBottom: 16 }}>Submit Challenge</h2>
 
         <form onSubmit={handleChallengeSubmit} style={{ display: 'grid', gap: 12 }}>
-          <input
-            placeholder="Challenger name"
+          <select
             value={challengeForm.challenger}
-            onChange={(e) => setChallengeForm({ ...challengeForm, challenger: e.target.value })}
+            onChange={(e) => {
+              const name = e.target.value
+              setChallengeForm({
+                ...challengeForm,
+                challenger: name,
+                challenger_rank: playerMap[name]?.rank || '',
+                opponent: challengeForm.opponent === name ? '' : challengeForm.opponent,
+                opponent_rank: challengeForm.opponent === name ? '' : challengeForm.opponent_rank,
+              })
+            }}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
+          >
+            <option value="">Select challenger</option>
+            {playerNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
 
-          <input
-            placeholder="Opponent name"
+          {challengeForm.challenger_rank && (
+            <div style={{ fontSize: 14, color: '#aaa' }}>
+              Challenger Rank: {challengeForm.challenger_rank}
+            </div>
+          )}
+
+          <select
             value={challengeForm.opponent}
-            onChange={(e) => setChallengeForm({ ...challengeForm, opponent: e.target.value })}
+            onChange={(e) => {
+              const name = e.target.value
+              setChallengeForm({
+                ...challengeForm,
+                opponent: name,
+                opponent_rank: playerMap[name]?.rank || '',
+              })
+            }}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
+          >
+            <option value="">Select opponent</option>
+            {playerNames
+              .filter((name) => name !== challengeForm.challenger)
+              .map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+          </select>
+
+          {challengeForm.opponent_rank && (
+            <div style={{ fontSize: 14, color: '#aaa' }}>
+              Opponent Rank: {challengeForm.opponent_rank}
+            </div>
+          )}
 
           <input
-  type="date"
-  value={challengeForm.match_date}
-  onChange={(e) => setChallengeForm({ ...challengeForm, match_date: e.target.value })}
-  style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-/>
+            type="date"
+            value={challengeForm.match_date}
+            onChange={(e) =>
+              setChallengeForm({ ...challengeForm, match_date: e.target.value })
+            }
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
 
           <button
             type="submit"
@@ -182,33 +270,60 @@ export default function Page() {
         <h2 style={{ fontSize: 28, marginBottom: 16 }}>Report Result</h2>
 
         <form onSubmit={handleResultSubmit} style={{ display: 'grid', gap: 12 }}>
-          <input
-            placeholder="Challenger"
+          <select
             value={resultForm.challenger}
-            onChange={(e) => setResultForm({ ...resultForm, challenger: e.target.value })}
+            onChange={(e) =>
+              setResultForm({
+                ...resultForm,
+                challenger: e.target.value,
+                opponent: '',
+                winner: '',
+              })
+            }
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
-
-          <input
-            placeholder="Opponent"
-            value={resultForm.opponent}
-            onChange={(e) => setResultForm({ ...resultForm, opponent: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
+          >
+            <option value="">Select challenger</option>
+            {playerNames.map((name) => (
+              <option key={name} value={name}>
+                {name}
+              </option>
+            ))}
+          </select>
 
           <select
-  value={resultForm.winner}
-  onChange={(e) => setResultForm({ ...resultForm, winner: e.target.value })}
-  style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
->
-  <option value="">Select winner</option>
-  {resultForm.challenger && (
-    <option value={resultForm.challenger}>{resultForm.challenger}</option>
-  )}
-  {resultForm.opponent && (
-    <option value={resultForm.opponent}>{resultForm.opponent}</option>
-  )}
-</select>
+            value={resultForm.opponent}
+            onChange={(e) =>
+              setResultForm({
+                ...resultForm,
+                opponent: e.target.value,
+                winner: '',
+              })
+            }
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          >
+            <option value="">Select opponent</option>
+            {playerNames
+              .filter((name) => name !== resultForm.challenger)
+              .map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+          </select>
+
+          <select
+            value={resultForm.winner}
+            onChange={(e) => setResultForm({ ...resultForm, winner: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          >
+            <option value="">Select winner</option>
+            {resultForm.challenger && (
+              <option value={resultForm.challenger}>{resultForm.challenger}</option>
+            )}
+            {resultForm.opponent && (
+              <option value={resultForm.opponent}>{resultForm.opponent}</option>
+            )}
+          </select>
 
           <input
             placeholder="Score"
