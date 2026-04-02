@@ -3,10 +3,13 @@
 import { useEffect, useMemo, useState } from 'react'
 
 export default function Page() {
-  const [matches, setMatches] = useState([])
+  const [challengeFeed, setChallengeFeed] = useState([])
+  const [challengeSubmissions, setChallengeSubmissions] = useState([])
+  const [matchLog, setMatchLog] = useState([])
   const [players, setPlayers] = useState([])
-  const [error, setError] = useState('')
+
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
   const [challengeMessage, setChallengeMessage] = useState('')
@@ -36,18 +39,13 @@ export default function Page() {
     if (!row) return ''
     if (row[fieldName] !== undefined) return row[fieldName]
 
-    const target = fieldName.trim().toLowerCase()
-    const foundKey = Object.keys(row).find(
-      (key) => String(key || '').trim().toLowerCase() === target
-    )
-
+    const target = normalize(fieldName)
+    const foundKey = Object.keys(row).find((key) => normalize(key) === target)
     return foundKey ? row[foundKey] : ''
   }
 
   function pairKey(a, b) {
-    return [String(a || '').trim().toLowerCase(), String(b || '').trim().toLowerCase()]
-      .sort()
-      .join('__')
+    return [normalize(a), normalize(b)].sort().join('__')
   }
 
   function addDays(dateString, days) {
@@ -58,73 +56,29 @@ export default function Page() {
     return date.toISOString().split('T')[0]
   }
 
+  function fetchJson(url) {
+    const sep = url.includes('?') ? '&' : '?'
+    return fetch(`${url}${sep}t=${Date.now()}`, { cache: 'no-store' }).then((res) => {
+      if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`)
+      return res.json()
+    })
+  }
+
   async function loadData() {
     try {
-      const [matchesRes, playersRes, submissionsRes, matchLogRes] = await Promise.all([
-        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
-        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
-        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeSubmissions`),
-        fetch(`https://opensheet.elk.sh/${sheetId}/MatchLog`),
+      setLoading(true)
+
+      const [feedData, playersData, submissionsData, matchLogData] = await Promise.all([
+        fetchJson(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
+        fetchJson(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
+        fetchJson(`https://opensheet.elk.sh/${sheetId}/ChallengeSubmissions`),
+        fetchJson(`https://opensheet.elk.sh/${sheetId}/MatchLog`),
       ])
 
-      if (!matchesRes.ok) {
-        throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
-      }
-      if (!playersRes.ok) {
-        throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
-      }
-      if (!submissionsRes.ok) {
-        throw new Error(`Failed to fetch ChallengeSubmissions (${submissionsRes.status})`)
-      }
-      if (!matchLogRes.ok) {
-        throw new Error(`Failed to fetch MatchLog (${matchLogRes.status})`)
-      }
-
-      const [matchesData, playersData, submissionsData, matchLogData] = await Promise.all([
-        matchesRes.json(),
-        playersRes.json(),
-        submissionsRes.json(),
-        matchLogRes.json(),
-      ])
-
-      const approvedSubmittedChallenges = submissionsData
-        .filter((m) => {
-          const eligible = normalize(getField(m, 'eligible'))
-          const approval = normalize(getField(m, 'approval'))
-          const status = normalize(getField(m, 'status'))
-          return eligible === 'eligible' && approval === 'approved' && status !== 'completed'
-        })
-        .map((m, index) => ({
-          id: `submission-${index}`,
-          challenger: getField(m, 'challenger'),
-          challenger_rank: getField(m, 'challenger_rank'),
-          opponent: getField(m, 'opponent'),
-          opponent_rank: getField(m, 'opponent_rank'),
-          approval: getField(m, 'approval'),
-          eligible: getField(m, 'eligible'),
-          match_date: getField(m, 'match_date'),
-          deadline: getField(m, 'deadline'),
-          winner: getField(m, 'winner'),
-          score: getField(m, 'score'),
-          status: getField(m, 'status') || 'Scheduled',
-          source: 'submission',
-        }))
-
-      const completedFromLog = matchLogData
-        .filter((m) => getField(m, 'challenger') && getField(m, 'opponent'))
-        .map((m, index) => ({
-          id: `log-${index}`,
-          challenger: getField(m, 'challenger'),
-          opponent: getField(m, 'opponent'),
-          winner: getField(m, 'winner'),
-          score: getField(m, 'score'),
-          match_date: getField(m, 'created_at'),
-          status: 'Completed',
-          source: 'log',
-        }))
-
-      setMatches([...matchesData, ...approvedSubmittedChallenges, ...completedFromLog])
+      setChallengeFeed(feedData)
       setPlayers(playersData)
+      setChallengeSubmissions(submissionsData)
+      setMatchLog(matchLogData)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -147,23 +101,117 @@ export default function Page() {
     const map = {}
     players.forEach((p) => {
       const name = String(getField(p, 'player') || '').trim()
-      if (name) {
-        map[name] = getField(p, 'rank') || ''
-      }
+      if (name) map[name] = getField(p, 'rank') || ''
     })
     return map
   }, [players])
 
+  const completedFromFeed = useMemo(() => {
+    return challengeFeed
+      .filter((m) => normalize(getField(m, 'status')) === 'completed')
+      .map((m, index) => ({
+        id: `feed-completed-${getField(m, 'match_id') || index}`,
+        challenger: getField(m, 'challenger'),
+        opponent: getField(m, 'opponent'),
+        winner: getField(m, 'winner'),
+        score: getField(m, 'score'),
+        match_date: getField(m, 'match_date'),
+        deadline: getField(m, 'deadline'),
+        challenger_rank: getField(m, 'challenger_rank'),
+        opponent_rank: getField(m, 'opponent_rank'),
+        approval: getField(m, 'approval'),
+        eligible: getField(m, 'eligible'),
+        status: 'Completed',
+        source: 'feed',
+      }))
+  }, [challengeFeed])
+
+  const completedFromLog = useMemo(() => {
+    return matchLog
+      .filter((m) => getField(m, 'challenger') && getField(m, 'opponent'))
+      .map((m, index) => ({
+        id: `log-completed-${index}`,
+        challenger: getField(m, 'challenger'),
+        opponent: getField(m, 'opponent'),
+        winner: getField(m, 'winner'),
+        score: getField(m, 'score'),
+        match_date: getField(m, 'created_at'),
+        deadline: '',
+        challenger_rank: '',
+        opponent_rank: '',
+        approval: 'Approved',
+        eligible: 'Eligible',
+        status: 'Completed',
+        source: 'log',
+      }))
+  }, [matchLog])
+
   const completedPairSet = useMemo(() => {
     const set = new Set()
-    matches.forEach((m) => {
-      const status = normalize(getField(m, 'status'))
-      if (status === 'completed' && getField(m, 'challenger') && getField(m, 'opponent')) {
-        set.add(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
-      }
+    ;[...completedFromFeed, ...completedFromLog].forEach((m) => {
+      set.add(pairKey(m.challenger, m.opponent))
     })
     return set
-  }, [matches])
+  }, [completedFromFeed, completedFromLog])
+
+  const activeFromFeed = useMemo(() => {
+    return challengeFeed
+      .filter((m) => {
+        const eligible = normalize(getField(m, 'eligible'))
+        const approval = normalize(getField(m, 'approval'))
+        const status = normalize(getField(m, 'status'))
+        return (
+          eligible === 'eligible' &&
+          approval === 'approved' &&
+          status !== 'completed' &&
+          !completedPairSet.has(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
+        )
+      })
+      .map((m, index) => ({
+        id: `feed-active-${getField(m, 'match_id') || index}`,
+        challenger: getField(m, 'challenger'),
+        challenger_rank: getField(m, 'challenger_rank'),
+        opponent: getField(m, 'opponent'),
+        opponent_rank: getField(m, 'opponent_rank'),
+        approval: getField(m, 'approval'),
+        eligible: getField(m, 'eligible'),
+        match_date: getField(m, 'match_date'),
+        deadline: getField(m, 'deadline'),
+        status: getField(m, 'status'),
+        source: 'feed',
+      }))
+  }, [challengeFeed, completedPairSet])
+
+  const activeFromSubmissions = useMemo(() => {
+    return challengeSubmissions
+      .filter((m) => {
+        const eligible = normalize(getField(m, 'eligible'))
+        const approval = normalize(getField(m, 'approval'))
+        const status = normalize(getField(m, 'status'))
+        return (
+          eligible === 'eligible' &&
+          approval === 'approved' &&
+          status !== 'completed' &&
+          !completedPairSet.has(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
+        )
+      })
+      .map((m, index) => ({
+        id: `submission-active-${index}`,
+        challenger: getField(m, 'challenger'),
+        challenger_rank: getField(m, 'challenger_rank'),
+        opponent: getField(m, 'opponent'),
+        opponent_rank: getField(m, 'opponent_rank'),
+        approval: getField(m, 'approval'),
+        eligible: getField(m, 'eligible'),
+        match_date: getField(m, 'match_date'),
+        deadline: getField(m, 'deadline'),
+        status: getField(m, 'status'),
+        source: 'submission',
+      }))
+  }, [challengeSubmissions, completedPairSet])
+
+  const activeMatches = [...activeFromFeed, ...activeFromSubmissions]
+  const completedMatches = [...completedFromFeed, ...completedFromLog]
 
   async function handleChallengeSubmit(e) {
     e.preventDefault()
@@ -203,7 +251,7 @@ export default function Page() {
         deadline: '',
       })
 
-      setTimeout(loadData, 1500)
+      setTimeout(loadData, 2000)
     } catch (err) {
       setChallengeMessage(err.message || 'Challenge submit failed')
     } finally {
@@ -253,7 +301,7 @@ export default function Page() {
       })
 
       setResultMessage('Result submitted successfully')
-      setTimeout(loadData, 1500)
+      setTimeout(loadData, 2000)
     } catch (err) {
       setResultMessage(err.message || 'Result submit failed')
     } finally {
@@ -261,26 +309,12 @@ export default function Page() {
     }
   }
 
-  const activeMatches = matches.filter((m) => {
-    const eligible = normalize(getField(m, 'eligible'))
-    const approval = normalize(getField(m, 'approval'))
-    const status = normalize(getField(m, 'status'))
-    const notCompleted = !completedPairSet.has(
-      pairKey(getField(m, 'challenger'), getField(m, 'opponent'))
-    )
-
-    return eligible === 'eligible' && approval === 'approved' && status !== 'completed' && notCompleted
-  })
-
-  const completedMatches = matches.filter(
-    (m) => normalize(getField(m, 'status')) === 'completed'
-  )
-
   return (
     <div
       style={{
         minHeight: '100vh',
-        background: 'radial-gradient(circle at top left, #0f2747 0%, #05070b 35%, #030303 100%)',
+        background:
+          'radial-gradient(circle at top left, #0f2747 0%, #05070b 35%, #030303 100%)',
         color: 'white',
         padding: '32px 20px 80px',
         fontFamily: 'Inter, system-ui, sans-serif',
@@ -310,6 +344,12 @@ export default function Page() {
 
         {challengeMessage && <div style={messageStyle}>{challengeMessage}</div>}
         {resultMessage && <div style={messageStyle}>{resultMessage}</div>}
+
+        {!loading && !error && (
+          <div style={{ ...messageStyle, marginBottom: 20 }}>
+            Submitted challenges found: {activeFromSubmissions.length}
+          </div>
+        )}
 
         <div
           style={{
@@ -434,17 +474,18 @@ export default function Page() {
                             {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
                             {match.opponent}
                           </div>
-                          <div style={detailStyle}>Date: {getField(match, 'match_date') || '—'}</div>
-                          <div style={detailStyle}>Deadline: {getField(match, 'deadline') || '—'}</div>
+                          <div style={detailStyle}>Date: {match.match_date || '—'}</div>
+                          <div style={detailStyle}>Deadline: {match.deadline || '—'}</div>
                           <div style={detailStyle}>
-                            Challenger Rank: {getField(match, 'challenger_rank') || '—'}
+                            Challenger Rank: {match.challenger_rank || '—'}
                           </div>
                           <div style={detailStyle}>
-                            Opponent Rank: {getField(match, 'opponent_rank') || '—'}
+                            Opponent Rank: {match.opponent_rank || '—'}
                           </div>
-                          <div style={detailStyle}>Approval: {getField(match, 'approval') || '—'}</div>
-                          <div style={detailStyle}>Eligible: {getField(match, 'eligible') || '—'}</div>
-                          <div style={detailStyle}>Status: {getField(match, 'status') || '—'}</div>
+                          <div style={detailStyle}>Approval: {match.approval || '—'}</div>
+                          <div style={detailStyle}>Eligible: {match.eligible || '—'}</div>
+                          <div style={detailStyle}>Status: {match.status || '—'}</div>
+                          <div style={detailStyle}>Source: {match.source || 'feed'}</div>
                         </div>
 
                         <div
