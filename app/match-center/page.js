@@ -79,7 +79,7 @@ export default function Page() {
       <h1 style={{ fontSize: 40, marginBottom: 24 }}>Match Center</h1>
 
       <section style={{ marginBottom: 40, maxWidth: 520 }}>
-        <h2 style={{ fontSize: 28, marginBottom: 16 }}>Report Match</h2>
+        <h2 style={{ fontSize: 28, marginBottom: 16 }}>Report Match</h2> 
 
         <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
           <input
