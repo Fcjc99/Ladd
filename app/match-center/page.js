@@ -44,7 +44,7 @@ export default function Page() {
       setLoading(true)
 
       const [feedRes, playersRes] = await Promise.all([
-        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed?t=${Date.now()}`, {
+        fetch(`https://opensheet.elk.sh/${sheetId}/CHALLENGE%20MATCHES?t=${Date.now()}`, {
           cache: 'no-store',
         }),
         fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed?t=${Date.now()}`, {
