@@ -6,10 +6,26 @@ export default function Page() {
   const [matches, setMatches] = useState([])
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(true)
-  const [submitting, setSubmitting] = useState(false)
-  const [message, setMessage] = useState('')
+  const [submittingChallenge, setSubmittingChallenge] = useState(false)
+  const [challengeMessage, setChallengeMessage] = useState('')
+  const [submittingResult, setSubmittingResult] = useState(false)
+  const [resultMessage, setResultMessage] = useState('')
 
-  const [form, setForm] = useState({
+  const [challengeForm, setChallengeForm] = useState({
+    challenger: '',
+    challenger_rank: '',
+    opponent: '',
+    opponent_rank: '',
+    approval: 'Pending',
+    eligible: 'Eligible',
+    match_date: '',
+    deadline: '',
+    winner: '',
+    score: '',
+    status: 'Scheduled',
+  })
+
+  const [resultForm, setResultForm] = useState({
     challenger: '',
     opponent: '',
     winner: '',
@@ -38,10 +54,10 @@ export default function Page() {
     loadMatches()
   }, [])
 
-  async function handleSubmit(e) {
+  async function handleChallengeSubmit(e) {
     e.preventDefault()
-    setSubmitting(true)
-    setMessage('')
+    setSubmittingChallenge(true)
+    setChallengeMessage('')
 
     try {
       const res = await fetch(submitUrl, {
@@ -49,15 +65,60 @@ export default function Page() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          action: 'challenge',
+          ...challengeForm,
+        }),
       })
 
       if (!res.ok) {
-        throw new Error(`Submit failed (${res.status})`)
+        throw new Error(`Challenge submit failed (${res.status})`)
       }
 
-      setMessage('Match submitted successfully')
-      setForm({
+      setChallengeMessage('Challenge submitted successfully')
+      setChallengeForm({
+        challenger: '',
+        challenger_rank: '',
+        opponent: '',
+        opponent_rank: '',
+        approval: 'Pending',
+        eligible: 'Eligible',
+        match_date: '',
+        deadline: '',
+        winner: '',
+        score: '',
+        status: 'Scheduled',
+      })
+    } catch (err) {
+      setChallengeMessage(err.message || 'Challenge submit failed')
+    } finally {
+      setSubmittingChallenge(false)
+    }
+  }
+
+  async function handleResultSubmit(e) {
+    e.preventDefault()
+    setSubmittingResult(true)
+    setResultMessage('')
+
+    try {
+      const res = await fetch(submitUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          action: 'match',
+          ...resultForm,
+        }),
+      })
+
+      if (!res.ok) {
+        throw new Error(`Result submit failed (${res.status})`)
+      }
+
+      setResultMessage('Result submitted successfully')
+      setResultForm({
         challenger: '',
         opponent: '',
         winner: '',
@@ -65,9 +126,9 @@ export default function Page() {
         submitted_by: '',
       })
     } catch (err) {
-      setMessage(err.message || 'Submit failed')
+      setResultMessage(err.message || 'Result submit failed')
     } finally {
-      setSubmitting(false)
+      setSubmittingResult(false)
     }
   }
 
@@ -78,48 +139,74 @@ export default function Page() {
     <div style={{ padding: 24, color: 'white', background: 'black', minHeight: '100vh' }}>
       <h1 style={{ fontSize: 40, marginBottom: 24 }}>Match Center</h1>
 
-      <section style={{ marginBottom: 40, maxWidth: 520 }}>
-        <h2 style={{ fontSize: 28, marginBottom: 16 }}>Report Match</h2> 
+      <section style={{ marginBottom: 48, maxWidth: 560 }}>
+        <h2 style={{ fontSize: 28, marginBottom: 16 }}>Submit Challenge</h2>
 
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: 12 }}>
+        <form onSubmit={handleChallengeSubmit} style={{ display: 'grid', gap: 12 }}>
           <input
-            placeholder="Challenger"
-            value={form.challenger}
-            onChange={(e) => setForm({ ...form, challenger: e.target.value })}
+            placeholder="Challenger name"
+            value={challengeForm.challenger}
+            onChange={(e) => setChallengeForm({ ...challengeForm, challenger: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
           <input
-            placeholder="Opponent"
-            value={form.opponent}
-            onChange={(e) => setForm({ ...form, opponent: e.target.value })}
+            placeholder="Challenger rank"
+            value={challengeForm.challenger_rank}
+            onChange={(e) => setChallengeForm({ ...challengeForm, challenger_rank: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
           <input
-            placeholder="Winner"
-            value={form.winner}
-            onChange={(e) => setForm({ ...form, winner: e.target.value })}
+            placeholder="Opponent name"
+            value={challengeForm.opponent}
+            onChange={(e) => setChallengeForm({ ...challengeForm, opponent: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
           <input
-            placeholder="Score"
-            value={form.score}
-            onChange={(e) => setForm({ ...form, score: e.target.value })}
+            placeholder="Opponent rank"
+            value={challengeForm.opponent_rank}
+            onChange={(e) => setChallengeForm({ ...challengeForm, opponent_rank: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <select
+            value={challengeForm.approval}
+            onChange={(e) => setChallengeForm({ ...challengeForm, approval: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          >
+            <option value="Pending">Pending Approval</option>
+            <option value="Approved">Approved</option>
+            <option value="Denied">Denied</option>
+          </select>
+
+          <select
+            value={challengeForm.eligible}
+            onChange={(e) => setChallengeForm({ ...challengeForm, eligible: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          >
+            <option value="Eligible">Eligible</option>
+            <option value="Not Eligible">Not Eligible</option>
+          </select>
+
+          <input
+            placeholder="Match date"
+            value={challengeForm.match_date}
+            onChange={(e) => setChallengeForm({ ...challengeForm, match_date: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
           <input
-            placeholder="Your name"
-            value={form.submitted_by}
-            onChange={(e) => setForm({ ...form, submitted_by: e.target.value })}
+            placeholder="Deadline"
+            value={challengeForm.deadline}
+            onChange={(e) => setChallengeForm({ ...challengeForm, deadline: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
           <button
             type="submit"
-            disabled={submitting}
+            disabled={submittingChallenge}
             style={{
               padding: 12,
               borderRadius: 10,
@@ -130,11 +217,70 @@ export default function Page() {
               cursor: 'pointer',
             }}
           >
-            {submitting ? 'Submitting...' : 'Submit Match'}
+            {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
           </button>
         </form>
 
-        {message && <p style={{ marginTop: 12 }}>{message}</p>}
+        {challengeMessage && <p style={{ marginTop: 12 }}>{challengeMessage}</p>}
+      </section>
+
+      <section style={{ marginBottom: 48, maxWidth: 560 }}>
+        <h2 style={{ fontSize: 28, marginBottom: 16 }}>Report Result</h2>
+
+        <form onSubmit={handleResultSubmit} style={{ display: 'grid', gap: 12 }}>
+          <input
+            placeholder="Challenger"
+            value={resultForm.challenger}
+            onChange={(e) => setResultForm({ ...resultForm, challenger: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <input
+            placeholder="Opponent"
+            value={resultForm.opponent}
+            onChange={(e) => setResultForm({ ...resultForm, opponent: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <input
+            placeholder="Winner"
+            value={resultForm.winner}
+            onChange={(e) => setResultForm({ ...resultForm, winner: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <input
+            placeholder="Score"
+            value={resultForm.score}
+            onChange={(e) => setResultForm({ ...resultForm, score: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <input
+            placeholder="Your name"
+            value={resultForm.submitted_by}
+            onChange={(e) => setResultForm({ ...resultForm, submitted_by: e.target.value })}
+            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+          />
+
+          <button
+            type="submit"
+            disabled={submittingResult}
+            style={{
+              padding: 12,
+              borderRadius: 10,
+              border: 'none',
+              background: 'white',
+              color: 'black',
+              fontWeight: 'bold',
+              cursor: 'pointer',
+            }}
+          >
+            {submittingResult ? 'Submitting...' : 'Submit Result'}
+          </button>
+        </form>
+
+        {resultMessage && <p style={{ marginTop: 12 }}>{resultMessage}</p>}
       </section>
 
       {loading && <p>Loading...</p>}
