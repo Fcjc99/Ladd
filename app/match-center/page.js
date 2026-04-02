@@ -66,20 +66,37 @@ export default function Page() {
     loadData()
   }, [])
 
+  function getPlayerName(row) {
+    return (
+      row.player ||
+      row.name ||
+      row.Player ||
+      row.Name ||
+      row.player_name ||
+      row.PlayerName ||
+      Object.values(row).find(
+        (v) => typeof v === 'string' && v.trim() && isNaN(Number(v.trim()))
+      ) ||
+      ''
+    ).trim()
+  }
+
+  function getPlayerRank(row) {
+    return row.rank || row.Rank || ''
+  }
+
   const playerNames = useMemo(() => {
-    return players
-      .map((p) => (p.player || p.name || '').trim())
-      .filter(Boolean)
+    return players.map((p) => getPlayerName(p)).filter(Boolean)
   }, [players])
 
   const playerMap = useMemo(() => {
     return Object.fromEntries(
       players.map((p) => {
-        const name = (p.player || p.name || '').trim()
+        const name = getPlayerName(p)
         return [
           name,
           {
-            rank: p.rank || '',
+            rank: getPlayerRank(p),
             photo: p.photo || '',
             flag: p.flag || '',
             status: p.status || '',
