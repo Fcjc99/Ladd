@@ -1,5 +1,5 @@
 export async function POST(request) {
-  try { 
+  try {
     const body = await request.json()
     const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
@@ -16,16 +16,38 @@ export async function POST(request) {
         'Content-Type': 'text/plain;charset=utf-8',
       },
       body: JSON.stringify(body),
+      redirect: 'follow',
       cache: 'no-store',
     })
 
     const text = await res.text()
 
-    return Response.json({
-      success: res.ok,
-      status: res.status,
-      raw: text,
-    })
+    let data
+    try {
+      data = JSON.parse(text)
+    } catch {
+      return Response.json(
+        {
+          success: false,
+          error: 'Apps Script did not return JSON',
+          raw: text,
+        },
+        { status: 500 }
+      )
+    }
+
+    if (!data.success) {
+      return Response.json(
+        {
+          success: false,
+          error: data.error || 'Apps Script rejected request',
+          raw: data,
+        },
+        { status: 400 }
+      )
+    }
+
+    return Response.json(data)
   } catch (error) {
     return Response.json(
       { success: false, error: error.message || 'Submit failed' },
