@@ -72,7 +72,7 @@ export default function Page() {
       }
 
       const data = await res.json()
-      setMatches(data)
+      setMatches(Array.isArray(data) ? data : [])
     } catch (err) {
       setMatches([])
       setError(err.message || 'Failed to fetch ChallengeFeed')
@@ -99,13 +99,12 @@ export default function Page() {
       const eligible = normalize(m.eligible)
       const approval = normalize(m.approval)
       const status = normalize(m.status)
-      const active = normalize(m.active)
 
       return (
         eligible === 'eligible' &&
         approval === 'approved' &&
         status !== 'completed' &&
-        active !== 'inactive'
+        status !== 'denied'
       )
     })
   }, [matches])
@@ -261,6 +260,10 @@ export default function Page() {
 
         {challengeMessage && <div style={messageStyle}>{challengeMessage}</div>}
         {resultMessage && <div style={messageStyle}>{resultMessage}</div>}
+
+        <div style={{ ...messageStyle, marginBottom: 16 }}>
+          Feed rows: {matches.length} | Active: {activeMatches.length} | Completed: {completedMatches.length}
+        </div>
 
         <div
           style={{
