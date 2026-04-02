@@ -3,11 +3,8 @@
 import { useEffect, useMemo, useState } from 'react'
 
 export default function Page() {
-  const [challengeFeed, setChallengeFeed] = useState([])
-  const [challengeSubmissions, setChallengeSubmissions] = useState([])
-  const [matchLog, setMatchLog] = useState([])
+  const [matches, setMatches] = useState([])
   const [players, setPlayers] = useState([])
-
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
@@ -35,19 +32,6 @@ export default function Page() {
     return String(value || '').trim().toLowerCase()
   }
 
-  function getField(row, fieldName) {
-    if (!row) return ''
-    if (row[fieldName] !== undefined) return row[fieldName]
-
-    const target = normalize(fieldName)
-    const foundKey = Object.keys(row).find((key) => normalize(key) === target)
-    return foundKey ? row[foundKey] : ''
-  }
-
-  function pairKey(a, b) {
-    return [normalize(a), normalize(b)].sort().join('__')
-  }
-
   function addDays(dateString, days) {
     if (!dateString) return ''
     const date = new Date(dateString + 'T00:00:00')
@@ -56,29 +40,30 @@ export default function Page() {
     return date.toISOString().split('T')[0]
   }
 
-  function fetchJson(url) {
-    const sep = url.includes('?') ? '&' : '?'
-    return fetch(`${url}${sep}t=${Date.now()}`, { cache: 'no-store' }).then((res) => {
-      if (!res.ok) throw new Error(`Failed to fetch ${url} (${res.status})`)
-      return res.json()
-    })
+  function pairKey(a, b) {
+    return [normalize(a), normalize(b)].sort().join('__')
   }
 
   async function loadData() {
     try {
       setLoading(true)
 
-      const [feedData, playersData, submissionsData, matchLogData] = await Promise.all([
-        fetchJson(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
-        fetchJson(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
-        fetchJson(`https://opensheet.elk.sh/${sheetId}/ChallengeSubmissions`),
-        fetchJson(`https://opensheet.elk.sh/${sheetId}/MatchLog`),
+      const [feedRes, playersRes] = await Promise.all([
+        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed?t=${Date.now()}`, {
+          cache: 'no-store',
+        }),
+        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed?t=${Date.now()}`, {
+          cache: 'no-store',
+        }),
       ])
 
-      setChallengeFeed(feedData)
+      if (!feedRes.ok) throw new Error(`Failed to fetch ChallengeFeed (${feedRes.status})`)
+      if (!playersRes.ok) throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
+
+      const [feedData, playersData] = await Promise.all([feedRes.json(), playersRes.json()])
+
+      setMatches(feedData)
       setPlayers(playersData)
-      setChallengeSubmissions(submissionsData)
-      setMatchLog(matchLogData)
       setError('')
     } catch (err) {
       setError(err.message || 'Unknown error')
@@ -93,125 +78,45 @@ export default function Page() {
 
   const playerNames = useMemo(() => {
     return players
-      .map((p) => String(getField(p, 'player') || '').trim())
+      .map((p) => String(p.player || '').trim())
       .filter(Boolean)
   }, [players])
 
   const playerRankMap = useMemo(() => {
     const map = {}
     players.forEach((p) => {
-      const name = String(getField(p, 'player') || '').trim()
-      if (name) map[name] = getField(p, 'rank') || ''
+      const name = String(p.player || '').trim()
+      if (name) map[name] = p.rank || ''
     })
     return map
   }, [players])
 
-  const completedFromFeed = useMemo(() => {
-    return challengeFeed
-      .filter((m) => normalize(getField(m, 'status')) === 'completed')
-      .map((m, index) => ({
-        id: `feed-completed-${getField(m, 'match_id') || index}`,
-        challenger: getField(m, 'challenger'),
-        opponent: getField(m, 'opponent'),
-        winner: getField(m, 'winner'),
-        score: getField(m, 'score'),
-        match_date: getField(m, 'match_date'),
-        deadline: getField(m, 'deadline'),
-        challenger_rank: getField(m, 'challenger_rank'),
-        opponent_rank: getField(m, 'opponent_rank'),
-        approval: getField(m, 'approval'),
-        eligible: getField(m, 'eligible'),
-        status: 'Completed',
-        source: 'feed',
-      }))
-  }, [challengeFeed])
+  const activeMatches = useMemo(() => {
+    return matches.filter((m) => {
+      const eligible = normalize(m.eligible)
+      const approval = normalize(m.approval)
+      const status = normalize(m.status)
+      return eligible === 'eligible' && approval === 'approved' && status !== 'completed'
+    })
+  }, [matches])
 
-  const completedFromLog = useMemo(() => {
-    return matchLog
-      .filter((m) => getField(m, 'challenger') && getField(m, 'opponent'))
-      .map((m, index) => ({
-        id: `log-completed-${index}`,
-        challenger: getField(m, 'challenger'),
-        opponent: getField(m, 'opponent'),
-        winner: getField(m, 'winner'),
-        score: getField(m, 'score'),
-        match_date: getField(m, 'created_at'),
-        deadline: '',
-        challenger_rank: '',
-        opponent_rank: '',
-        approval: 'Approved',
-        eligible: 'Eligible',
-        status: 'Completed',
-        source: 'log',
-      }))
-  }, [matchLog])
-
-  const completedPairSet = useMemo(() => {
+  const busyPlayers = useMemo(() => {
     const set = new Set()
-    ;[...completedFromFeed, ...completedFromLog].forEach((m) => {
-      set.add(pairKey(m.challenger, m.opponent))
+    activeMatches.forEach((m) => {
+      if (m.challenger) set.add(m.challenger)
+      if (m.opponent) set.add(m.opponent)
     })
     return set
-  }, [completedFromFeed, completedFromLog])
+  }, [activeMatches])
 
-  const activeFromFeed = useMemo(() => {
-    return challengeFeed
-      .filter((m) => {
-        const eligible = normalize(getField(m, 'eligible'))
-        const approval = normalize(getField(m, 'approval'))
-        const status = normalize(getField(m, 'status'))
-        return (
-          eligible === 'eligible' &&
-          approval === 'approved' &&
-          status !== 'completed' &&
-          !completedPairSet.has(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
-        )
-      })
-      .map((m, index) => ({
-        id: `feed-active-${getField(m, 'match_id') || index}`,
-        challenger: getField(m, 'challenger'),
-        challenger_rank: getField(m, 'challenger_rank'),
-        opponent: getField(m, 'opponent'),
-        opponent_rank: getField(m, 'opponent_rank'),
-        approval: getField(m, 'approval'),
-        eligible: getField(m, 'eligible'),
-        match_date: getField(m, 'match_date'),
-        deadline: getField(m, 'deadline'),
-        status: getField(m, 'status'),
-        source: 'feed',
-      }))
-  }, [challengeFeed, completedPairSet])
+  const availableChallengers = playerNames.filter((name) => !busyPlayers.has(name))
+  const availableOpponents = playerNames.filter(
+    (name) => name !== challengeForm.challenger && !busyPlayers.has(name)
+  )
 
-  const activeFromSubmissions = useMemo(() => {
-    return challengeSubmissions
-      .filter((m) => {
-        const eligible = normalize(getField(m, 'eligible'))
-        const approval = normalize(getField(m, 'approval'))
-        const status = normalize(getField(m, 'status'))
-        return (
-          eligible === 'eligible' &&
-          approval === 'approved' &&
-          status !== 'completed' &&
-          !completedPairSet.has(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
-        )
-      })
-      .map((m, index) => ({
-        id: `submission-active-${index}`,
-        challenger: getField(m, 'challenger'),
-        challenger_rank: getField(m, 'challenger_rank'),
-        opponent: getField(m, 'opponent'),
-        opponent_rank: getField(m, 'opponent_rank'),
-        approval: getField(m, 'approval'),
-        eligible: getField(m, 'eligible'),
-        match_date: getField(m, 'match_date'),
-        deadline: getField(m, 'deadline'),
-        status: getField(m, 'status'),
-        source: 'submission',
-      }))
-  }, [challengeSubmissions, completedPairSet])
-
-  const activeMatches = [...activeFromFeed, ...activeFromSubmissions]
-  const completedMatches = [...completedFromFeed, ...completedFromLog]
+  const completedMatches = useMemo(() => {
+    return matches.filter((m) => normalize(m.status) === 'completed')
+  }, [matches])
 
   async function handleChallengeSubmit(e) {
     e.preventDefault()
@@ -219,9 +124,8 @@ export default function Page() {
     setChallengeMessage('')
 
     try {
-      await fetch(submitUrl, {
+      const res = await fetch(submitUrl, {
         method: 'POST',
-        mode: 'no-cors',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
@@ -231,17 +135,23 @@ export default function Page() {
           challenger_rank: challengeForm.challenger_rank,
           opponent: challengeForm.opponent,
           opponent_rank: challengeForm.opponent_rank,
-          approval: 'Approved',
-          eligible: 'Eligible',
           match_date: challengeForm.match_date,
           deadline: challengeForm.deadline,
-          winner: '',
-          score: '',
-          status: 'Scheduled',
         }),
       })
 
-      setChallengeMessage('Challenge submitted successfully')
+      const data = await res.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Challenge submit failed')
+      }
+
+      if (data.approval === 'Denied') {
+        setChallengeMessage(data.eligible || 'Challenge denied')
+      } else {
+        setChallengeMessage('Challenge submitted successfully')
+      }
+
       setChallengeForm({
         challenger: '',
         challenger_rank: '',
@@ -251,7 +161,7 @@ export default function Page() {
         deadline: '',
       })
 
-      setTimeout(loadData, 2000)
+      setTimeout(loadData, 1500)
     } catch (err) {
       setChallengeMessage(err.message || 'Challenge submit failed')
     } finally {
@@ -274,19 +184,18 @@ export default function Page() {
 
   async function handleResultSubmit(e, match) {
     e.preventDefault()
-    setSubmittingResultId(match.id)
+    setSubmittingResultId(match.match_id || match.challenger + match.opponent)
     setResultMessage('')
 
-    const form = scoreForms[match.id] || {
+    const form = scoreForms[match.match_id || match.challenger + match.opponent] || {
       winner: '',
       score: '',
       submitted_by: '',
     }
 
     try {
-      await fetch(submitUrl, {
+      const res = await fetch(submitUrl, {
         method: 'POST',
-        mode: 'no-cors',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
         },
@@ -300,8 +209,14 @@ export default function Page() {
         }),
       })
 
+      const data = await res.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Result submit failed')
+      }
+
       setResultMessage('Result submitted successfully')
-      setTimeout(loadData, 2000)
+      setTimeout(loadData, 1500)
     } catch (err) {
       setResultMessage(err.message || 'Result submit failed')
     } finally {
@@ -345,12 +260,6 @@ export default function Page() {
         {challengeMessage && <div style={messageStyle}>{challengeMessage}</div>}
         {resultMessage && <div style={messageStyle}>{resultMessage}</div>}
 
-        {!loading && !error && (
-          <div style={{ ...messageStyle, marginBottom: 20 }}>
-            Submitted challenges found: {activeFromSubmissions.length}
-          </div>
-        )}
-
         <div
           style={{
             display: 'grid',
@@ -379,7 +288,7 @@ export default function Page() {
                 style={inputStyle}
               >
                 <option value="">Select challenger</option>
-                {playerNames.map((name) => (
+                {availableChallengers.map((name) => (
                   <option key={name} value={name}>
                     {name}
                   </option>
@@ -403,13 +312,11 @@ export default function Page() {
                 style={inputStyle}
               >
                 <option value="">Select opponent</option>
-                {playerNames
-                  .filter((name) => name !== challengeForm.challenger)
-                  .map((name) => (
-                    <option key={name} value={name}>
-                      {name}
-                    </option>
-                  ))}
+                {availableOpponents.map((name) => (
+                  <option key={name} value={name}>
+                    {name}
+                  </option>
+                ))}
               </select>
 
               {challengeForm.opponent_rank && (
@@ -452,14 +359,15 @@ export default function Page() {
 
               <div style={{ display: 'grid', gap: 18 }}>
                 {activeMatches.map((match) => {
-                  const form = scoreForms[match.id] || {
+                  const id = match.match_id || `${match.challenger}-${match.opponent}`
+                  const form = scoreForms[id] || {
                     winner: '',
                     score: '',
                     submitted_by: '',
                   }
 
                   return (
-                    <div key={match.id} style={cardStyle}>
+                    <div key={id} style={cardStyle}>
                       <div
                         style={{
                           display: 'flex',
@@ -485,7 +393,6 @@ export default function Page() {
                           <div style={detailStyle}>Approval: {match.approval || '—'}</div>
                           <div style={detailStyle}>Eligible: {match.eligible || '—'}</div>
                           <div style={detailStyle}>Status: {match.status || '—'}</div>
-                          <div style={detailStyle}>Source: {match.source || 'feed'}</div>
                         </div>
 
                         <div
@@ -508,9 +415,7 @@ export default function Page() {
                           >
                             <select
                               value={form.winner}
-                              onChange={(e) =>
-                                updateScoreForm(match.id, { winner: e.target.value })
-                              }
+                              onChange={(e) => updateScoreForm(id, { winner: e.target.value })}
                               style={inputStyle}
                             >
                               <option value="">Select winner</option>
@@ -521,9 +426,7 @@ export default function Page() {
                             <input
                               placeholder="Score"
                               value={form.score}
-                              onChange={(e) =>
-                                updateScoreForm(match.id, { score: e.target.value })
-                              }
+                              onChange={(e) => updateScoreForm(id, { score: e.target.value })}
                               style={inputStyle}
                             />
 
@@ -531,17 +434,17 @@ export default function Page() {
                               placeholder="Your name"
                               value={form.submitted_by}
                               onChange={(e) =>
-                                updateScoreForm(match.id, { submitted_by: e.target.value })
+                                updateScoreForm(id, { submitted_by: e.target.value })
                               }
                               style={inputStyle}
                             />
 
                             <button
                               type="submit"
-                              disabled={submittingResultId === match.id}
+                              disabled={submittingResultId === id}
                               style={buttonStyle}
                             >
-                              {submittingResultId === match.id ? 'Submitting...' : 'Submit Result'}
+                              {submittingResultId === id ? 'Submitting...' : 'Submit Result'}
                             </button>
                           </form>
                         </div>
@@ -560,17 +463,20 @@ export default function Page() {
               )}
 
               <div style={{ display: 'grid', gap: 18 }}>
-                {completedMatches.map((match) => (
-                  <div key={match.id} style={cardStyle}>
-                    <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                      {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
-                      {match.opponent}
+                {completedMatches.map((match) => {
+                  const id = match.match_id || `${match.challenger}-${match.opponent}`
+                  return (
+                    <div key={id} style={cardStyle}>
+                      <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
+                        {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
+                        {match.opponent}
+                      </div>
+                      <div style={detailStyle}>Date: {match.match_date || '—'}</div>
+                      <div style={detailStyle}>Winner: {match.winner || '—'}</div>
+                      <div style={detailStyle}>Score: {match.score || '—'}</div>
                     </div>
-                    <div style={detailStyle}>Date: {getField(match, 'match_date') || '—'}</div>
-                    <div style={detailStyle}>Winner: {getField(match, 'winner') || '—'}</div>
-                    <div style={detailStyle}>Score: {getField(match, 'score') || '—'}</div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </section>
           </div>
