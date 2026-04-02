@@ -152,11 +152,11 @@ export default function Page() {
           />
 
           <input
-            placeholder="Date"
-            value={challengeForm.match_date}
-            onChange={(e) => setChallengeForm({ ...challengeForm, match_date: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
+  type="date"
+  value={challengeForm.match_date}
+  onChange={(e) => setChallengeForm({ ...challengeForm, match_date: e.target.value })}
+  style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
+/>
 
           <button
             type="submit"
