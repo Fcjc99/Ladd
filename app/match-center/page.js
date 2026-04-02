@@ -124,7 +124,7 @@ export default function Page() {
     setChallengeMessage('')
 
     try {
-      const res = await fetch(submitUrl, {
+      const res = await fetch('/api/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
@@ -194,7 +194,7 @@ export default function Page() {
     }
 
     try {
-      const res = await fetch(submitUrl, {
+      const res = await fetch('/api/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'text/plain;charset=utf-8',
