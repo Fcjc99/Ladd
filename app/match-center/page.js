@@ -13,16 +13,8 @@ export default function Page() {
 
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
-    challenger_rank: '',
     opponent: '',
-    opponent_rank: '',
-    approval: 'Pending',
-    eligible: 'Eligible',
     match_date: '',
-    deadline: '',
-    winner: '',
-    score: '',
-    status: 'Scheduled',
   })
 
   const [resultForm, setResultForm] = useState({
@@ -67,7 +59,17 @@ export default function Page() {
         },
         body: JSON.stringify({
           action: 'challenge',
-          ...challengeForm,
+          challenger: challengeForm.challenger,
+          opponent: challengeForm.opponent,
+          match_date: challengeForm.match_date,
+          challenger_rank: '',
+          opponent_rank: '',
+          approval: 'Pending',
+          eligible: 'Eligible',
+          deadline: '',
+          winner: '',
+          score: '',
+          status: 'Scheduled',
         }),
       })
 
@@ -78,16 +80,8 @@ export default function Page() {
       setChallengeMessage('Challenge submitted successfully')
       setChallengeForm({
         challenger: '',
-        challenger_rank: '',
         opponent: '',
-        opponent_rank: '',
-        approval: 'Pending',
-        eligible: 'Eligible',
         match_date: '',
-        deadline: '',
-        winner: '',
-        score: '',
-        status: 'Scheduled',
       })
     } catch (err) {
       setChallengeMessage(err.message || 'Challenge submit failed')
@@ -151,13 +145,6 @@ export default function Page() {
           />
 
           <input
-            placeholder="Challenger rank"
-            value={challengeForm.challenger_rank}
-            onChange={(e) => setChallengeForm({ ...challengeForm, challenger_rank: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
-
-          <input
             placeholder="Opponent name"
             value={challengeForm.opponent}
             onChange={(e) => setChallengeForm({ ...challengeForm, opponent: e.target.value })}
@@ -165,42 +152,9 @@ export default function Page() {
           />
 
           <input
-            placeholder="Opponent rank"
-            value={challengeForm.opponent_rank}
-            onChange={(e) => setChallengeForm({ ...challengeForm, opponent_rank: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
-
-          <select
-            value={challengeForm.approval}
-            onChange={(e) => setChallengeForm({ ...challengeForm, approval: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          >
-            <option value="Pending">Pending Approval</option>
-            <option value="Approved">Approved</option>
-            <option value="Denied">Denied</option>
-          </select>
-
-          <select
-            value={challengeForm.eligible}
-            onChange={(e) => setChallengeForm({ ...challengeForm, eligible: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          >
-            <option value="Eligible">Eligible</option>
-            <option value="Not Eligible">Not Eligible</option>
-          </select>
-
-          <input
-            placeholder="Match date"
+            placeholder="Date"
             value={challengeForm.match_date}
             onChange={(e) => setChallengeForm({ ...challengeForm, match_date: e.target.value })}
-            style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
-          />
-
-          <input
-            placeholder="Deadline"
-            value={challengeForm.deadline}
-            onChange={(e) => setChallengeForm({ ...challengeForm, deadline: e.target.value })}
             style={{ padding: 12, borderRadius: 8, border: '1px solid #444' }}
           />
 
@@ -304,9 +258,13 @@ export default function Page() {
                   <div style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 8 }}>
                     {match.challenger} vs {match.opponent}
                   </div>
-                  <div>Rank #{match.challenger_rank} vs Rank #{match.opponent_rank}</div>
-                  <div>Status: {match.status}</div>
-                  <div>Deadline: {match.deadline}</div>
+                  <div>Date: {match.match_date || '—'}</div>
+                  <div>Deadline: {match.deadline || '—'}</div>
+                  <div>Challenger Rank: {match.challenger_rank || '—'}</div>
+                  <div>Opponent Rank: {match.opponent_rank || '—'}</div>
+                  <div>Approval: {match.approval || '—'}</div>
+                  <div>Eligible: {match.eligible || '—'}</div>
+                  <div>Status: {match.status || '—'}</div>
                 </div>
               ))}
             </div>
@@ -328,6 +286,7 @@ export default function Page() {
                   <div style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 8 }}>
                     {match.challenger} vs {match.opponent}
                   </div>
+                  <div>Date: {match.match_date || '—'}</div>
                   <div>Winner: {match.winner || '—'}</div>
                   <div>Score: {match.score || '—'}</div>
                 </div>
