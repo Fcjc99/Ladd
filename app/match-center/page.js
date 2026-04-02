@@ -28,53 +28,97 @@ export default function Page() {
   const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
   const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
+  function normalize(value) {
+    return String(value || '').trim().toLowerCase()
+  }
+
+  function getField(row, fieldName) {
+    if (!row) return ''
+    if (row[fieldName] !== undefined) return row[fieldName]
+
+    const target = fieldName.trim().toLowerCase()
+    const foundKey = Object.keys(row).find(
+      (key) => String(key || '').trim().toLowerCase() === target
+    )
+
+    return foundKey ? row[foundKey] : ''
+  }
+
+  function pairKey(a, b) {
+    return [String(a || '').trim().toLowerCase(), String(b || '').trim().toLowerCase()]
+      .sort()
+      .join('__')
+  }
+
+  function addDays(dateString, days) {
+    if (!dateString) return ''
+    const date = new Date(dateString + 'T00:00:00')
+    if (Number.isNaN(date.getTime())) return ''
+    date.setDate(date.getDate() + days)
+    return date.toISOString().split('T')[0]
+  }
+
   async function loadData() {
     try {
-      const matchesRes = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`)
-      const playersRes = await fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`)
-      const submissionsRes = await fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeSubmissions`)
-      const matchLogRes = await fetch(`https://opensheet.elk.sh/${sheetId}/MatchLog`)
+      const [matchesRes, playersRes, submissionsRes, matchLogRes] = await Promise.all([
+        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeFeed`),
+        fetch(`https://opensheet.elk.sh/${sheetId}/PlayersFeed`),
+        fetch(`https://opensheet.elk.sh/${sheetId}/ChallengeSubmissions`),
+        fetch(`https://opensheet.elk.sh/${sheetId}/MatchLog`),
+      ])
 
-      if (!matchesRes.ok) throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
-      if (!playersRes.ok) throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
-      if (!submissionsRes.ok) throw new Error(`Failed to fetch ChallengeSubmissions (${submissionsRes.status})`)
-      if (!matchLogRes.ok) throw new Error(`Failed to fetch MatchLog (${matchLogRes.status})`)
+      if (!matchesRes.ok) {
+        throw new Error(`Failed to fetch ChallengeFeed (${matchesRes.status})`)
+      }
+      if (!playersRes.ok) {
+        throw new Error(`Failed to fetch PlayersFeed (${playersRes.status})`)
+      }
+      if (!submissionsRes.ok) {
+        throw new Error(`Failed to fetch ChallengeSubmissions (${submissionsRes.status})`)
+      }
+      if (!matchLogRes.ok) {
+        throw new Error(`Failed to fetch MatchLog (${matchLogRes.status})`)
+      }
 
-      const matchesData = await matchesRes.json()
-      const playersData = await playersRes.json()
-      const submissionsData = await submissionsRes.json()
-      const matchLogData = await matchLogRes.json()
+      const [matchesData, playersData, submissionsData, matchLogData] = await Promise.all([
+        matchesRes.json(),
+        playersRes.json(),
+        submissionsRes.json(),
+        matchLogRes.json(),
+      ])
 
       const approvedSubmittedChallenges = submissionsData
         .filter((m) => {
-          const eligible = String(m.eligible || '').trim().toLowerCase() === 'eligible'
-          const approval = String(m.approval || '').trim().toLowerCase() === 'approved'
-          const status = String(m.status || '').trim().toLowerCase() !== 'completed'
-          return eligible && approval && status
+          const eligible = normalize(getField(m, 'eligible'))
+          const approval = normalize(getField(m, 'approval'))
+          const status = normalize(getField(m, 'status'))
+          return eligible === 'eligible' && approval === 'approved' && status !== 'completed'
         })
         .map((m, index) => ({
           id: `submission-${index}`,
-          challenger: m.challenger || '',
-          challenger_rank: m.challenger_rank || '',
-          opponent: m.opponent || '',
-          opponent_rank: m.opponent_rank || '',
-          approval: m.approval || '',
-          eligible: m.eligible || '',
-          match_date: m.match_date || '',
-          deadline: m.deadline || '',
-          status: m.status || '',
+          challenger: getField(m, 'challenger'),
+          challenger_rank: getField(m, 'challenger_rank'),
+          opponent: getField(m, 'opponent'),
+          opponent_rank: getField(m, 'opponent_rank'),
+          approval: getField(m, 'approval'),
+          eligible: getField(m, 'eligible'),
+          match_date: getField(m, 'match_date'),
+          deadline: getField(m, 'deadline'),
+          winner: getField(m, 'winner'),
+          score: getField(m, 'score'),
+          status: getField(m, 'status') || 'Scheduled',
           source: 'submission',
         }))
 
       const completedFromLog = matchLogData
-        .filter((m) => m.challenger && m.opponent)
+        .filter((m) => getField(m, 'challenger') && getField(m, 'opponent'))
         .map((m, index) => ({
           id: `log-${index}`,
-          challenger: m.challenger || '',
-          opponent: m.opponent || '',
-          winner: m.winner || '',
-          score: m.score || '',
-          match_date: m.created_at || '',
+          challenger: getField(m, 'challenger'),
+          opponent: getField(m, 'opponent'),
+          winner: getField(m, 'winner'),
+          score: getField(m, 'score'),
+          match_date: getField(m, 'created_at'),
           status: 'Completed',
           source: 'log',
         }))
@@ -95,39 +139,27 @@ export default function Page() {
 
   const playerNames = useMemo(() => {
     return players
-      .map((p) => String(p.player || '').trim())
+      .map((p) => String(getField(p, 'player') || '').trim())
       .filter(Boolean)
   }, [players])
 
   const playerRankMap = useMemo(() => {
     const map = {}
     players.forEach((p) => {
-      const name = String(p.player || '').trim()
-      if (name) map[name] = p.rank || ''
+      const name = String(getField(p, 'player') || '').trim()
+      if (name) {
+        map[name] = getField(p, 'rank') || ''
+      }
     })
     return map
   }, [players])
 
-  function addDays(dateString, days) {
-    if (!dateString) return ''
-    const date = new Date(dateString + 'T00:00:00')
-    if (Number.isNaN(date.getTime())) return ''
-    date.setDate(date.getDate() + days)
-    return date.toISOString().split('T')[0]
-  }
-
-  function pairKey(a, b) {
-    return [String(a || '').trim().toLowerCase(), String(b || '').trim().toLowerCase()]
-      .sort()
-      .join('__')
-  }
-
   const completedPairSet = useMemo(() => {
     const set = new Set()
     matches.forEach((m) => {
-      const status = String(m.status || '').trim().toLowerCase()
-      if (status === 'completed' && m.challenger && m.opponent) {
-        set.add(pairKey(m.challenger, m.opponent))
+      const status = normalize(getField(m, 'status'))
+      if (status === 'completed' && getField(m, 'challenger') && getField(m, 'opponent')) {
+        set.add(pairKey(getField(m, 'challenger'), getField(m, 'opponent')))
       }
     })
     return set
@@ -230,15 +262,18 @@ export default function Page() {
   }
 
   const activeMatches = matches.filter((m) => {
-    const eligible = String(m.eligible || '').trim().toLowerCase()
-    const approval = String(m.approval || '').trim().toLowerCase()
-    const status = String(m.status || '').trim().toLowerCase()
-    const notCompleted = !completedPairSet.has(pairKey(m.challenger, m.opponent))
+    const eligible = normalize(getField(m, 'eligible'))
+    const approval = normalize(getField(m, 'approval'))
+    const status = normalize(getField(m, 'status'))
+    const notCompleted = !completedPairSet.has(
+      pairKey(getField(m, 'challenger'), getField(m, 'opponent'))
+    )
+
     return eligible === 'eligible' && approval === 'approved' && status !== 'completed' && notCompleted
   })
 
   const completedMatches = matches.filter(
-    (m) => String(m.status || '').trim().toLowerCase() === 'completed'
+    (m) => normalize(getField(m, 'status')) === 'completed'
   )
 
   return (
@@ -297,7 +332,8 @@ export default function Page() {
                     challenger: name,
                     challenger_rank: playerRankMap[name] || '',
                     opponent: challengeForm.opponent === name ? '' : challengeForm.opponent,
-                    opponent_rank: challengeForm.opponent === name ? '' : challengeForm.opponent_rank,
+                    opponent_rank:
+                      challengeForm.opponent === name ? '' : challengeForm.opponent_rank,
                   })
                 }}
                 style={inputStyle}
@@ -376,7 +412,11 @@ export default function Page() {
 
               <div style={{ display: 'grid', gap: 18 }}>
                 {activeMatches.map((match) => {
-                  const form = scoreForms[match.id] || { winner: '', score: '', submitted_by: '' }
+                  const form = scoreForms[match.id] || {
+                    winner: '',
+                    score: '',
+                    submitted_by: '',
+                  }
 
                   return (
                     <div key={match.id} style={cardStyle}>
@@ -391,15 +431,20 @@ export default function Page() {
                       >
                         <div>
                           <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                            {match.challenger} <span style={{ color: '#6b7280' }}>vs</span> {match.opponent}
+                            {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
+                            {match.opponent}
                           </div>
-                          <div style={detailStyle}>Date: {match.match_date || '—'}</div>
-                          <div style={detailStyle}>Deadline: {match.deadline || '—'}</div>
-                          <div style={detailStyle}>Challenger Rank: {match.challenger_rank || '—'}</div>
-                          <div style={detailStyle}>Opponent Rank: {match.opponent_rank || '—'}</div>
-                          <div style={detailStyle}>Approval: {match.approval || '—'}</div>
-                          <div style={detailStyle}>Eligible: {match.eligible || '—'}</div>
-                          <div style={detailStyle}>Status: {match.status || '—'}</div>
+                          <div style={detailStyle}>Date: {getField(match, 'match_date') || '—'}</div>
+                          <div style={detailStyle}>Deadline: {getField(match, 'deadline') || '—'}</div>
+                          <div style={detailStyle}>
+                            Challenger Rank: {getField(match, 'challenger_rank') || '—'}
+                          </div>
+                          <div style={detailStyle}>
+                            Opponent Rank: {getField(match, 'opponent_rank') || '—'}
+                          </div>
+                          <div style={detailStyle}>Approval: {getField(match, 'approval') || '—'}</div>
+                          <div style={detailStyle}>Eligible: {getField(match, 'eligible') || '—'}</div>
+                          <div style={detailStyle}>Status: {getField(match, 'status') || '—'}</div>
                         </div>
 
                         <div
@@ -416,10 +461,15 @@ export default function Page() {
                             Report Score
                           </div>
 
-                          <form onSubmit={(e) => handleResultSubmit(e, match)} style={{ display: 'grid', gap: 10 }}>
+                          <form
+                            onSubmit={(e) => handleResultSubmit(e, match)}
+                            style={{ display: 'grid', gap: 10 }}
+                          >
                             <select
                               value={form.winner}
-                              onChange={(e) => updateScoreForm(match.id, { winner: e.target.value })}
+                              onChange={(e) =>
+                                updateScoreForm(match.id, { winner: e.target.value })
+                              }
                               style={inputStyle}
                             >
                               <option value="">Select winner</option>
@@ -430,14 +480,18 @@ export default function Page() {
                             <input
                               placeholder="Score"
                               value={form.score}
-                              onChange={(e) => updateScoreForm(match.id, { score: e.target.value })}
+                              onChange={(e) =>
+                                updateScoreForm(match.id, { score: e.target.value })
+                              }
                               style={inputStyle}
                             />
 
                             <input
                               placeholder="Your name"
                               value={form.submitted_by}
-                              onChange={(e) => updateScoreForm(match.id, { submitted_by: e.target.value })}
+                              onChange={(e) =>
+                                updateScoreForm(match.id, { submitted_by: e.target.value })
+                              }
                               style={inputStyle}
                             />
 
@@ -468,11 +522,12 @@ export default function Page() {
                 {completedMatches.map((match) => (
                   <div key={match.id} style={cardStyle}>
                     <div style={{ fontSize: 28, fontWeight: 800, marginBottom: 10 }}>
-                      {match.challenger} <span style={{ color: '#6b7280' }}>vs</span> {match.opponent}
+                      {match.challenger} <span style={{ color: '#6b7280' }}>vs</span>{' '}
+                      {match.opponent}
                     </div>
-                    <div style={detailStyle}>Date: {match.match_date || '—'}</div>
-                    <div style={detailStyle}>Winner: {match.winner || '—'}</div>
-                    <div style={detailStyle}>Score: {match.score || '—'}</div>
+                    <div style={detailStyle}>Date: {getField(match, 'match_date') || '—'}</div>
+                    <div style={detailStyle}>Winner: {getField(match, 'winner') || '—'}</div>
+                    <div style={detailStyle}>Score: {getField(match, 'score') || '—'}</div>
                   </div>
                 ))}
               </div>
