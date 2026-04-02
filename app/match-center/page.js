@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const PLAYERS = [
+const PLAYERS = [ 
   { player: 'Sophia', rank: '1' },
   { player: 'Skye', rank: '2' },
   { player: 'Viv', rank: '3' },
