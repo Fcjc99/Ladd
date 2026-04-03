@@ -619,31 +619,6 @@ export default function HomePage() {
   )
 }
 
-function CrownIcon() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="22"
-      height="22"
-      fill="none"
-      aria-hidden="true"
-      style={{ display: 'block' }}
-    >
-      <path
-        d="M4 18L2.5 7.5L8 11L12 4L16 11L21.5 7.5L20 18H4Z"
-        fill="currentColor"
-        opacity="0.95"
-      />
-      <path
-        d="M5 20H19"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-      />
-    </svg>
-  )
-}
-
 const loadingCardStyle = {
   background: 'rgba(17, 40, 74, 0.7)',
   border: '1px solid #234b86',
