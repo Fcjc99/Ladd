@@ -7,41 +7,22 @@ const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 const PLAYERS = [
   { name: 'Sophia', rank: 1 },
-  { name: 'Skye', rank: 2 },
-  { name: 'Viv', rank: 3 },
-  { name: 'Julia', rank: 4 },
-  { name: 'Clara', rank: 5 },
+  { name: 'Viv', rank: 2 },
+  { name: 'Julia', rank: 3 },
+  { name: 'Clara', rank: 4 },
+  { name: 'Skye', rank: 5 },
   { name: 'Caroline', rank: 6 },
   { name: 'Christi', rank: 7 },
   { name: 'Logan', rank: 8 },
   { name: 'Ella', rank: 9 },
   { name: 'Elizabeth', rank: 10 },
   { name: 'Karen', rank: 11 },
-  { name: 'Ellie', rank: 12 },
-  { name: 'Julianna', rank: 13 },
-  { name: 'Lulu', rank: 14 },
-  { name: 'Mia', rank: 15 },
-  { name: 'Ava', rank: 16 },
+  { name: 'Aislinn', rank: 12 },
+  { name: 'ChristyC', rank: 13 },
+  { name: 'Bree', rank: 14 },
+  { name: 'Ellie', rank: 15 },
+  { name: 'Julianna', rank: 16 },
 ]
-<a
-  href="/"
-  style={{
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: 46,
-    padding: '0 16px',
-    borderRadius: 14,
-    textDecoration: 'none',
-    fontWeight: 800,
-    fontSize: 14,
-    color: '#eef6ff',
-    background: 'rgba(255,255,255,0.06)',
-    border: '1px solid rgba(255,255,255,0.18)',
-  }}
->
-  ← Back to  Live Rankings
-</a>
 
 function normalizeText(value) {
   return String(value || '').trim()
@@ -301,9 +282,41 @@ export default function MatchCenterPage() {
       }}
     >
       <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <h1 style={{ fontSize: 40, fontWeight: 800, marginBottom: 20 }}>
-          Match Center
-        </h1>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 16,
+            flexWrap: 'wrap',
+            marginBottom: 20,
+          }}
+        >
+          <h1 style={{ fontSize: 40, fontWeight: 800, margin: 0 }}>
+            Match Center
+          </h1>
+
+          <a
+            href="/"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              minHeight: 48,
+              padding: '0 18px',
+              borderRadius: 14,
+              textDecoration: 'none',
+              fontWeight: 800,
+              fontSize: 14,
+              color: '#eef6ff',
+              background: 'rgba(255,255,255,0.06)',
+              border: '1px solid rgba(255,255,255,0.22)',
+              boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+            }}
+          >
+            ← Back to Live Rankings
+          </a>
+        </div>
 
         {challengeMessage ? (
           <div
