@@ -77,7 +77,7 @@ function getTierStyles(rank) {
       frame: {
         borderRadius: 35,
         background:
-          'radial-gradient(circle at 50% 38%, rgba(145,220,255,0.22) 0%, rgba(92,154,255,0.16) 24%, rgba(255,255,255,0.02) 56%, rgba(255,255,255,0) 74%), linear-gradient(180deg, rgba(18,42,80,0.82) 0%, rgba(9,22,44,0.94) 100%)',
+          'radial-gradient(circle at 50% 38%, rgba(145,220,255,0.22) 0%, rgba(92,154,255,0.16) 24%, rgba(255,255,255,0.02) 56%, rgba(255,255,255,0) 74%), linear-gradient(180deg, rgba(18,42,80,0.84) 0%, rgba(9,22,44,0.95) 100%)',
         border: '3px solid rgba(225,251,255,0.62)',
       },
       accent: '#aef2ff',
@@ -88,6 +88,7 @@ function getTierStyles(rank) {
       },
       title: 'Diamond Elite',
       glow: 'rgba(168,240,255,0.55)',
+      aura: '#9eefff',
     }
   }
 
@@ -182,13 +183,12 @@ function getTierStyles(rank) {
       position: 'relative',
       padding: 1,
       borderRadius: 22,
-      background: 'rgba(35,75,134,0.40)',
+      background: 'rgba(255,255,255,0.08)',
     },
     frame: {
       borderRadius: 22,
-      background:
-        'linear-gradient(180deg, rgba(17,40,74,0.95) 0%, rgba(12,26,48,0.95) 100%)',
-      border: '1px solid rgba(255,255,255,0.06)',
+      background: 'rgba(10,18,32,0.72)',
+      border: '1px solid rgba(255,255,255,0.14)',
     },
     accent: '#7fa7dd',
     badge: {
@@ -447,12 +447,28 @@ function TopRankCard({ row, rank }) {
             <div
               style={{
                 position: 'absolute',
-                inset: -20,
+                inset: 0,
+                borderRadius: 35,
                 pointerEvents: 'none',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(196,247,255,0.18), inset 0 0 34px rgba(168,240,255,0.08)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: 35,
+                pointerEvents: 'none',
+                WebkitMask:
+                  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+                padding: 3,
                 background:
-                  'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(185,246,255,0.06) 55deg, rgba(110,195,255,0.26) 110deg, rgba(255,255,255,0) 170deg, rgba(180,240,255,0.08) 240deg, rgba(108,176,255,0.26) 300deg, rgba(255,255,255,0) 360deg)',
-                animation: 'championBorderSpin 5.2s linear infinite',
-                opacity: 0.95,
+                  'conic-gradient(from 0deg, rgba(158,239,255,0) 0deg, rgba(158,239,255,0.0) 35deg, rgba(158,239,255,0.92) 85deg, rgba(115,196,255,0.98) 110deg, rgba(158,239,255,0.0) 150deg, rgba(158,239,255,0.0) 220deg, rgba(158,239,255,0.92) 280deg, rgba(115,196,255,0.98) 306deg, rgba(158,239,255,0.0) 340deg, rgba(158,239,255,0) 360deg)',
+                animation: 'championAuraTrace 2.4s linear infinite',
+                filter: 'drop-shadow(0 0 10px rgba(158,239,255,0.85)) drop-shadow(0 0 18px rgba(115,196,255,0.55))',
               }}
             />
             <div
@@ -460,21 +476,8 @@ function TopRankCard({ row, rank }) {
                 position: 'absolute',
                 inset: 8,
                 borderRadius: 28,
-                border: '1px solid rgba(188,244,255,0.22)',
-                boxShadow:
-                  'inset 0 0 30px rgba(168,240,255,0.10), 0 0 26px rgba(120,210,255,0.08)',
+                border: '1px solid rgba(188,244,255,0.18)',
                 pointerEvents: 'none',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                pointerEvents: 'none',
-                background:
-                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(189,245,255,0.08) 14%, rgba(255,255,255,0) 28%, rgba(160,208,255,0.16) 48%, rgba(255,255,255,0) 66%, rgba(189,245,255,0.10) 86%, rgba(255,255,255,0) 100%)',
-                animation: 'championSweep 3.2s linear infinite',
-                mixBlendMode: 'screen',
               }}
             />
           </>
@@ -637,7 +640,7 @@ function MidRankCard({ row, rank }) {
               flexWrap: 'wrap',
             }}
           >
-            <Pill compact accent={tierStyles.accent}>#{rank}</Pill>
+            <Pill compact accent={tierStyles.accent}>Bronze Rank</Pill>
             <Pill compact muted>Status: {row.status || '-'}</Pill>
           </div>
         </div>
@@ -842,35 +845,17 @@ export default function HomePage() {
           }
         }
 
-        @keyframes championSweep {
+        @keyframes championAuraTrace {
           0% {
-            transform: translateX(-38%);
-            opacity: 0;
-          }
-          12% {
-            opacity: 0.14;
-          }
-          32% {
-            opacity: 0.34;
-          }
-          54% {
-            opacity: 0.52;
-          }
-          100% {
-            transform: translateX(38%);
-            opacity: 0;
-          }
-        }
-
-        @keyframes championBorderSpin {
-          0% {
-            transform: rotate(0deg) scale(1);
+            transform: rotate(0deg);
+            opacity: 0.88;
           }
           50% {
-            transform: rotate(180deg) scale(1.02);
+            opacity: 1;
           }
           100% {
-            transform: rotate(360deg) scale(1);
+            transform: rotate(360deg);
+            opacity: 0.88;
           }
         }
 
@@ -930,7 +915,7 @@ export default function HomePage() {
                   marginBottom: 14,
                 }}
               >
-                Elite Ladder
+                NDA 2026 Tennis
               </div>
 
               <h1
@@ -945,17 +930,6 @@ export default function HomePage() {
               >
                 Live Ranking
               </h1>
-
-              <div
-                style={{
-                  marginTop: 10,
-                  color: 'rgba(220,232,255,0.72)',
-                  fontSize: 15,
-                  lineHeight: 1.5,
-                }}
-              >
-                Premium standings view with stronger podium treatment.
-              </div>
             </div>
 
             <a
@@ -964,15 +938,16 @@ export default function HomePage() {
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: 52,
-                padding: '0 18px',
+                minHeight: 54,
+                padding: '0 20px',
                 borderRadius: 16,
                 textDecoration: 'none',
-                fontWeight: 800,
+                fontWeight: 900,
                 fontSize: 16,
-                color: '#182235',
-                background: '#dbe7f7',
-                boxShadow: '0 10px 28px rgba(0,0,0,0.18)',
+                color: '#eef6ff',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+                border: '2px solid rgba(219,231,247,0.38)',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
             >
               Go to Match Center
@@ -1057,12 +1032,11 @@ const compactCardShellStyle = {
   position: 'relative',
   padding: 1,
   borderRadius: 24,
-  background: 'rgba(35,75,134,0.4)',
+  background: 'rgba(255,255,255,0.08)',
 }
 
 const compactCardStyle = {
   borderRadius: 24,
-  background:
-    'linear-gradient(180deg, rgba(17,40,74,0.95) 0%, rgba(12,26,48,0.95) 100%)',
-  border: '1px solid rgba(255,255,255,0.06)',
+  background: 'rgba(10,18,32,0.72)',
+  border: '1px solid rgba(255,255,255,0.14)',
 }
