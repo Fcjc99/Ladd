@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
-const rankingUrl = `https://opensheet.elk.sh/${sheetId}/Live%20Ranking`
+const sheetId =
+  process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
+  '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
+
+const rankingUrl = `https://opensheet.elk.sh/${sheetId}/LiveRankingFeed`
 
 function toNumber(value) {
   const n = Number(String(value ?? '').trim())
@@ -24,12 +27,12 @@ export default function HomePage() {
       const data = await res.json()
 
       if (!Array.isArray(data)) {
-        throw new Error('Live Ranking did not return an array')
+        throw new Error('LiveRankingFeed did not return an array')
       }
 
       setRows(data)
     } catch (err) {
-      console.error('Failed to load Live Ranking:', err)
+      console.error('Failed to load rankings:', err)
       setError(err.message || 'Failed to load rankings')
       setRows([])
     } finally {
@@ -42,26 +45,9 @@ export default function HomePage() {
   }, [])
 
   const rankingRows = useMemo(() => {
-    const cleaned = rows.filter((row) => {
-      const values = Object.values(row || {})
-      return values.some((v) => String(v || '').trim() !== '')
-    })
-
-    return cleaned.sort((a, b) => {
-      const rankA =
-        toNumber(a.rank) ??
-        toNumber(a.Rank) ??
-        toNumber(a.ranking) ??
-        toNumber(a.Ranking) ??
-        9999
-
-      const rankB =
-        toNumber(b.rank) ??
-        toNumber(b.Rank) ??
-        toNumber(b.ranking) ??
-        toNumber(b.Ranking) ??
-        9999
-
+    return [...rows].sort((a, b) => {
+      const rankA = toNumber(a.rank) ?? 9999
+      const rankB = toNumber(b.rank) ?? 9999
       return rankA - rankB
     })
   }, [rows])
@@ -117,50 +103,19 @@ export default function HomePage() {
           <div style={cardStyle}>No ranking rows found.</div>
         ) : (
           <div style={{ display: 'grid', gap: 16 }}>
-            {rankingRows.map((row, index) => {
-              const rank =
-                row.rank ??
-                row.Rank ??
-                row.ranking ??
-                row.Ranking ??
-                index + 1
+            {rankingRows.map((row, index) => (
+              <div key={`rank-${index}`} style={cardStyle}>
+                <div style={rowTopStyle}>
+                  <div style={rankBadgeStyle}>#{row.rank}</div>
 
-              const player =
-                row.player ??
-                row.Player ??
-                row.name ??
-                row.Name ??
-                row.player_name ??
-                row['Player Name'] ??
-                'Unknown'
-
-              const record =
-                row.record ??
-                row.Record ??
-                row.wins_losses ??
-                row['W-L'] ??
-                ''
-
-              const points =
-                row.points ??
-                row.Points ??
-                row.score ??
-                row.Score ??
-                ''
-
-              return (
-                <div key={`rank-${index}`} style={cardStyle}>
-                  <div style={rowTopStyle}>
-                    <div style={rankBadgeStyle}>#{rank}</div>
-                    <div>
-                      <div style={playerNameStyle}>{player}</div>
-                      {record ? <div style={metaStyle}>Record: {record}</div> : null}
-                      {points ? <div style={metaStyle}>Points: {points}</div> : null}
-                    </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={playerNameStyle}>{row.player || 'Unknown'}</div>
+                    <div style={metaStyle}>Move: {row.move ?? '-'}</div>
+                    <div style={metaStyle}>Status: {row.status || '-'}</div>
                   </div>
                 </div>
-              )
-            })}
+              </div>
+            ))}
           </div>
         )}
       </div>
