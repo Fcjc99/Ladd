@@ -2,180 +2,320 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
-const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
+const sheetId =
+  process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
+  '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
 
-const PLAYERS = [
-  { name: 'Sophia', rank: 1 },
-  { name: 'Viv', rank: 2 },
-  { name: 'Julia', rank: 3 },
-  { name: 'Clara', rank: 4 },
-  { name: 'Skye', rank: 5 },
-  { name: 'Caroline', rank: 6 },
-  { name: 'Christi', rank: 7 },
-  { name: 'Logan', rank: 8 },
-  { name: 'Ella', rank: 9 },
-  { name: 'Elizabeth', rank: 10 },
-  { name: 'Karen', rank: 11 },
-  { name: 'Aislinn', rank: 12 },
-  { name: 'ChristyC', rank: 13 },
-  { name: 'Bree', rank: 14 },
-  { name: 'Ellie', rank: 15 },
-  { name: 'Julianna', rank: 16 },
-]
+const rankingUrl = `https://opensheet.elk.sh/${sheetId}/LiveRankingFeed`
 
-function normalizeText(value) {
-  return String(value || '').trim()
+function toNumber(value) {
+  const n = Number(String(value ?? '').trim())
+  return Number.isFinite(n) ? n : null
 }
 
-function normalizeUpper(value) {
-  return normalizeText(value).toUpperCase()
+function getTier(rank) {
+  if (rank === 1) return 'diamond'
+  if (rank === 2) return 'gold'
+  if (rank === 3) return 'silver'
+  if (rank >= 4 && rank <= 7) return 'bronze'
+  return 'standard'
 }
 
-function isArchived(row) {
-  const archived = normalizeUpper(row.archived)
-  return archived === 'YES' || archived === 'TRUE'
-}
+function getMoveDisplay(moveValue) {
+  const move = toNumber(moveValue)
 
-function isCompleted(row) {
-  const status = normalizeUpper(row.status)
-  return status === 'COMPLETE' || status === 'COMPLETED'
-}
-
-function isActive(row) {
-  if (isArchived(row)) return false
-  if (isCompleted(row)) return false
-
-  const status = normalizeUpper(row.status)
-  const active = normalizeUpper(row.active)
-
-  if (active === 'YES' || active === 'ACTIVE') return true
-  if (status === 'ACTIVE' || status === 'PENDING' || status === 'SCHEDULED') return true
-
-  return false
-}
-
-function playerByName(name) {
-  return PLAYERS.find((p) => p.name === name)
-}
-
-function rankByName(name) {
-  const player = playerByName(name)
-  return player ? player.rank : '-'
-}
-
-function getRankTheme(rank) {
-  const n = Number(rank)
-
-  if (n === 1) {
+  if (move === null) {
     return {
-      accent: '#aef2ff',
-      accentSoft: 'rgba(174,242,255,0.16)',
-      accentBorder: 'rgba(174,242,255,0.34)',
-      badgeBg: 'linear-gradient(135deg, #ffffff 0%, #e2f9ff 45%, #a3ebff 100%)',
-      badgeColor: '#102444',
-      glow: 'rgba(168,240,255,0.26)',
-      cardBorder: 'rgba(174,242,255,0.24)',
+      label: '• 0',
+      bg: 'rgba(255,255,255,0.08)',
+      border: 'rgba(255,255,255,0.12)',
+      color: '#d9e7ff',
     }
   }
 
-  if (n === 2) {
+  if (move > 0) {
     return {
-      accent: '#f6d56f',
-      accentSoft: 'rgba(246,213,111,0.14)',
-      accentBorder: 'rgba(246,213,111,0.28)',
-      badgeBg: 'linear-gradient(135deg, #fff7d6 0%, #f4d566 58%, #ddb13d 100%)',
-      badgeColor: '#3d2c00',
-      glow: 'rgba(247,215,108,0.18)',
-      cardBorder: 'rgba(246,213,111,0.20)',
+      label: `▲ ${move}`,
+      bg: 'rgba(36, 184, 100, 0.16)',
+      border: 'rgba(57, 212, 122, 0.40)',
+      color: '#85f0af',
     }
   }
 
-  if (n === 3) {
+  if (move < 0) {
     return {
-      accent: '#dde6f0',
-      accentSoft: 'rgba(221,230,240,0.13)',
-      accentBorder: 'rgba(221,230,240,0.26)',
-      badgeBg: 'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
-      badgeColor: '#253245',
-      glow: 'rgba(220,229,239,0.16)',
-      cardBorder: 'rgba(221,230,240,0.18)',
-    }
-  }
-
-  if (n >= 4 && n <= 7) {
-    return {
-      accent: '#d29667',
-      accentSoft: 'rgba(210,150,103,0.14)',
-      accentBorder: 'rgba(210,150,103,0.28)',
-      badgeBg: 'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
-      badgeColor: '#3f1f0d',
-      glow: 'rgba(210,150,103,0.14)',
-      cardBorder: 'rgba(210,150,103,0.18)',
+      label: `▼ ${Math.abs(move)}`,
+      bg: 'rgba(210, 68, 68, 0.16)',
+      border: 'rgba(255, 106, 106, 0.35)',
+      color: '#ff9f9f',
     }
   }
 
   return {
-    accent: '#b8c9e6',
-    accentSoft: 'rgba(184,201,230,0.10)',
-    accentBorder: 'rgba(184,201,230,0.18)',
-    badgeBg: 'linear-gradient(135deg, #eff5ff 0%, #dbe7f7 100%)',
-    badgeColor: '#182235',
-    glow: 'rgba(184,201,230,0.10)',
-    cardBorder: 'rgba(255,255,255,0.10)',
+    label: '• 0',
+    bg: 'rgba(255,255,255,0.08)',
+    border: 'rgba(255,255,255,0.12)',
+    color: '#d9e7ff',
   }
 }
 
-function formatMatchLabel(row) {
-  const challengerRank = row.challenger_rank || rankByName(row.challenger)
-  const opponentRank = row.opponent_rank || rankByName(row.opponent)
+function getTierStyles(rank) {
+  const tier = getTier(rank)
 
-  return `${row.challenger} (#${challengerRank}) vs ${row.opponent} (#${opponentRank})`
+  if (tier === 'diamond') {
+    return {
+      shell: {
+        position: 'relative',
+        padding: 7,
+        borderRadius: 42,
+        background:
+          'linear-gradient(135deg, #fbffff 0%, #d6f7ff 12%, #ffffff 26%, #8fe6ff 48%, #8ea9ff 72%, #ecfcff 100%)',
+        boxShadow:
+          '0 0 26px rgba(149,236,255,0.42), 0 0 90px rgba(76,138,255,0.26), 0 18px 48px rgba(0,0,0,0.30)',
+        animation: 'diamondPulse 3.4s ease-in-out infinite',
+      },
+      frame: {
+        borderRadius: 35,
+        background:
+          'radial-gradient(circle at 50% 38%, rgba(145,220,255,0.22) 0%, rgba(92,154,255,0.16) 24%, rgba(255,255,255,0.02) 56%, rgba(255,255,255,0) 74%), linear-gradient(180deg, rgba(18,42,80,0.84) 0%, rgba(9,22,44,0.95) 100%)',
+        border: '3px solid rgba(225,251,255,0.62)',
+      },
+      accent: '#aef2ff',
+      badge: {
+        background:
+          'linear-gradient(135deg, #ffffff 0%, #e2f9ff 45%, #a3ebff 100%)',
+        color: '#102444',
+      },
+      title: 'Diamond Elite',
+      glow: 'rgba(168,240,255,0.55)',
+      aura: '#9eefff',
+    }
+  }
+
+  if (tier === 'gold') {
+    return {
+      shell: {
+        position: 'relative',
+        padding: 6,
+        borderRadius: 38,
+        background:
+          'linear-gradient(135deg, #fff2c8 0%, #f7df8a 16%, #e6b547 42%, #ba7b1c 72%, #ffe4a4 100%)',
+        boxShadow:
+          '0 0 20px rgba(247,215,108,0.28), 0 0 58px rgba(202,146,32,0.16), 0 16px 40px rgba(0,0,0,0.24)',
+        animation: 'goldPulse 4.1s ease-in-out infinite',
+      },
+      frame: {
+        borderRadius: 31,
+        background:
+          'linear-gradient(180deg, rgba(48,33,11,0.92) 0%, rgba(22,16,7,0.98) 100%)',
+        border: '3px solid rgba(255,231,162,0.44)',
+      },
+      accent: '#f6d56f',
+      badge: {
+        background:
+          'linear-gradient(135deg, #fff7d6 0%, #f4d566 58%, #ddb13d 100%)',
+        color: '#3d2c00',
+      },
+      title: 'Gold Rank',
+      glow: 'rgba(247,215,108,0.22)',
+    }
+  }
+
+  if (tier === 'silver') {
+    return {
+      shell: {
+        position: 'relative',
+        padding: 6,
+        borderRadius: 38,
+        background:
+          'linear-gradient(135deg, #ffffff 0%, #e8eef6 18%, #c2ccda 46%, #8f9bb0 72%, #f4f7fb 100%)',
+        boxShadow:
+          '0 0 20px rgba(220,229,239,0.22), 0 0 52px rgba(143,157,179,0.16), 0 16px 40px rgba(0,0,0,0.22)',
+        animation: 'silverPulse 4.3s ease-in-out infinite',
+      },
+      frame: {
+        borderRadius: 31,
+        background:
+          'linear-gradient(180deg, rgba(36,42,54,0.95) 0%, rgba(20,24,33,0.98) 100%)',
+        border: '3px solid rgba(233,240,247,0.36)',
+      },
+      accent: '#dde6f0',
+      badge: {
+        background:
+          'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
+        color: '#253245',
+      },
+      title: 'Silver Rank',
+      glow: 'rgba(220,229,239,0.18)',
+    }
+  }
+
+  if (tier === 'bronze') {
+    return {
+      shell: {
+        position: 'relative',
+        padding: 3,
+        borderRadius: 30,
+        background:
+          'linear-gradient(135deg, #f0c8a7 0%, #c78550 32%, #9b5a2e 70%, #e0b08a 100%)',
+        boxShadow:
+          '0 0 12px rgba(199,133,80,0.18), 0 10px 26px rgba(0,0,0,0.20)',
+      },
+      frame: {
+        borderRadius: 26,
+        background:
+          'linear-gradient(180deg, rgba(35,24,19,0.94) 0%, rgba(24,17,14,0.96) 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      },
+      accent: '#d29667',
+      badge: {
+        background:
+          'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
+        color: '#3f1f0d',
+      },
+      title: 'Bronze Rank',
+      glow: 'rgba(210,150,103,0.18)',
+    }
+  }
+
+  return {
+    shell: {
+      position: 'relative',
+      padding: 1,
+      borderRadius: 22,
+      background: 'rgba(255,255,255,0.08)',
+    },
+    frame: {
+      borderRadius: 22,
+      background: 'rgba(10,18,32,0.72)',
+      border: '1px solid rgba(255,255,255,0.14)',
+    },
+    accent: '#7fa7dd',
+    badge: {
+      background: '#dbe7f7',
+      color: '#182235',
+    },
+    title: 'Ranked',
+    glow: 'rgba(127,167,221,0.16)',
+  }
 }
 
-function RankBadge({ rank, small = false }) {
-  const theme = getRankTheme(rank)
+function CrownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      <path
+        d="M4 18L2.5 7.5L8 11L12 4L16 11L21.5 7.5L20 18H4Z"
+        fill="currentColor"
+        opacity="0.95"
+      />
+      <path
+        d="M5 20H19"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
 
+function PlayerPhoto({
+  photoUrl,
+  player,
+  size = 86,
+  radius = 26,
+  borderColor = 'rgba(255,255,255,0.14)',
+  champion = false,
+}) {
   return (
     <div
       style={{
-        minWidth: small ? 40 : 52,
-        height: small ? 40 : 52,
-        borderRadius: small ? 14 : 16,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontWeight: 900,
-        fontSize: small ? 18 : 20,
-        letterSpacing: '-0.04em',
-        background: theme.badgeBg,
-        color: theme.badgeColor,
-        boxShadow: `0 10px 22px rgba(0,0,0,0.18), 0 0 18px ${theme.glow}`,
+        width: size,
+        height: size,
+        borderRadius: radius,
+        overflow: 'hidden',
+        border: `2px solid ${borderColor}`,
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+        boxShadow: champion
+          ? `0 0 0 3px rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.30), 0 0 30px ${borderColor}`
+          : '0 16px 34px rgba(0,0,0,0.24)',
         flexShrink: 0,
       }}
     >
-      #{rank}
+      {photoUrl ? (
+        <img
+          src={photoUrl}
+          alt={player || 'Player'}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            display: 'block',
+          }}
+        />
+      ) : (
+        <div
+          style={{
+            width: '100%',
+            height: '100%',
+            display: 'grid',
+            placeItems: 'center',
+            color: 'rgba(255,255,255,0.72)',
+            fontWeight: 800,
+            fontSize: Math.max(18, size * 0.22),
+            letterSpacing: '-0.03em',
+          }}
+        >
+          {(player || '?').slice(0, 1).toUpperCase()}
+        </div>
+      )}
     </div>
   )
 }
 
-function Pill({ children, accent = '#dce8ff', muted = false, background, borderColor }) {
+function FlagInline({ flagUrl, player, width = 30, height = 20, radius = 6 }) {
+  if (!flagUrl) return null
+
+  return (
+    <img
+      src={flagUrl}
+      alt={`${player || 'Player'} flag`}
+      style={{
+        width,
+        height,
+        objectFit: 'cover',
+        borderRadius: radius,
+        border: '1px solid rgba(255,255,255,0.16)',
+        boxShadow: '0 8px 18px rgba(0,0,0,0.18)',
+        flexShrink: 0,
+      }}
+    />
+  )
+}
+
+function Pill({ children, accent, muted = false, compact = false }) {
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: '8px 12px',
+        padding: compact ? '7px 12px' : '10px 16px',
         borderRadius: 999,
-        fontSize: 12,
+        fontSize: compact ? 12 : 14,
         fontWeight: 800,
-        letterSpacing: '0.02em',
-        background: background || (muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'),
-        border: `1px solid ${borderColor || 'rgba(255,255,255,0.10)'}`,
-        color: accent,
+        background: muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        color: accent || '#dce8ff',
         whiteSpace: 'nowrap',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
       }}
     >
       {children}
@@ -183,475 +323,557 @@ function Pill({ children, accent = '#dce8ff', muted = false, background, borderC
   )
 }
 
-function MetaBox({ label, value }) {
+function RankBadge({ rank, styles, small = false, champion = false }) {
   return (
     <div
       style={{
-        borderRadius: 18,
-        padding: '12px 14px',
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        minWidth: small ? 50 : 84,
+        height: small ? 50 : 84,
+        borderRadius: small ? 16 : 24,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 900,
+        fontSize: small ? 24 : 38,
+        letterSpacing: '-0.04em',
+        position: 'relative',
+        ...styles.badge,
+        boxShadow: champion
+          ? `0 16px 34px rgba(0,0,0,0.22), 0 0 28px ${styles.glow || 'rgba(255,255,255,0.12)'}`
+          : `0 12px 24px rgba(0,0,0,0.18), 0 0 18px ${styles.glow || 'rgba(255,255,255,0.08)'}`,
       }}
     >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(220,232,255,0.56)',
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 15,
-          fontWeight: 750,
-          color: '#eef6ff',
-          wordBreak: 'break-word',
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  )
-}
-
-function SectionCard({ title, children, right, accent = 'rgba(91,171,255,0.12)' }) {
-  return (
-    <section
-      style={{
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.09)',
-        borderRadius: 28,
-        padding: 24,
-        boxShadow: `0 0 40px ${accent}`,
-        backdropFilter: 'blur(14px)',
-        WebkitBackdropFilter: 'blur(14px)',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          gap: 12,
-          flexWrap: 'wrap',
-          marginBottom: 20,
-        }}
-      >
-        <h2 style={{ fontSize: 28, fontWeight: 850, margin: 0 }}>{title}</h2>
-        {right}
-      </div>
-      {children}
-    </section>
-  )
-}
-
-function MatchCard({ row, onClick, completed = false }) {
-  const challengerRank = row.challenger_rank || rankByName(row.challenger)
-  const opponentRank = row.opponent_rank || rankByName(row.opponent)
-  const challengerTheme = getRankTheme(challengerRank)
-  const opponentTheme = getRankTheme(opponentRank)
-
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        background:
-          completed
-            ? 'linear-gradient(180deg, rgba(17,40,74,0.82) 0%, rgba(12,26,48,0.86) 100%)'
-            : 'linear-gradient(180deg, rgba(17,40,74,0.90) 0%, rgba(12,26,48,0.92) 100%)',
-        border: completed
-          ? '1px solid rgba(255,255,255,0.08)'
-          : '1px solid rgba(91,171,255,0.20)',
-        borderRadius: 24,
-        padding: 18,
-        boxShadow: completed
-          ? '0 10px 24px rgba(0,0,0,0.18)'
-          : '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.05)',
-        cursor: onClick ? 'pointer' : 'default',
-        transition: 'transform 0.18s ease, border-color 0.18s ease',
-      }}
-    >
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 14,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          marginBottom: 16,
-        }}
-      >
-        <div style={{ minWidth: 0, flex: 1 }}>
+      {champion ? (
+        <>
           <div
             style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              flexWrap: 'wrap',
-              marginBottom: 12,
+              position: 'absolute',
+              top: 7,
+              right: 7,
+              color: '#1a4765',
+              opacity: 0.96,
             }}
           >
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <RankBadge rank={challengerRank} />
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 850,
-                  color: '#eef6ff',
-                }}
-              >
-                {row.challenger}
-              </div>
-            </div>
-
-            <div
-              style={{
-                fontSize: 15,
-                fontWeight: 800,
-                color: 'rgba(220,232,255,0.64)',
-                letterSpacing: '0.12em',
-                textTransform: 'uppercase',
-              }}
-            >
-              vs
-            </div>
-
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-              <RankBadge rank={opponentRank} />
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 850,
-                  color: '#eef6ff',
-                }}
-              >
-                {row.opponent}
-              </div>
-            </div>
+            <CrownIcon />
           </div>
+          #{rank}
+        </>
+      ) : (
+        `#${rank}`
+      )}
+    </div>
+  )
+}
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Pill accent="#bdefff">{row.status || (completed ? 'Completed' : 'Active')}</Pill>
-            {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
-            {row.eligible ? <Pill muted>Eligible: {row.eligible}</Pill> : null}
-          </div>
-        </div>
-
-        {onClick ? (
-          <Pill
-            accent="#aef2ff"
-            background="rgba(174,242,255,0.10)"
-            borderColor="rgba(174,242,255,0.20)"
-          >
-            Click to enter result
-          </Pill>
-        ) : null}
-      </div>
+function CenterIdentity({
+  row,
+  titleSize = 26,
+  photoSize = 74,
+  flagWidth = 34,
+  flagHeight = 22,
+  photoBorderColor,
+  champion = false,
+}) {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        textAlign: 'center',
+        minWidth: 0,
+      }}
+    >
+      <PlayerPhoto
+        photoUrl={row.photo_url}
+        player={row.player}
+        size={photoSize}
+        borderColor={photoBorderColor}
+        champion={champion}
+      />
 
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
           gap: 10,
+          flexWrap: 'wrap',
+          minWidth: 0,
+          marginTop: 18,
         }}
       >
-        <MetaBox label="Match Date" value={row.match_date || '-'} />
-        <MetaBox label="Deadline" value={row.deadline || '-'} />
-        {completed ? <MetaBox label="Winner" value={row.winner || '-'} /> : null}
-        {completed ? <MetaBox label="Score" value={row.score || '-'} /> : null}
-      </div>
-
-      {!completed ? (
         <div
           style={{
-            display: 'grid',
-            gridTemplateColumns: '1fr 1fr',
-            gap: 10,
-            marginTop: 12,
+            fontSize: titleSize,
+            fontWeight: 900,
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+            wordBreak: 'break-word',
+          }}
+        >
+          {row.player || 'Unknown'}
+        </div>
+
+        <FlagInline
+          flagUrl={row.flag_url}
+          player={row.player}
+          width={flagWidth}
+          height={flagHeight}
+        />
+      </div>
+    </div>
+  )
+}
+
+function TopRankCard({ row, rank }) {
+  const tierStyles = getTierStyles(rank)
+  const moveDisplay = getMoveDisplay(row.move)
+  const isFirst = rank === 1
+
+  return (
+    <div style={tierStyles.shell}>
+      <div
+        style={{
+          ...tierStyles.frame,
+          position: 'relative',
+          overflow: 'hidden',
+          padding: isFirst ? '24px 26px 22px' : '22px 24px 20px',
+          minHeight: isFirst ? 500 : 395,
+        }}
+      >
+        {isFirst ? (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: 35,
+                pointerEvents: 'none',
+                boxShadow:
+                  'inset 0 0 0 1px rgba(196,247,255,0.18), inset 0 0 34px rgba(168,240,255,0.08)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 0,
+                borderRadius: 35,
+                pointerEvents: 'none',
+                WebkitMask:
+                  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                WebkitMaskComposite: 'xor',
+                maskComposite: 'exclude',
+                padding: 3,
+                background:
+                  'conic-gradient(from 0deg, rgba(158,239,255,0) 0deg, rgba(158,239,255,0.0) 35deg, rgba(158,239,255,0.92) 85deg, rgba(115,196,255,0.98) 110deg, rgba(158,239,255,0.0) 150deg, rgba(158,239,255,0.0) 220deg, rgba(158,239,255,0.92) 280deg, rgba(115,196,255,0.98) 306deg, rgba(158,239,255,0.0) 340deg, rgba(158,239,255,0) 360deg)',
+                animation: 'championAuraTrace 2.4s linear infinite',
+                filter: 'drop-shadow(0 0 10px rgba(158,239,255,0.85)) drop-shadow(0 0 18px rgba(115,196,255,0.55))',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 8,
+                borderRadius: 28,
+                border: '1px solid rgba(188,244,255,0.18)',
+                pointerEvents: 'none',
+              }}
+            />
+          </>
+        ) : null}
+
+        <div
+          className="top-rank-content"
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            minHeight: isFirst ? 448 : 350,
           }}
         >
           <div
             style={{
-              borderRadius: 18,
-              padding: '12px 14px',
-              background: challengerTheme.accentSoft,
-              border: `1px solid ${challengerTheme.accentBorder}`,
+              width: '100%',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
             }}
           >
+            <RankBadge rank={rank} styles={tierStyles} small={false} champion={isFirst} />
+
             <div
               style={{
-                fontSize: 11,
+                padding: '8px 14px',
+                borderRadius: 999,
+                fontSize: 14,
                 fontWeight: 800,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(220,232,255,0.56)',
-                marginBottom: 8,
+                background: moveDisplay.bg,
+                border: `1px solid ${moveDisplay.border}`,
+                color: moveDisplay.color,
+                whiteSpace: 'nowrap',
               }}
             >
-              Challenger
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: challengerTheme.accent }}>
-              {row.challenger} (#{challengerRank})
+              {moveDisplay.label}
             </div>
           </div>
 
           <div
             style={{
-              borderRadius: 18,
-              padding: '12px 14px',
-              background: opponentTheme.accentSoft,
-              border: `1px solid ${opponentTheme.accentBorder}`,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: isFirst ? 8 : 2,
+              marginBottom: 8,
             }}
           >
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 800,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(220,232,255,0.56)',
-                marginBottom: 8,
-              }}
-            >
-              Opponent
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: opponentTheme.accent }}>
-              {row.opponent} (#{opponentRank})
-            </div>
+            <CenterIdentity
+              row={row}
+              titleSize={isFirst ? 64 : 44}
+              photoSize={isFirst ? 190 : 138}
+              flagWidth={isFirst ? 44 : 38}
+              flagHeight={isFirst ? 28 : 24}
+              photoBorderColor={tierStyles.accent}
+              champion={isFirst}
+            />
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 12,
+              flexWrap: 'wrap',
+              marginTop: 4,
+            }}
+          >
+            <Pill accent={tierStyles.accent}>{tierStyles.title}</Pill>
+            <Pill muted>Status: {row.status || '-'}</Pill>
           </div>
         </div>
-      ) : null}
+      </div>
     </div>
   )
 }
 
-export default function MatchCenterPage() {
-  const [feedRows, setFeedRows] = useState([])
+function MidRankCard({ row, rank }) {
+  const tierStyles = getTierStyles(rank)
+  const moveDisplay = getMoveDisplay(row.move)
+
+  return (
+    <div style={tierStyles.shell}>
+      <div
+        style={{
+          ...tierStyles.frame,
+          position: 'relative',
+          overflow: 'hidden',
+          padding: '18px 20px 18px',
+          minHeight: 285,
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            minHeight: 245,
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'flex-start',
+              justifyContent: 'space-between',
+            }}
+          >
+            <RankBadge rank={rank} styles={tierStyles} small />
+
+            <div
+              style={{
+                padding: '7px 12px',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 800,
+                background: moveDisplay.bg,
+                border: `1px solid ${moveDisplay.border}`,
+                color: moveDisplay.color,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {moveDisplay.label}
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: -2,
+              marginBottom: 6,
+            }}
+          >
+            <CenterIdentity
+              row={row}
+              titleSize={30}
+              photoSize={124}
+              flagWidth={34}
+              flagHeight={22}
+              photoBorderColor={tierStyles.accent}
+            />
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Pill compact accent={tierStyles.accent}>Bronze Rank</Pill>
+            <Pill compact muted>Status: {row.status || '-'}</Pill>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function CompactCard({ row, rank }) {
+  const moveDisplay = getMoveDisplay(row.move)
+
+  return (
+    <div style={compactCardShellStyle}>
+      <div
+        style={{
+          ...compactCardStyle,
+          position: 'relative',
+          overflow: 'hidden',
+          minHeight: 230,
+          padding: '16px 18px 18px',
+        }}
+      >
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            minHeight: 194,
+          }}
+        >
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+            }}
+          >
+            <div
+              style={{
+                minWidth: 46,
+                height: 46,
+                borderRadius: 15,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 900,
+                fontSize: 22,
+                background: '#dbe7f7',
+                color: '#182235',
+                boxShadow: '0 8px 18px rgba(0,0,0,0.16)',
+              }}
+            >
+              #{rank}
+            </div>
+
+            <div
+              style={{
+                padding: '7px 12px',
+                borderRadius: 999,
+                fontSize: 12,
+                fontWeight: 800,
+                background: moveDisplay.bg,
+                border: `1px solid ${moveDisplay.border}`,
+                color: moveDisplay.color,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {moveDisplay.label}
+            </div>
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: -4,
+              marginBottom: 6,
+            }}
+          >
+            <CenterIdentity
+              row={row}
+              titleSize={26}
+              photoSize={112}
+              flagWidth={32}
+              flagHeight={20}
+            />
+          </div>
+
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 10,
+              flexWrap: 'wrap',
+            }}
+          >
+            <Pill compact accent="#dce8ff">#{rank}</Pill>
+            <Pill compact muted>Status: {row.status || '-'}</Pill>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function HomePage() {
+  const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [challengeMessage, setChallengeMessage] = useState('')
-  const [submittingChallenge, setSubmittingChallenge] = useState(false)
+  const [error, setError] = useState('')
 
-  const [selectedMatch, setSelectedMatch] = useState(null)
-  const [resultForm, setResultForm] = useState({
-    winner: '',
-    score: '',
-  })
-  const [submittingResult, setSubmittingResult] = useState(false)
-
-  const [challengeForm, setChallengeForm] = useState({
-    challenger: '',
-    challenger_rank: '',
-    opponent: '',
-    opponent_rank: '',
-    match_date: '',
-    deadline: '',
-  })
-
-  async function loadData() {
+  async function loadRankings() {
     try {
       setLoading(true)
-      const res = await fetch(feedUrl, { cache: 'no-store' })
+      setError('')
+
+      const res = await fetch(rankingUrl, { cache: 'no-store' })
       const data = await res.json()
 
       if (!Array.isArray(data)) {
-        setFeedRows([])
-        return
+        throw new Error('Live Ranking did not return an array')
       }
 
-      setFeedRows(data)
+      setRows(data)
     } catch (err) {
-      console.error('Failed to load ChallengeFeed:', err)
-      setFeedRows([])
+      console.error('Failed to load rankings:', err)
+      setError(err.message || 'Failed to load rankings')
+      setRows([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    loadData()
+    loadRankings()
   }, [])
 
-  const activeChallenges = useMemo(() => {
-    return feedRows.filter(isActive)
-  }, [feedRows])
+  const rankingRows = useMemo(() => {
+    return [...rows].sort((a, b) => {
+      const rankA = toNumber(a.rank) ?? 9999
+      const rankB = toNumber(b.rank) ?? 9999
+      return rankA - rankB
+    })
+  }, [rows])
 
-  const completedChallenges = useMemo(() => {
-    return feedRows.filter((row) => isCompleted(row) || isArchived(row))
-  }, [feedRows])
+  const topThree = rankingRows.filter((row) => {
+    const rank = toNumber(row.rank)
+    return rank && rank <= 3
+  })
 
-  function updateChallengeField(name, value) {
-    if (name === 'challenger') {
-      const player = PLAYERS.find((p) => p.name === value)
-      setChallengeForm((prev) => ({
-        ...prev,
-        challenger: value,
-        challenger_rank: player ? String(player.rank) : '',
-      }))
-      return
-    }
+  const bronzeRows = rankingRows.filter((row) => {
+    const rank = toNumber(row.rank)
+    return rank && rank >= 4 && rank <= 7
+  })
 
-    if (name === 'opponent') {
-      const player = PLAYERS.find((p) => p.name === value)
-      setChallengeForm((prev) => ({
-        ...prev,
-        opponent: value,
-        opponent_rank: player ? String(player.rank) : '',
-      }))
-      return
-    }
-
-    setChallengeForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  async function handleChallengeSubmit(e) {
-    e.preventDefault()
-    setSubmittingChallenge(true)
-    setChallengeMessage('')
-
-    try {
-      if (!challengeForm.challenger || !challengeForm.opponent) {
-        throw new Error('Please select both challenger and opponent')
-      }
-
-      if (challengeForm.challenger === challengeForm.opponent) {
-        throw new Error('Challenger and opponent must be different')
-      }
-
-      const payload = {
-        action: 'challenge',
-        challenger: challengeForm.challenger,
-        challenger_rank: challengeForm.challenger_rank,
-        opponent: challengeForm.opponent,
-        opponent_rank: challengeForm.opponent_rank,
-        match_date: challengeForm.match_date,
-        deadline: challengeForm.deadline,
-        eligible: 'YES',
-        approval: 'PENDING',
-        status: 'ACTIVE',
-        winner: '',
-        score: '',
-        active: 'YES',
-        archived: 'NO',
-      }
-
-      const res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      const data = await res.json()
-
-      if (!data.success) {
-        throw new Error(data.error || data.raw || 'Challenge submit failed')
-      }
-
-      setChallengeMessage('Challenge submitted successfully')
-
-      setChallengeForm({
-        challenger: '',
-        challenger_rank: '',
-        opponent: '',
-        opponent_rank: '',
-        match_date: '',
-        deadline: '',
-      })
-
-      setTimeout(() => {
-        loadData()
-      }, 1000)
-    } catch (err) {
-      console.error('Challenge submit failed:', err)
-      setChallengeMessage(err.message || 'Challenge submit failed')
-    } finally {
-      setSubmittingChallenge(false)
-    }
-  }
-
-  async function handleResultSubmit(e) {
-    e.preventDefault()
-    if (!selectedMatch) return
-
-    setSubmittingResult(true)
-    setChallengeMessage('')
-
-    try {
-      if (!selectedMatch.source_row) {
-        throw new Error('Missing source_row from ChallengeFeed')
-      }
-
-      if (!resultForm.winner || !resultForm.score) {
-        throw new Error('Please select winner and enter score')
-      }
-
-      const payload = {
-        action: 'complete_match',
-        source_row: Number(selectedMatch.source_row),
-        winner: resultForm.winner,
-        score: resultForm.score,
-      }
-
-      const res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      const data = await res.json()
-      console.log('Result submit response:', data)
-
-      if (!data.success) {
-        throw new Error(data.error || data.raw || 'Failed to submit result')
-      }
-
-      setFeedRows((prev) =>
-        prev.map((row) => {
-          if (String(row.source_row) !== String(payload.source_row)) return row
-
-          return {
-            ...row,
-            winner: payload.winner,
-            score: payload.score,
-            status: 'Completed',
-            active: 'Inactive',
-            archived: 'Yes',
-          }
-        })
-      )
-
-      setSelectedMatch(null)
-      setResultForm({
-        winner: '',
-        score: '',
-      })
-
-      setChallengeMessage('Match result saved successfully')
-
-      setTimeout(() => {
-        loadData()
-      }, 1500)
-    } catch (err) {
-      console.error('Result submit failed:', err)
-      setChallengeMessage(err.message || 'Failed to submit result')
-    } finally {
-      setSubmittingResult(false)
-    }
-  }
+  const restRows = rankingRows.filter((row) => {
+    const rank = toNumber(row.rank)
+    return rank && rank >= 8
+  })
 
   return (
     <>
       <style>{`
-        @media (max-width: 700px) {
-          .match-center-title {
-            font-size: 34px !important;
+        @keyframes diamondPulse {
+          0% {
+            box-shadow: 0 0 24px rgba(149,236,255,0.34), 0 0 64px rgba(76,138,255,0.18), 0 18px 48px rgba(0,0,0,0.30);
+          }
+          50% {
+            box-shadow: 0 0 40px rgba(149,236,255,0.62), 0 0 118px rgba(76,138,255,0.36), 0 18px 48px rgba(0,0,0,0.34);
+          }
+          100% {
+            box-shadow: 0 0 24px rgba(149,236,255,0.34), 0 0 64px rgba(76,138,255,0.18), 0 18px 48px rgba(0,0,0,0.30);
+          }
+        }
+
+        @keyframes goldPulse {
+          0% {
+            box-shadow: 0 0 18px rgba(247,215,108,0.22), 0 0 48px rgba(202,146,32,0.12), 0 16px 40px rgba(0,0,0,0.24);
+          }
+          50% {
+            box-shadow: 0 0 28px rgba(247,215,108,0.34), 0 0 68px rgba(202,146,32,0.20), 0 16px 40px rgba(0,0,0,0.24);
+          }
+          100% {
+            box-shadow: 0 0 18px rgba(247,215,108,0.22), 0 0 48px rgba(202,146,32,0.12), 0 16px 40px rgba(0,0,0,0.24);
+          }
+        }
+
+        @keyframes silverPulse {
+          0% {
+            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 16px 40px rgba(0,0,0,0.22);
+          }
+          50% {
+            box-shadow: 0 0 24px rgba(220,229,239,0.28), 0 0 58px rgba(143,157,179,0.18), 0 16px 40px rgba(0,0,0,0.22);
+          }
+          100% {
+            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 16px 40px rgba(0,0,0,0.22);
+          }
+        }
+
+        @keyframes championAuraTrace {
+          0% {
+            transform: rotate(0deg);
+            opacity: 0.88;
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            transform: rotate(360deg);
+            opacity: 0.88;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .ranking-page-title {
+            font-size: 44px !important;
+          }
+        }
+
+        @media (max-width: 680px) {
+          .bronze-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .top-rank-content {
+            min-height: auto !important;
           }
         }
       `}</style>
@@ -665,15 +887,15 @@ export default function MatchCenterPage() {
           padding: '32px 16px 60px',
         }}
       >
-        <div style={{ maxWidth: 980, margin: '0 auto' }}>
+        <div style={{ maxWidth: 1150, margin: '0 auto' }}>
           <div
             style={{
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'flex-start',
+              alignItems: 'center',
               gap: 16,
               flexWrap: 'wrap',
-              marginBottom: 16,
+              marginBottom: 14,
             }}
           >
             <div>
@@ -697,21 +919,21 @@ export default function MatchCenterPage() {
               </div>
 
               <h1
-                className="match-center-title"
+                className="ranking-page-title"
                 style={{
-                  fontSize: 48,
+                  fontSize: 56,
                   fontWeight: 900,
                   letterSpacing: '-0.03em',
                   margin: 0,
                   lineHeight: 0.95,
                 }}
               >
-                Match Center
+                Live Ranking
               </h1>
             </div>
 
             <a
-              href="/"
+              href="/match-center"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -721,16 +943,14 @@ export default function MatchCenterPage() {
                 borderRadius: 16,
                 textDecoration: 'none',
                 fontWeight: 900,
-                fontSize: 15,
+                fontSize: 16,
                 color: '#eef6ff',
-                background:
-                  'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+                background: 'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
                 border: '2px solid rgba(219,231,247,0.38)',
-                boxShadow:
-                  '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
+                boxShadow: '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
             >
-              ← Back to Live Rankings
+              Go to Match Center
             </a>
           </div>
 
@@ -739,355 +959,84 @@ export default function MatchCenterPage() {
               height: 1,
               background:
                 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(168,240,255,0.18) 22%, rgba(255,255,255,0.08) 50%, rgba(168,240,255,0.18) 78%, rgba(255,255,255,0) 100%)',
-              marginBottom: 24,
+              marginBottom: 26,
             }}
           />
 
-          {challengeMessage ? (
+          {error ? (
             <div
               style={{
                 marginBottom: 24,
                 padding: '18px 20px',
-                borderRadius: 18,
-                background: 'rgba(17,40,74,0.78)',
-                border: '1px solid rgba(91,171,255,0.26)',
-                fontSize: 17,
-                fontWeight: 700,
-                boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
+                borderRadius: 16,
+                background: '#4a1120',
+                border: '1px solid #86234b',
+                fontSize: 16,
+                fontWeight: 600,
               }}
             >
-              {challengeMessage}
+              {error}
             </div>
           ) : null}
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: 12,
-              marginBottom: 28,
-            }}
-          >
-            <MetaBox label="Feed Rows" value={String(feedRows.length)} />
-            <MetaBox label="Active" value={String(activeChallenges.length)} />
-            <MetaBox label="Completed" value={String(completedChallenges.length)} />
-          </div>
+          {loading ? (
+            <div style={loadingCardStyle}>Loading rankings...</div>
+          ) : rankingRows.length === 0 ? (
+            <div style={loadingCardStyle}>No ranking rows found.</div>
+          ) : (
+            <>
+              <div style={{ display: 'grid', gap: 18, marginBottom: 28 }}>
+                {topThree.map((row) => {
+                  const rank = toNumber(row.rank) ?? 0
+                  return <TopRankCard key={`top-${rank}`} row={row} rank={rank} />
+                })}
+              </div>
 
-          <div style={{ display: 'grid', gap: 24 }}>
-            <SectionCard title="Submit Challenge" accent="rgba(168,240,255,0.10)">
-              <form onSubmit={handleChallengeSubmit}>
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-                    gap: 16,
-                    marginBottom: 16,
-                  }}
-                >
-                  <div>
-                    <label style={labelStyle}>Challenger</label>
-                    <select
-                      value={challengeForm.challenger}
-                      onChange={(e) => updateChallengeField('challenger', e.target.value)}
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select challenger</option>
-                      {PLAYERS.map((player) => (
-                        <option key={player.name} value={player.name}>
-                          {player.name} (#{player.rank})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+              <div
+                className="bronze-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+                  gap: 16,
+                  marginBottom: 28,
+                }}
+              >
+                {bronzeRows.map((row) => {
+                  const rank = toNumber(row.rank) ?? 0
+                  return <MidRankCard key={`bronze-${rank}`} row={row} rank={rank} />
+                })}
+              </div>
 
-                  <div>
-                    <label style={labelStyle}>Opponent</label>
-                    <select
-                      value={challengeForm.opponent}
-                      onChange={(e) => updateChallengeField('opponent', e.target.value)}
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select opponent</option>
-                      {PLAYERS.map((player) => (
-                        <option key={player.name} value={player.name}>
-                          {player.name} (#{player.rank})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>Match Date</label>
-                    <input
-                      type="date"
-                      value={challengeForm.match_date}
-                      onChange={(e) => updateChallengeField('match_date', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>Deadline</label>
-                    <input
-                      type="date"
-                      value={challengeForm.deadline}
-                      onChange={(e) => updateChallengeField('deadline', e.target.value)}
-                      style={inputStyle}
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submittingChallenge}
-                  style={{
-                    ...buttonStyle,
-                    opacity: submittingChallenge ? 0.7 : 1,
-                    cursor: submittingChallenge ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
-                </button>
-              </form>
-            </SectionCard>
-
-            <SectionCard
-              title="Active Challenges"
-              accent="rgba(168,240,255,0.08)"
-              right={
-                <Pill
-                  accent="#aef2ff"
-                  background="rgba(174,242,255,0.10)"
-                  borderColor="rgba(174,242,255,0.18)"
-                >
-                  {loading ? 'Loading...' : `${activeChallenges.length} Active`}
-                </Pill>
-              }
-            >
-              {loading ? (
-                <div style={emptyStateStyle}>Loading active challenges...</div>
-              ) : activeChallenges.length === 0 ? (
-                <div style={emptyStateStyle}>No active challenges found.</div>
-              ) : (
-                <div style={listStyle}>
-                  {activeChallenges.map((row, index) => (
-                    <MatchCard
-                      key={`active-${index}`}
-                      row={row}
-                      onClick={() => {
-                        setSelectedMatch(row)
-                        setResultForm({
-                          winner: '',
-                          score: '',
-                        })
-                      }}
-                    />
-                  ))}
-                </div>
-              )}
-            </SectionCard>
-
-            <SectionCard
-              title="Completed Challenges"
-              accent="rgba(255,255,255,0.05)"
-              right={
-                <Pill muted>
-                  {loading ? 'Loading...' : `${completedChallenges.length} Completed`}
-                </Pill>
-              }
-            >
-              {loading ? (
-                <div style={emptyStateStyle}>Loading completed challenges...</div>
-              ) : completedChallenges.length === 0 ? (
-                <div style={emptyStateStyle}>No completed challenges found.</div>
-              ) : (
-                <div style={listStyle}>
-                  {completedChallenges.map((row, index) => (
-                    <MatchCard key={`completed-${index}`} row={row} completed />
-                  ))}
-                </div>
-              )}
-            </SectionCard>
-          </div>
+              <div style={{ display: 'grid', gap: 16 }}>
+                {restRows.map((row) => {
+                  const rank = toNumber(row.rank) ?? 0
+                  return <CompactCard key={`rest-${rank}`} row={row} rank={rank} />
+                })}
+              </div>
+            </>
+          )}
         </div>
-
-        {selectedMatch ? (
-          <div style={modalOverlayStyle}>
-            <div style={modalStyle}>
-              <div
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  gap: 12,
-                  alignItems: 'center',
-                  marginBottom: 18,
-                  flexWrap: 'wrap',
-                }}
-              >
-                <h3 style={{ fontSize: 26, fontWeight: 850, margin: 0 }}>
-                  Enter Match Result
-                </h3>
-                <Pill muted>Row: {selectedMatch.source_row || 'missing'}</Pill>
-              </div>
-
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 750,
-                  lineHeight: 1.45,
-                  marginBottom: 18,
-                }}
-              >
-                {formatMatchLabel(selectedMatch)}
-              </div>
-
-              <form onSubmit={handleResultSubmit}>
-                <div style={{ display: 'grid', gap: 16 }}>
-                  <div>
-                    <label style={labelStyle}>Winner</label>
-                    <select
-                      value={resultForm.winner}
-                      onChange={(e) =>
-                        setResultForm((prev) => ({ ...prev, winner: e.target.value }))
-                      }
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select winner</option>
-                      <option value={selectedMatch.challenger}>
-                        {selectedMatch.challenger}
-                      </option>
-                      <option value={selectedMatch.opponent}>
-                        {selectedMatch.opponent}
-                      </option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label style={labelStyle}>Score</label>
-                    <input
-                      type="text"
-                      placeholder="Enter score, e.g. 6-3, 6-4"
-                      value={resultForm.score}
-                      onChange={(e) =>
-                        setResultForm((prev) => ({ ...prev, score: e.target.value }))
-                      }
-                      style={inputStyle}
-                      required
-                    />
-                  </div>
-
-                  <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
-                    <button
-                      type="submit"
-                      style={buttonStyle}
-                      disabled={submittingResult}
-                    >
-                      {submittingResult ? 'Saving...' : 'Save Result'}
-                    </button>
-
-                    <button
-                      type="button"
-                      style={secondaryButtonStyle}
-                      onClick={() => setSelectedMatch(null)}
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        ) : null}
       </div>
     </>
   )
 }
 
-const labelStyle = {
-  display: 'block',
-  marginBottom: 8,
-  fontSize: 12,
-  fontWeight: 800,
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase',
-  color: 'rgba(220,232,255,0.72)',
-}
-
-const inputStyle = {
-  width: '100%',
-  height: 58,
+const loadingCardStyle = {
+  background: 'rgba(17, 40, 74, 0.7)',
+  border: '1px solid #234b86',
   borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.12)',
-  outline: 'none',
-  padding: '0 18px',
-  fontSize: 17,
-  background: 'rgba(243,244,246,0.96)',
-  color: '#111827',
-  boxSizing: 'border-box',
-}
-
-const buttonStyle = {
-  width: '100%',
-  height: 58,
-  borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.08)',
-  fontSize: 18,
-  fontWeight: 850,
-  background: '#dbe7f7',
-  color: '#182235',
-  cursor: 'pointer',
-  boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
-}
-
-const secondaryButtonStyle = {
-  width: '100%',
-  height: 58,
-  borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.18)',
-  fontSize: 17,
-  fontWeight: 750,
-  background: 'rgba(255,255,255,0.04)',
-  color: 'white',
-  cursor: 'pointer',
-}
-
-const listStyle = {
-  display: 'grid',
-  gap: 16,
-}
-
-const emptyStateStyle = {
-  borderRadius: 20,
   padding: 18,
-  background: 'rgba(17,40,74,0.68)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  fontSize: 16,
-  color: 'rgba(238,246,255,0.88)',
 }
 
-const modalOverlayStyle = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.60)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 16,
-  zIndex: 1000,
-  backdropFilter: 'blur(6px)',
-  WebkitBackdropFilter: 'blur(6px)',
+const compactCardShellStyle = {
+  position: 'relative',
+  padding: 1,
+  borderRadius: 24,
+  background: 'rgba(255,255,255,0.08)',
 }
 
-const modalStyle = {
-  width: '100%',
-  maxWidth: 560,
-  background:
-    'linear-gradient(180deg, rgba(15,34,63,0.96) 0%, rgba(10,23,43,0.98) 100%)',
-  border: '1px solid rgba(91,171,255,0.24)',
-  borderRadius: 26,
-  padding: 24,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
+const compactCardStyle = {
+  borderRadius: 24,
+  background: 'rgba(10,18,32,0.72)',
+  border: '1px solid rgba(255,255,255,0.14)',
 }
