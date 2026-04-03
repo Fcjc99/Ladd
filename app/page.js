@@ -357,16 +357,47 @@ export default function HomePage() {
         }}
       >
         <div style={{ maxWidth: 1100, margin: '0 auto' }}>
-          <h1
+          <div
             style={{
-              fontSize: 56,
-              fontWeight: 900,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 16,
+              flexWrap: 'wrap',
               marginBottom: 20,
-              letterSpacing: '-0.03em',
             }}
           >
-            Live Ranking
-          </h1>
+            <h1
+              style={{
+                fontSize: 56,
+                fontWeight: 900,
+                letterSpacing: '-0.03em',
+                margin: 0,
+              }}
+            >
+              Live Ranking
+            </h1>
+
+            <a
+              href="/match-center"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 52,
+                padding: '0 18px',
+                borderRadius: 16,
+                textDecoration: 'none',
+                fontWeight: 800,
+                fontSize: 16,
+                color: '#182235',
+                background: '#dbe7f7',
+                boxShadow: '0 10px 28px rgba(0,0,0,0.18)',
+              }}
+            >
+              Go to Match Center
+            </a>
+          </div>
 
           {error ? (
             <div
@@ -434,7 +465,8 @@ export default function HomePage() {
                               borderRadius: '50%',
                               background:
                                 'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(178,240,255,0.5) 65deg, rgba(132,177,255,0.9) 140deg, rgba(255,255,255,0.08) 220deg, rgba(178,240,255,0.4) 300deg, rgba(255,255,255,0) 360deg)',
-                              animation: 'auraSpin 11s linear infinite, auraPulse 3.2s ease-in-out infinite',
+                              animation:
+                                'auraSpin 11s linear infinite, auraPulse 3.2s ease-in-out infinite',
                               pointerEvents: 'none',
                             }}
                           />
@@ -499,6 +531,7 @@ export default function HomePage() {
                             ...tierStyles.badge,
                             position: 'relative',
                             overflow: 'hidden',
+                            flexShrink: 0,
                           }}
                         >
                           {tier === 'diamond' ? (
@@ -536,16 +569,55 @@ export default function HomePage() {
                           >
                             <div
                               style={{
-                                fontSize: rank <= 3 ? 30 : 26,
-                                fontWeight: 900,
-                                letterSpacing: '-0.02em',
-                                textShadow:
-                                  tier === 'diamond'
-                                    ? '0 0 16px rgba(156,236,255,0.18)'
-                                    : 'none',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 14,
+                                minWidth: 0,
                               }}
                             >
-                              {row.player || 'Unknown'}
+                              <div
+                                style={{
+                                  width: 58,
+                                  height: 58,
+                                  borderRadius: 18,
+                                  overflow: 'hidden',
+                                  border: '1px solid rgba(255,255,255,0.12)',
+                                  background: 'rgba(255,255,255,0.06)',
+                                  boxShadow:
+                                    tier === 'diamond'
+                                      ? '0 0 20px rgba(156,236,255,0.16)'
+                                      : 'none',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                {row.photo_url ? (
+                                  <img
+                                    src={row.photo_url}
+                                    alt={row.player || 'Player'}
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'cover',
+                                      display: 'block',
+                                    }}
+                                  />
+                                ) : null}
+                              </div>
+
+                              <div
+                                style={{
+                                  fontSize: rank <= 3 ? 30 : 26,
+                                  fontWeight: 900,
+                                  letterSpacing: '-0.02em',
+                                  textShadow:
+                                    tier === 'diamond'
+                                      ? '0 0 16px rgba(156,236,255,0.18)'
+                                      : 'none',
+                                  minWidth: 0,
+                                }}
+                              >
+                                {row.player || 'Unknown'}
+                              </div>
                             </div>
 
                             <div
