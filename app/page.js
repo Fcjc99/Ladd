@@ -26,10 +26,10 @@ function getMoveDisplay(moveValue) {
 
   if (move === null) {
     return {
-      label: '-',
+      label: '• 0',
       bg: 'rgba(255,255,255,0.08)',
       border: 'rgba(255,255,255,0.12)',
-      color: 'white',
+      color: '#d9e7ff',
     }
   }
 
@@ -131,7 +131,7 @@ function getTierStyles(rank) {
         background:
           'linear-gradient(135deg, #ffffff 0%, #e4ebf3 18%, #bcc8d8 45%, #8f9db3 70%, #eef2f7 100%)',
         boxShadow:
-          '0 0 24px rgba(215,224,236,0.32), 0 0 64px rgba(143,157,179,0.18), inset 0 0 10px rgba(255,255,255,0.12)',
+          '0 0 24px rgba(220,229,239,0.32), 0 0 64px rgba(143,157,179,0.18), inset 0 0 10px rgba(255,255,255,0.12)',
         animation: 'silverGlow 4.4s ease-in-out infinite',
       },
       inner: {
@@ -202,8 +202,8 @@ function CrownIcon() {
   return (
     <svg
       viewBox="0 0 24 24"
-      width="22"
-      height="22"
+      width="20"
+      height="20"
       fill="none"
       aria-hidden="true"
       style={{ display: 'block' }}
@@ -223,18 +223,18 @@ function CrownIcon() {
   )
 }
 
-function PlayerMedia({ photoUrl, player }) {
+function PlayerPhoto({ photoUrl, player, size = 86 }) {
   return (
     <div
       style={{
-        width: 88,
-        height: 88,
+        width: size,
+        height: size,
         borderRadius: 22,
         overflow: 'hidden',
         border: '1px solid rgba(255,255,255,0.14)',
         background: 'rgba(255,255,255,0.06)',
-        flexShrink: 0,
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        flexShrink: 0,
       }}
     >
       {photoUrl ? (
@@ -253,7 +253,7 @@ function PlayerMedia({ photoUrl, player }) {
   )
 }
 
-function FlagMedia({ flagUrl, player, width = 122, height = 72 }) {
+function FlagMedia({ flagUrl, player, width = 124, height = 72 }) {
   return (
     <div
       style={{
@@ -263,8 +263,8 @@ function FlagMedia({ flagUrl, player, width = 122, height = 72 }) {
         overflow: 'hidden',
         border: '1px solid rgba(255,255,255,0.14)',
         background: 'rgba(255,255,255,0.06)',
-        flexShrink: 0,
         boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
+        flexShrink: 0,
       }}
     >
       {flagUrl ? (
@@ -340,133 +340,134 @@ function FeaturedCard({ row, rank }) {
 
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 18,
+            display: 'grid',
+            gridTemplateColumns: '110px minmax(260px, 1fr) 140px',
+            gap: 24,
+            alignItems: 'start',
             position: 'relative',
             zIndex: 1,
-            flexWrap: 'wrap',
           }}
         >
           <div
             style={{
-              ...featuredBadgeStyle,
-              ...tierStyles.badge,
-              position: 'relative',
-              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'flex-start',
+              gap: 14,
             }}
           >
-            {tier === 'diamond' ? (
-              <>
-                <div
-                  style={{
-                    position: 'absolute',
-                    top: 8,
-                    right: 8,
-                    color: '#14405d',
-                    opacity: 0.9,
-                  }}
-                >
-                  <CrownIcon />
-                </div>
-                #{rank}
-              </>
-            ) : (
-              `#${rank}`
-            )}
+            <div
+              style={{
+                ...featuredBadgeStyle,
+                ...tierStyles.badge,
+                position: 'relative',
+              }}
+            >
+              {tier === 'diamond' ? (
+                <>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      top: 6,
+                      right: 6,
+                      color: '#14405d',
+                      opacity: 0.9,
+                    }}
+                  >
+                    <CrownIcon />
+                  </div>
+                  #{rank}
+                </>
+              ) : (
+                `#${rank}`
+              )}
+            </div>
+
+            <div
+              style={{
+                padding: '10px 16px',
+                borderRadius: 999,
+                fontSize: 16,
+                fontWeight: 800,
+                letterSpacing: '0.02em',
+                background: moveDisplay.bg,
+                border: `1px solid ${moveDisplay.border}`,
+                color: moveDisplay.color,
+                whiteSpace: 'nowrap',
+              }}
+            >
+              {moveDisplay.label}
+            </div>
           </div>
 
-          <div style={{ flex: 1, minWidth: 260 }}>
+          <div>
+            <div
+              style={{
+                fontSize: 34,
+                fontWeight: 900,
+                letterSpacing: '-0.02em',
+                marginBottom: 16,
+              }}
+            >
+              {row.player || 'Unknown'}
+            </div>
+
+            <PlayerPhoto photoUrl={row.photo_url} player={row.player} size={86} />
+
             <div
               style={{
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
+                gap: 10,
                 flexWrap: 'wrap',
-                marginBottom: 10,
+                marginTop: 16,
               }}
             >
               <div
                 style={{
+                  width: 170,
                   display: 'flex',
                   alignItems: 'center',
-                  gap: 16,
-                  flexWrap: 'wrap',
-                  minWidth: 0,
+                  justifyContent: 'center',
+                  padding: '10px 14px',
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: tierStyles.accent,
                 }}
               >
-                <div
-                  style={{
-                    fontSize: 34,
-                    fontWeight: 900,
-                    letterSpacing: '-0.02em',
-                    minWidth: 0,
-                  }}
-                >
-                  {row.player || 'Unknown'}
-                </div>
-
-                <FlagMedia flagUrl={row.flag_url} player={row.player} />
+                {tierStyles.title}
               </div>
 
               <div
                 style={{
-                  padding: '10px 16px',
+                  width: 170,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '10px 14px',
                   borderRadius: 999,
-                  fontSize: 16,
-                  fontWeight: 800,
-                  letterSpacing: '0.02em',
-                  background: moveDisplay.bg,
-                  border: `1px solid ${moveDisplay.border}`,
-                  color: moveDisplay.color,
-                  whiteSpace: 'nowrap',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#dce8ff',
                 }}
               >
-                {moveDisplay.label}
+                Status: {row.status || '-'}
               </div>
             </div>
+          </div>
 
-            <div
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 16,
-                flexWrap: 'wrap',
-              }}
-            >
-              <PlayerMedia photoUrl={row.photo_url} player={row.player} />
-
-              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                <div
-                  style={{
-                    padding: '9px 14px',
-                    borderRadius: 999,
-                    fontSize: 13,
-                    fontWeight: 800,
-                    background: 'rgba(255,255,255,0.08)',
-                    border: '1px solid rgba(255,255,255,0.12)',
-                    color: tierStyles.accent,
-                  }}
-                >
-                  {tierStyles.title}
-                </div>
-
-                <div
-                  style={{
-                    padding: '9px 14px',
-                    borderRadius: 999,
-                    fontSize: 13,
-                    fontWeight: 700,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#dce8ff',
-                  }}
-                >
-                  Status: {row.status || '-'}
-                </div>
-              </div>
-            </div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'flex-start',
+            }}
+          >
+            <FlagMedia flagUrl={row.flag_url} player={row.player} width={124} height={72} />
           </div>
         </div>
       </div>
@@ -498,30 +499,7 @@ function BronzeCard({ row, rank }) {
           </div>
 
           <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div
-              style={{
-                width: 72,
-                height: 72,
-                borderRadius: 18,
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                flexShrink: 0,
-              }}
-            >
-              {row.photo_url ? (
-                <img
-                  src={row.photo_url}
-                  alt={row.player || 'Player'}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-              ) : null}
-            </div>
+            <PlayerPhoto photoUrl={row.photo_url} player={row.player} size={72} />
 
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
               <div
@@ -598,31 +576,7 @@ function CompactCard({ row, rank }) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
-            <div
-              style={{
-                width: 62,
-                height: 62,
-                borderRadius: 16,
-                overflow: 'hidden',
-                border: '1px solid rgba(255,255,255,0.12)',
-                background: 'rgba(255,255,255,0.06)',
-                flexShrink: 0,
-              }}
-            >
-              {row.photo_url ? (
-                <img
-                  src={row.photo_url}
-                  alt={row.player || 'Player'}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    objectFit: 'cover',
-                    display: 'block',
-                  }}
-                />
-              ) : null}
-            </div>
-
+            <PlayerPhoto photoUrl={row.photo_url} player={row.player} size={62} />
             <div style={{ fontSize: 13, opacity: 0.9 }}>Status: {row.status || '-'}</div>
           </div>
         </div>
@@ -944,7 +898,6 @@ const featuredBadgeStyle = {
   fontWeight: 900,
   fontSize: 28,
   letterSpacing: '-0.03em',
-  flexShrink: 0,
 }
 
 const compactBadgeStyle = {
