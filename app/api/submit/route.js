@@ -10,6 +10,9 @@ export async function POST(req) {
       )
     }
 
+    console.log('Submit URL:', submitUrl)
+    console.log('Submit body:', body)
+
     const res = await fetch(submitUrl, {
       method: 'POST',
       headers: {
@@ -19,6 +22,7 @@ export async function POST(req) {
     })
 
     const text = await res.text()
+    console.log('Apps Script raw response:', text)
 
     let data
     try {
@@ -34,8 +38,27 @@ export async function POST(req) {
       )
     }
 
-    return Response.json(data, { status: res.ok ? 200 : 500 })
+    if (!data.success) {
+      return Response.json(
+        {
+          success: false,
+          error: data.error || 'Apps Script returned failure',
+          appsScript: data,
+        },
+        { status: 500 }
+      )
+    }
+
+    return Response.json(
+      {
+        success: true,
+        message: data.message || 'Challenge submitted',
+        appsScript: data,
+      },
+      { status: 200 }
+    )
   } catch (error) {
+    console.error('Submit route error:', error)
     return Response.json(
       { success: false, error: error.message },
       { status: 500 }
