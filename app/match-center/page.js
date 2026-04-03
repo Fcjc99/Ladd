@@ -76,7 +76,6 @@ function getRankTheme(rank) {
       accent: '#aef2ff',
       accentSoft: 'rgba(174,242,255,0.16)',
       accentBorder: 'rgba(174,242,255,0.34)',
-      glow: 'rgba(168,240,255,0.26)',
     }
   }
 
@@ -85,7 +84,6 @@ function getRankTheme(rank) {
       accent: '#f6d56f',
       accentSoft: 'rgba(246,213,111,0.14)',
       accentBorder: 'rgba(246,213,111,0.28)',
-      glow: 'rgba(247,215,108,0.18)',
     }
   }
 
@@ -94,7 +92,6 @@ function getRankTheme(rank) {
       accent: '#dde6f0',
       accentSoft: 'rgba(221,230,240,0.13)',
       accentBorder: 'rgba(221,230,240,0.26)',
-      glow: 'rgba(220,229,239,0.16)',
     }
   }
 
@@ -103,7 +100,6 @@ function getRankTheme(rank) {
       accent: '#d29667',
       accentSoft: 'rgba(210,150,103,0.14)',
       accentBorder: 'rgba(210,150,103,0.28)',
-      glow: 'rgba(210,150,103,0.14)',
     }
   }
 
@@ -111,7 +107,6 @@ function getRankTheme(rank) {
     accent: '#b8c9e6',
     accentSoft: 'rgba(184,201,230,0.10)',
     accentBorder: 'rgba(184,201,230,0.18)',
-    glow: 'rgba(184,201,230,0.10)',
   }
 }
 
@@ -234,7 +229,7 @@ function PlayerPhoto({ name, photoUrl, size = 74, borderColor = 'rgba(255,255,25
       style={{
         width: size,
         height: size,
-        borderRadius: Math.round(size * 0.26),
+        borderRadius: Math.round(size * 0.22),
         overflow: 'hidden',
         border: `2px solid ${borderColor}`,
         background:
@@ -291,7 +286,6 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
         padding: 18,
         boxShadow: '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.05)',
         cursor: 'pointer',
-        transition: 'transform 0.18s ease, border-color 0.18s ease',
       }}
     >
       <div
@@ -388,70 +382,11 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
       >
         <MetaBox label="Match Date" value={row.match_date || '-'} />
       </div>
-
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 10,
-          marginTop: 12,
-        }}
-      >
-        <div
-          style={{
-            borderRadius: 18,
-            padding: '12px 14px',
-            background: challengerTheme.accentSoft,
-            border: `1px solid ${challengerTheme.accentBorder}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.56)',
-              marginBottom: 8,
-            }}
-          >
-            Challenger
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: challengerTheme.accent }}>
-            {row.challenger} (#{challengerRank})
-          </div>
-        </div>
-
-        <div
-          style={{
-            borderRadius: 18,
-            padding: '12px 14px',
-            background: opponentTheme.accentSoft,
-            border: `1px solid ${opponentTheme.accentBorder}`,
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.56)',
-              marginBottom: 8,
-            }}
-          >
-            Opponent
-          </div>
-          <div style={{ fontSize: 15, fontWeight: 800, color: opponentTheme.accent }}>
-            {row.opponent} (#{opponentRank})
-          </div>
-        </div>
-      </div>
     </div>
   )
 }
 
-function ScoreDisplay({ row }) {
+function ScorePanel({ row }) {
   const sets = parseScore(row.score)
   const winnerIsChall = winnerIsChallenger(row)
 
@@ -459,11 +394,67 @@ function ScoreDisplay({ row }) {
     return (
       <div
         style={{
-          borderRadius: 18,
-          padding: '12px 14px',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          minWidth: 180,
+          minWidth: 260,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <div
+          style={{
+            width: '100%',
+            maxWidth: 260,
+            borderRadius: 20,
+            padding: '16px 18px',
+            background: 'rgba(255,255,255,0.05)',
+            border: '1px solid rgba(255,255,255,0.10)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.56)',
+              marginBottom: 10,
+              textAlign: 'center',
+            }}
+          >
+            Reported Score
+          </div>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 850,
+              color: '#eef6ff',
+              textAlign: 'center',
+            }}
+          >
+            {row.score || '-'}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div
+      style={{
+        minWidth: 260,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: 300,
+          borderRadius: 20,
+          padding: '16px 18px',
+          background: 'rgba(255,255,255,0.05)',
+          border: '1px solid rgba(255,255,255,0.10)',
         }}
       >
         <div
@@ -473,100 +464,66 @@ function ScoreDisplay({ row }) {
             letterSpacing: '0.14em',
             textTransform: 'uppercase',
             color: 'rgba(220,232,255,0.56)',
-            marginBottom: 8,
+            marginBottom: 12,
+            textAlign: 'center',
           }}
         >
           Reported Score
         </div>
-        <div
-          style={{
-            fontSize: 16,
-            fontWeight: 800,
-            color: '#eef6ff',
-          }}
-        >
-          {row.score || '-'}
-        </div>
-      </div>
-    )
-  }
 
-  return (
-    <div
-      style={{
-        minWidth: 220,
-        borderRadius: 20,
-        padding: '14px 16px',
-        background: 'rgba(255,255,255,0.05)',
-        border: '1px solid rgba(255,255,255,0.10)',
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(220,232,255,0.56)',
-          marginBottom: 12,
-          textAlign: 'center',
-        }}
-      >
-        Reported Score
-      </div>
+        <div style={{ display: 'grid', gap: 10 }}>
+          {sets.map((set, index) => {
+            const winnerScore = winnerIsChall ? set.a : set.b
+            const loserScore = winnerIsChall ? set.b : set.a
 
-      <div style={{ display: 'grid', gap: 10 }}>
-        {sets.map((set, index) => {
-          const winnerScore = winnerIsChall ? set.a : set.b
-          const loserScore = winnerIsChall ? set.b : set.a
-
-          return (
-            <div
-              key={index}
-              style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr auto auto',
-                alignItems: 'center',
-                gap: 14,
-              }}
-            >
+            return (
               <div
+                key={index}
                 style={{
-                  height: 1,
-                  background: 'rgba(255,255,255,0.18)',
-                  width: '100%',
-                }}
-              />
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: '50%',
                   display: 'grid',
-                  placeItems: 'center',
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#0f2342',
-                  background: '#dbe7f7',
-                  boxShadow: '0 10px 20px rgba(0,0,0,0.18)',
+                  gridTemplateColumns: '1fr auto auto',
+                  alignItems: 'center',
+                  gap: 14,
                 }}
               >
-                {winnerScore}
+                <div
+                  style={{
+                    height: 1,
+                    background: 'rgba(255,255,255,0.18)',
+                    width: '100%',
+                  }}
+                />
+                <div
+                  style={{
+                    width: 44,
+                    height: 44,
+                    borderRadius: '50%',
+                    display: 'grid',
+                    placeItems: 'center',
+                    fontSize: 22,
+                    fontWeight: 900,
+                    color: '#0f2342',
+                    background: '#dbe7f7',
+                    boxShadow: '0 10px 20px rgba(0,0,0,0.18)',
+                  }}
+                >
+                  {winnerScore}
+                </div>
+                <div
+                  style={{
+                    fontSize: 22,
+                    fontWeight: 900,
+                    color: '#eef6ff',
+                    minWidth: 18,
+                    textAlign: 'center',
+                  }}
+                >
+                  {loserScore}
+                </div>
               </div>
-              <div
-                style={{
-                  fontSize: 20,
-                  fontWeight: 900,
-                  color: '#eef6ff',
-                  minWidth: 18,
-                  textAlign: 'center',
-                }}
-              >
-                {loserScore}
-              </div>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
     </div>
   )
@@ -586,7 +543,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
     <div
       style={{
         background:
-          'linear-gradient(180deg, rgba(17,40,74,0.84) 0%, rgba(12,26,48,0.88) 100%)',
+          'linear-gradient(180deg, rgba(17,40,74,0.88) 0%, rgba(12,26,48,0.90) 100%)',
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 24,
         padding: 18,
@@ -597,25 +554,41 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
         className="completed-match-card-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'auto minmax(220px, 1fr) auto',
+          gridTemplateColumns: '150px minmax(260px, 1fr) 320px',
           gap: 18,
           alignItems: 'center',
         }}
       >
-        <PlayerPhoto
-          name={winnerName}
-          photoUrl={getPlayerPhotoUrl(winnerName)}
-          size={108}
-          borderColor={winnerTheme.accentBorder}
-        />
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            minHeight: 150,
+          }}
+        >
+          <PlayerPhoto
+            name={winnerName}
+            photoUrl={getPlayerPhotoUrl(winnerName)}
+            size={140}
+            borderColor={winnerTheme.accentBorder}
+          />
+        </div>
 
-        <div style={{ minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            minHeight: 150,
+          }}
+        >
           <div
             style={{
-              fontSize: 24,
+              fontSize: 32,
               fontWeight: 900,
               color: '#eef6ff',
-              lineHeight: 1.05,
+              lineHeight: 1.02,
               marginBottom: 8,
             }}
           >
@@ -637,11 +610,11 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
 
           <div
             style={{
-              fontSize: 19,
+              fontSize: 28,
               fontWeight: 850,
               color: '#dce8ff',
-              lineHeight: 1.15,
-              marginBottom: 12,
+              lineHeight: 1.05,
+              marginBottom: 14,
             }}
           >
             {loserName || '-'}
@@ -653,7 +626,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
           </div>
         </div>
 
-        <ScoreDisplay row={row} />
+        <ScorePanel row={row} />
       </div>
     </div>
   )
@@ -844,7 +817,6 @@ export default function MatchCenterPage() {
       })
 
       const data = await res.json()
-      console.log('Result submit response:', data)
 
       if (!data.success) {
         throw new Error(data.error || data.raw || 'Failed to submit result')
@@ -887,15 +859,23 @@ export default function MatchCenterPage() {
   return (
     <>
       <style>{`
-        @media (max-width: 860px) {
+        @media (max-width: 980px) {
           .completed-match-card-grid {
-            grid-template-columns: 1fr !important;
+            grid-template-columns: 120px 1fr !important;
+          }
+
+          .completed-match-score-panel {
+            grid-column: 1 / -1;
           }
         }
 
         @media (max-width: 700px) {
           .match-center-title {
             font-size: 34px !important;
+          }
+
+          .completed-match-card-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
