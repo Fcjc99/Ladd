@@ -66,29 +66,31 @@ function getTierStyles(rank) {
     return {
       wrapper: {
         position: 'relative',
-        padding: 2,
-        borderRadius: 34,
+        padding: 3,
+        borderRadius: 38,
         background:
-          'linear-gradient(135deg, rgba(245,252,255,1) 0%, rgba(183,235,255,1) 20%, rgba(255,255,255,1) 36%, rgba(121,214,255,1) 54%, rgba(143,175,255,1) 75%, rgba(236,250,255,1) 100%)',
+          'linear-gradient(135deg, #f8fdff 0%, #c9f4ff 16%, #ffffff 30%, #7ddcff 48%, #8a9fff 72%, #eefcff 100%)',
         boxShadow:
-          '0 0 24px rgba(141, 230, 255, 0.45), 0 0 64px rgba(83, 156, 255, 0.22)',
-        animation: 'diamondGlow 4s ease-in-out infinite',
+          '0 0 28px rgba(141,230,255,0.55), 0 0 88px rgba(83,156,255,0.28), inset 0 0 18px rgba(255,255,255,0.22)',
+        animation: 'diamondGlow 3.6s ease-in-out infinite',
       },
       inner: {
         background:
-          'linear-gradient(180deg, rgba(16,34,66,0.72) 0%, rgba(9,20,42,0.82) 100%)',
-        border: '1px solid rgba(255,255,255,0.18)',
+          'linear-gradient(180deg, rgba(15,35,68,0.64) 0%, rgba(10,23,46,0.82) 100%)',
+        border: '1px solid rgba(255,255,255,0.24)',
         boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -1px 0 rgba(255,255,255,0.04)',
-        backdropFilter: 'blur(18px)',
-        WebkitBackdropFilter: 'blur(18px)',
+          'inset 0 1px 0 rgba(255,255,255,0.28), inset 0 -1px 0 rgba(255,255,255,0.05)',
+        backdropFilter: 'blur(22px)',
+        WebkitBackdropFilter: 'blur(22px)',
       },
       badge: {
         background:
-          'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(202,244,255,0.9) 40%, rgba(135,225,255,0.92) 100%)',
+          'linear-gradient(135deg, rgba(255,255,255,0.96) 0%, rgba(213,247,255,0.95) 42%, rgba(146,228,255,0.96) 100%)',
         color: '#0f2342',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.85), 0 0 24px rgba(120,222,255,0.38)',
       },
-      accent: '#9cecff',
+      accent: '#a4eeff',
       title: 'Diamond Elite',
     }
   }
@@ -97,17 +99,17 @@ function getTierStyles(rank) {
     return {
       wrapper: {
         position: 'relative',
-        padding: 2,
-        borderRadius: 30,
+        padding: 3,
+        borderRadius: 34,
         background:
-          'linear-gradient(135deg, #fff4bf 0%, #f6d86c 24%, #cf9e22 60%, #fff0a1 100%)',
+          'linear-gradient(135deg, #fff6cb 0%, #f6d86c 22%, #cf9e22 58%, #fff0a1 100%)',
         boxShadow:
-          '0 0 16px rgba(246, 216, 108, 0.34), 0 0 34px rgba(207, 158, 34, 0.18)',
+          '0 0 22px rgba(246,216,108,0.34), 0 0 52px rgba(207,158,34,0.2), inset 0 0 14px rgba(255,255,255,0.12)',
       },
       inner: {
         background:
-          'linear-gradient(180deg, rgba(33,28,20,0.9) 0%, rgba(21,18,14,0.94) 100%)',
-        border: '1px solid rgba(255,255,255,0.08)',
+          'linear-gradient(180deg, rgba(35,29,18,0.88) 0%, rgba(23,18,12,0.94) 100%)',
+        border: '1px solid rgba(255,255,255,0.09)',
       },
       badge: {
         background:
@@ -123,17 +125,17 @@ function getTierStyles(rank) {
     return {
       wrapper: {
         position: 'relative',
-        padding: 2,
-        borderRadius: 30,
+        padding: 3,
+        borderRadius: 34,
         background:
-          'linear-gradient(135deg, #f1f4f8 0%, #cfd7e2 30%, #a6b3c5 68%, #eef2f7 100%)',
+          'linear-gradient(135deg, #f7f9fc 0%, #d8e0eb 24%, #aeb9ca 62%, #f0f4f8 100%)',
         boxShadow:
-          '0 0 14px rgba(207, 215, 226, 0.24), 0 0 28px rgba(166, 179, 197, 0.14)',
+          '0 0 20px rgba(207,215,226,0.28), 0 0 46px rgba(166,179,197,0.18)',
       },
       inner: {
         background:
-          'linear-gradient(180deg, rgba(28,32,41,0.92) 0%, rgba(19,22,29,0.95) 100%)',
-        border: '1px solid rgba(255,255,255,0.07)',
+          'linear-gradient(180deg, rgba(28,32,41,0.9) 0%, rgba(19,22,29,0.95) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
       },
       badge: {
         background:
@@ -154,7 +156,7 @@ function getTierStyles(rank) {
         background:
           'linear-gradient(135deg, #f0c8a7 0%, #c78550 32%, #9b5a2e 70%, #e0b08a 100%)',
         boxShadow:
-          '0 0 12px rgba(199, 133, 80, 0.2), 0 0 22px rgba(155, 90, 46, 0.12)',
+          '0 0 12px rgba(199,133,80,0.2), 0 0 22px rgba(155,90,46,0.12)',
       },
       inner: {
         background:
@@ -176,7 +178,7 @@ function getTierStyles(rank) {
       position: 'relative',
       padding: 1,
       borderRadius: 24,
-      background: 'rgba(35, 75, 134, 0.55)',
+      background: 'rgba(35,75,134,0.45)',
     },
     inner: {
       background:
@@ -219,16 +221,17 @@ function CrownIcon() {
 
 function PlayerMedia({ photoUrl, flagUrl, player }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
       <div
         style={{
-          width: 64,
-          height: 64,
-          borderRadius: 16,
+          width: 88,
+          height: 88,
+          borderRadius: 22,
           overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.14)',
           background: 'rgba(255,255,255,0.06)',
           flexShrink: 0,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         }}
       >
         {photoUrl ? (
@@ -247,13 +250,14 @@ function PlayerMedia({ photoUrl, flagUrl, player }) {
 
       <div
         style={{
-          width: 96,
-          height: 64,
-          borderRadius: 16,
+          width: 122,
+          height: 72,
+          borderRadius: 18,
           overflow: 'hidden',
-          border: '1px solid rgba(255,255,255,0.12)',
+          border: '1px solid rgba(255,255,255,0.14)',
           background: 'rgba(255,255,255,0.06)',
           flexShrink: 0,
+          boxShadow: '0 8px 24px rgba(0,0,0,0.18)',
         }}
       >
         {flagUrl ? (
@@ -294,11 +298,11 @@ function FeaturedCard({ row, rank }) {
                 position: 'absolute',
                 top: '50%',
                 left: '50%',
-                width: 280,
-                height: 280,
+                width: 360,
+                height: 360,
                 borderRadius: '50%',
                 background:
-                  'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(178,240,255,0.5) 65deg, rgba(132,177,255,0.9) 140deg, rgba(255,255,255,0.08) 220deg, rgba(178,240,255,0.4) 300deg, rgba(255,255,255,0) 360deg)',
+                  'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(178,240,255,0.52) 70deg, rgba(132,177,255,0.95) 150deg, rgba(255,255,255,0.08) 220deg, rgba(178,240,255,0.4) 310deg, rgba(255,255,255,0) 360deg)',
                 animation:
                   'auraSpin 11s linear infinite, auraPulse 3.2s ease-in-out infinite',
                 pointerEvents: 'none',
@@ -310,7 +314,7 @@ function FeaturedCard({ row, rank }) {
                 inset: 0,
                 pointerEvents: 'none',
                 overflow: 'hidden',
-                borderRadius: 30,
+                borderRadius: 34,
               }}
             >
               <div
@@ -318,10 +322,10 @@ function FeaturedCard({ row, rank }) {
                   position: 'absolute',
                   top: 0,
                   bottom: 0,
-                  width: '34%',
+                  width: '28%',
                   background:
-                    'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%)',
-                  animation: 'shimmerSweep 4.5s linear infinite',
+                    'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 100%)',
+                  animation: 'shimmerSweep 4.2s linear infinite',
                 }}
               />
             </div>
@@ -366,13 +370,7 @@ function FeaturedCard({ row, rank }) {
             )}
           </div>
 
-          <PlayerMedia
-            photoUrl={row.photo_url}
-            flagUrl={row.flag_url}
-            player={row.player}
-          />
-
-          <div style={{ flex: 1, minWidth: 220 }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
             <div
               style={{
                 display: 'flex',
@@ -380,29 +378,66 @@ function FeaturedCard({ row, rank }) {
                 justifyContent: 'space-between',
                 gap: 12,
                 flexWrap: 'wrap',
-                marginBottom: 8,
+                marginBottom: 10,
               }}
             >
               <div
                 style={{
-                  fontSize: 30,
-                  fontWeight: 900,
-                  letterSpacing: '-0.02em',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 16,
+                  flexWrap: 'wrap',
+                  minWidth: 0,
                 }}
               >
-                {row.player || 'Unknown'}
+                <div
+                  style={{
+                    fontSize: 34,
+                    fontWeight: 900,
+                    letterSpacing: '-0.02em',
+                    minWidth: 0,
+                  }}
+                >
+                  {row.player || 'Unknown'}
+                </div>
+
+                <div
+                  style={{
+                    width: 122,
+                    height: 72,
+                    borderRadius: 18,
+                    overflow: 'hidden',
+                    border: '1px solid rgba(255,255,255,0.14)',
+                    background: 'rgba(255,255,255,0.06)',
+                    flexShrink: 0,
+                  }}
+                >
+                  {row.flag_url ? (
+                    <img
+                      src={row.flag_url}
+                      alt={`${row.player || 'Player'} flag`}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'cover',
+                        display: 'block',
+                      }}
+                    />
+                  ) : null}
+                </div>
               </div>
 
               <div
                 style={{
-                  padding: '8px 14px',
+                  padding: '10px 16px',
                   borderRadius: 999,
-                  fontSize: 14,
+                  fontSize: 16,
                   fontWeight: 800,
                   letterSpacing: '0.02em',
                   background: moveDisplay.bg,
                   border: `1px solid ${moveDisplay.border}`,
                   color: moveDisplay.color,
+                  whiteSpace: 'nowrap',
                 }}
               >
                 {moveDisplay.label}
@@ -412,37 +447,45 @@ function FeaturedCard({ row, rank }) {
             <div
               style={{
                 display: 'flex',
-                gap: 10,
-                flexWrap: 'wrap',
                 alignItems: 'center',
+                gap: 16,
+                flexWrap: 'wrap',
               }}
             >
-              <div
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 999,
-                  fontSize: 13,
-                  fontWeight: 800,
-                  background: 'rgba(255,255,255,0.08)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  color: tierStyles.accent,
-                }}
-              >
-                {tierStyles.title}
-              </div>
+              <PlayerMedia
+                photoUrl={row.photo_url}
+                flagUrl={null}
+                player={row.player}
+              />
 
-              <div
-                style={{
-                  padding: '8px 12px',
-                  borderRadius: 999,
-                  fontSize: 13,
-                  fontWeight: 700,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: '#dce8ff',
-                }}
-              >
-                Status: {row.status || '-'}
+              <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+                <div
+                  style={{
+                    padding: '9px 14px',
+                    borderRadius: 999,
+                    fontSize: 13,
+                    fontWeight: 800,
+                    background: 'rgba(255,255,255,0.08)',
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    color: tierStyles.accent,
+                  }}
+                >
+                  {tierStyles.title}
+                </div>
+
+                <div
+                  style={{
+                    padding: '9px 14px',
+                    borderRadius: 999,
+                    fontSize: 13,
+                    fontWeight: 700,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    color: '#dce8ff',
+                  }}
+                >
+                  Status: {row.status || '-'}
+                </div>
               </div>
             </div>
           </div>
@@ -471,40 +514,88 @@ function BronzeCard({ row, rank }) {
               marginBottom: 10,
             }}
           >
-            <PlayerMedia
-              photoUrl={row.photo_url}
-              flagUrl={row.flag_url}
-              player={row.player}
-            />
             <div style={{ fontSize: 24, fontWeight: 800 }}>{row.player || 'Unknown'}</div>
+
+            <div
+              style={{
+                width: 96,
+                height: 58,
+                borderRadius: 14,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)',
+                flexShrink: 0,
+              }}
+            >
+              {row.flag_url ? (
+                <img
+                  src={row.flag_url}
+                  alt={`${row.player || 'Player'} flag`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'center' }}>
             <div
               style={{
-                padding: '8px 12px',
-                borderRadius: 999,
-                fontSize: 13,
-                fontWeight: 800,
-                background: 'rgba(255,255,255,0.08)',
+                width: 72,
+                height: 72,
+                borderRadius: 18,
+                overflow: 'hidden',
                 border: '1px solid rgba(255,255,255,0.12)',
-                color: tierStyles.accent,
+                background: 'rgba(255,255,255,0.06)',
+                flexShrink: 0,
               }}
             >
-              Bronze Rank
+              {row.photo_url ? (
+                <img
+                  src={row.photo_url}
+                  alt={row.player || 'Player'}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              ) : null}
             </div>
-            <div
-              style={{
-                padding: '8px 12px',
-                borderRadius: 999,
-                fontSize: 13,
-                fontWeight: 700,
-                background: 'rgba(255,255,255,0.04)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: '#dce8ff',
-              }}
-            >
-              Status: {row.status || '-'}
+
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+              <div
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 800,
+                  background: 'rgba(255,255,255,0.08)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: tierStyles.accent,
+                }}
+              >
+                Bronze Rank
+              </div>
+
+              <div
+                style={{
+                  padding: '8px 12px',
+                  borderRadius: 999,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#dce8ff',
+                }}
+              >
+                Status: {row.status || '-'}
+              </div>
             </div>
           </div>
         </div>
@@ -537,17 +628,72 @@ function CompactCard({ row, rank }) {
       <div style={compactCardStyle}>
         <div style={compactBadgeStyle}>#{rank}</div>
 
-        <PlayerMedia
-          photoUrl={row.photo_url}
-          flagUrl={row.flag_url}
-          player={row.player}
-        />
-
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 22, fontWeight: 800, marginBottom: 6 }}>
-            {row.player || 'Unknown'}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              flexWrap: 'wrap',
+              marginBottom: 8,
+            }}
+          >
+            <div style={{ fontSize: 22, fontWeight: 800 }}>{row.player || 'Unknown'}</div>
+
+            <div
+              style={{
+                width: 90,
+                height: 54,
+                borderRadius: 14,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)',
+                flexShrink: 0,
+              }}
+            >
+              {row.flag_url ? (
+                <img
+                  src={row.flag_url}
+                  alt={`${row.player || 'Player'} flag`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              ) : null}
+            </div>
           </div>
-          <div style={{ fontSize: 13, opacity: 0.9 }}>Status: {row.status || '-'}</div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <div
+              style={{
+                width: 62,
+                height: 62,
+                borderRadius: 16,
+                overflow: 'hidden',
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)',
+                flexShrink: 0,
+              }}
+            >
+              {row.photo_url ? (
+                <img
+                  src={row.photo_url}
+                  alt={row.player || 'Player'}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              ) : null}
+            </div>
+
+            <div style={{ fontSize: 13, opacity: 0.9 }}>Status: {row.status || '-'}</div>
+          </div>
         </div>
 
         <div
@@ -629,15 +775,15 @@ export default function HomePage() {
       <style>{`
         @keyframes diamondGlow {
           0% {
-            box-shadow: 0 0 20px rgba(141, 230, 255, 0.35), 0 0 48px rgba(83, 156, 255, 0.16);
+            box-shadow: 0 0 20px rgba(141,230,255,0.35), 0 0 48px rgba(83,156,255,0.16);
             transform: translateY(0px);
           }
           50% {
-            box-shadow: 0 0 34px rgba(141, 230, 255, 0.7), 0 0 84px rgba(83, 156, 255, 0.28);
+            box-shadow: 0 0 34px rgba(141,230,255,0.7), 0 0 84px rgba(83,156,255,0.28);
             transform: translateY(-2px);
           }
           100% {
-            box-shadow: 0 0 20px rgba(141, 230, 255, 0.35), 0 0 48px rgba(83, 156, 255, 0.16);
+            box-shadow: 0 0 20px rgba(141,230,255,0.35), 0 0 48px rgba(83,156,255,0.16);
             transform: translateY(0px);
           }
         }
@@ -802,8 +948,8 @@ const loadingCardStyle = {
 
 const featuredCardStyle = {
   position: 'relative',
-  borderRadius: 30,
-  padding: 22,
+  borderRadius: 34,
+  padding: 24,
 }
 
 const bronzeCardStyle = {
@@ -819,7 +965,7 @@ const compactCardShellStyle = {
   position: 'relative',
   padding: 1,
   borderRadius: 22,
-  background: 'rgba(35, 75, 134, 0.4)',
+  background: 'rgba(35,75,134,0.4)',
 }
 
 const compactCardStyle = {
@@ -834,14 +980,14 @@ const compactCardStyle = {
 }
 
 const featuredBadgeStyle = {
-  minWidth: 92,
-  height: 92,
-  borderRadius: 26,
+  minWidth: 72,
+  height: 72,
+  borderRadius: 22,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   fontWeight: 900,
-  fontSize: 30,
+  fontSize: 28,
   letterSpacing: '-0.03em',
   flexShrink: 0,
 }
