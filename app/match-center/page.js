@@ -55,6 +55,381 @@ function isActive(row) {
   return false
 }
 
+function playerByName(name) {
+  return PLAYERS.find((p) => p.name === name)
+}
+
+function rankByName(name) {
+  const player = playerByName(name)
+  return player ? player.rank : '-'
+}
+
+function getRankTheme(rank) {
+  const n = Number(rank)
+
+  if (n === 1) {
+    return {
+      accent: '#aef2ff',
+      accentSoft: 'rgba(174,242,255,0.16)',
+      accentBorder: 'rgba(174,242,255,0.34)',
+      badgeBg: 'linear-gradient(135deg, #ffffff 0%, #e2f9ff 45%, #a3ebff 100%)',
+      badgeColor: '#102444',
+      glow: 'rgba(168,240,255,0.26)',
+      cardBorder: 'rgba(174,242,255,0.24)',
+    }
+  }
+
+  if (n === 2) {
+    return {
+      accent: '#f6d56f',
+      accentSoft: 'rgba(246,213,111,0.14)',
+      accentBorder: 'rgba(246,213,111,0.28)',
+      badgeBg: 'linear-gradient(135deg, #fff7d6 0%, #f4d566 58%, #ddb13d 100%)',
+      badgeColor: '#3d2c00',
+      glow: 'rgba(247,215,108,0.18)',
+      cardBorder: 'rgba(246,213,111,0.20)',
+    }
+  }
+
+  if (n === 3) {
+    return {
+      accent: '#dde6f0',
+      accentSoft: 'rgba(221,230,240,0.13)',
+      accentBorder: 'rgba(221,230,240,0.26)',
+      badgeBg: 'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
+      badgeColor: '#253245',
+      glow: 'rgba(220,229,239,0.16)',
+      cardBorder: 'rgba(221,230,240,0.18)',
+    }
+  }
+
+  if (n >= 4 && n <= 7) {
+    return {
+      accent: '#d29667',
+      accentSoft: 'rgba(210,150,103,0.14)',
+      accentBorder: 'rgba(210,150,103,0.28)',
+      badgeBg: 'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
+      badgeColor: '#3f1f0d',
+      glow: 'rgba(210,150,103,0.14)',
+      cardBorder: 'rgba(210,150,103,0.18)',
+    }
+  }
+
+  return {
+    accent: '#b8c9e6',
+    accentSoft: 'rgba(184,201,230,0.10)',
+    accentBorder: 'rgba(184,201,230,0.18)',
+    badgeBg: 'linear-gradient(135deg, #eff5ff 0%, #dbe7f7 100%)',
+    badgeColor: '#182235',
+    glow: 'rgba(184,201,230,0.10)',
+    cardBorder: 'rgba(255,255,255,0.10)',
+  }
+}
+
+function formatMatchLabel(row) {
+  const challengerRank = row.challenger_rank || rankByName(row.challenger)
+  const opponentRank = row.opponent_rank || rankByName(row.opponent)
+
+  return `${row.challenger} (#${challengerRank}) vs ${row.opponent} (#${opponentRank})`
+}
+
+function RankBadge({ rank, small = false }) {
+  const theme = getRankTheme(rank)
+
+  return (
+    <div
+      style={{
+        minWidth: small ? 40 : 52,
+        height: small ? 40 : 52,
+        borderRadius: small ? 14 : 16,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontWeight: 900,
+        fontSize: small ? 18 : 20,
+        letterSpacing: '-0.04em',
+        background: theme.badgeBg,
+        color: theme.badgeColor,
+        boxShadow: `0 10px 22px rgba(0,0,0,0.18), 0 0 18px ${theme.glow}`,
+        flexShrink: 0,
+      }}
+    >
+      #{rank}
+    </div>
+  )
+}
+
+function Pill({ children, accent = '#dce8ff', muted = false, background, borderColor }) {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '8px 12px',
+        borderRadius: 999,
+        fontSize: 12,
+        fontWeight: 800,
+        letterSpacing: '0.02em',
+        background: background || (muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'),
+        border: `1px solid ${borderColor || 'rgba(255,255,255,0.10)'}`,
+        color: accent,
+        whiteSpace: 'nowrap',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+function MetaBox({ label, value }) {
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        padding: '12px 14px',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.56)',
+          marginBottom: 8,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: 15,
+          fontWeight: 750,
+          color: '#eef6ff',
+          wordBreak: 'break-word',
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function SectionCard({ title, children, right, accent = 'rgba(91,171,255,0.12)' }) {
+  return (
+    <section
+      style={{
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.09)',
+        borderRadius: 28,
+        padding: 24,
+        boxShadow: `0 0 40px ${accent}`,
+        backdropFilter: 'blur(14px)',
+        WebkitBackdropFilter: 'blur(14px)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: 12,
+          flexWrap: 'wrap',
+          marginBottom: 20,
+        }}
+      >
+        <h2 style={{ fontSize: 28, fontWeight: 850, margin: 0 }}>{title}</h2>
+        {right}
+      </div>
+      {children}
+    </section>
+  )
+}
+
+function MatchCard({ row, onClick, completed = false }) {
+  const challengerRank = row.challenger_rank || rankByName(row.challenger)
+  const opponentRank = row.opponent_rank || rankByName(row.opponent)
+  const challengerTheme = getRankTheme(challengerRank)
+  const opponentTheme = getRankTheme(opponentRank)
+
+  return (
+    <div
+      onClick={onClick}
+      style={{
+        background:
+          completed
+            ? 'linear-gradient(180deg, rgba(17,40,74,0.82) 0%, rgba(12,26,48,0.86) 100%)'
+            : 'linear-gradient(180deg, rgba(17,40,74,0.90) 0%, rgba(12,26,48,0.92) 100%)',
+        border: completed
+          ? '1px solid rgba(255,255,255,0.08)'
+          : '1px solid rgba(91,171,255,0.20)',
+        borderRadius: 24,
+        padding: 18,
+        boxShadow: completed
+          ? '0 10px 24px rgba(0,0,0,0.18)'
+          : '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.05)',
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'transform 0.18s ease, border-color 0.18s ease',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 14,
+          alignItems: 'flex-start',
+          flexWrap: 'wrap',
+          marginBottom: 16,
+        }}
+      >
+        <div style={{ minWidth: 0, flex: 1 }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              flexWrap: 'wrap',
+              marginBottom: 12,
+            }}
+          >
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <RankBadge rank={challengerRank} />
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 850,
+                  color: '#eef6ff',
+                }}
+              >
+                {row.challenger}
+              </div>
+            </div>
+
+            <div
+              style={{
+                fontSize: 15,
+                fontWeight: 800,
+                color: 'rgba(220,232,255,0.64)',
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+              }}
+            >
+              vs
+            </div>
+
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <RankBadge rank={opponentRank} />
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 850,
+                  color: '#eef6ff',
+                }}
+              >
+                {row.opponent}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <Pill accent="#bdefff">{row.status || (completed ? 'Completed' : 'Active')}</Pill>
+            {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
+            {row.eligible ? <Pill muted>Eligible: {row.eligible}</Pill> : null}
+          </div>
+        </div>
+
+        {onClick ? (
+          <Pill
+            accent="#aef2ff"
+            background="rgba(174,242,255,0.10)"
+            borderColor="rgba(174,242,255,0.20)"
+          >
+            Click to enter result
+          </Pill>
+        ) : null}
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+          gap: 10,
+        }}
+      >
+        <MetaBox label="Match Date" value={row.match_date || '-'} />
+        <MetaBox label="Deadline" value={row.deadline || '-'} />
+        {completed ? <MetaBox label="Winner" value={row.winner || '-'} /> : null}
+        {completed ? <MetaBox label="Score" value={row.score || '-'} /> : null}
+      </div>
+
+      {!completed ? (
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 10,
+            marginTop: 12,
+          }}
+        >
+          <div
+            style={{
+              borderRadius: 18,
+              padding: '12px 14px',
+              background: challengerTheme.accentSoft,
+              border: `1px solid ${challengerTheme.accentBorder}`,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.56)',
+                marginBottom: 8,
+              }}
+            >
+              Challenger
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: challengerTheme.accent }}>
+              {row.challenger} (#{challengerRank})
+            </div>
+          </div>
+
+          <div
+            style={{
+              borderRadius: 18,
+              padding: '12px 14px',
+              background: opponentTheme.accentSoft,
+              border: `1px solid ${opponentTheme.accentBorder}`,
+            }}
+          >
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: '0.14em',
+                textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.56)',
+                marginBottom: 8,
+              }}
+            >
+              Opponent
+            </div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: opponentTheme.accent }}>
+              {row.opponent} (#{opponentRank})
+            </div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export default function MatchCenterPage() {
   const [feedRows, setFeedRows] = useState([])
   const [loading, setLoading] = useState(true)
@@ -272,322 +647,409 @@ export default function MatchCenterPage() {
   }
 
   return (
-    <div
-      style={{
-        minHeight: '100vh',
-        background:
-          'radial-gradient(circle at top, #0b2447 0%, #07111f 40%, #02060d 100%)',
-        color: 'white',
-        padding: '32px 16px 60px',
-      }}
-    >
-      <div style={{ maxWidth: 900, margin: '0 auto' }}>
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            gap: 16,
-            flexWrap: 'wrap',
-            marginBottom: 20,
-          }}
-        >
-          <h1 style={{ fontSize: 40, fontWeight: 800, margin: 0 }}>
-            Match Center
-          </h1>
+    <>
+      <style>{`
+        @media (max-width: 700px) {
+          .match-center-title {
+            font-size: 34px !important;
+          }
+        }
+      `}</style>
 
-          <a
-            href="/"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              minHeight: 48,
-              padding: '0 18px',
-              borderRadius: 14,
-              textDecoration: 'none',
-              fontWeight: 800,
-              fontSize: 14,
-              color: '#eef6ff',
-              background: 'rgba(255,255,255,0.06)',
-              border: '1px solid rgba(255,255,255,0.22)',
-              boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
-            }}
-          >
-            ← Back to Live Rankings
-          </a>
-        </div>
-
-        {challengeMessage ? (
+      <div
+        style={{
+          minHeight: '100vh',
+          background:
+            'radial-gradient(circle at top, #0b2447 0%, #07111f 40%, #02060d 100%)',
+          color: 'white',
+          padding: '32px 16px 60px',
+        }}
+      >
+        <div style={{ maxWidth: 980, margin: '0 auto' }}>
           <div
             style={{
-              marginBottom: 24,
-              padding: '18px 20px',
-              borderRadius: 16,
-              background: '#11284a',
-              border: '1px solid #234b86',
-              fontSize: 18,
-              fontWeight: 600,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-start',
+              gap: 16,
+              flexWrap: 'wrap',
+              marginBottom: 16,
             }}
           >
-            {challengeMessage}
-          </div>
-        ) : null}
-
-        <div
-          style={{
-            marginBottom: 24,
-            padding: '18px 20px',
-            borderRadius: 16,
-            background: '#11284a',
-            border: '1px solid #234b86',
-            fontSize: 18,
-            fontWeight: 600,
-          }}
-        >
-          Feed rows: {feedRows.length} | Active: {activeChallenges.length} | Completed:{' '}
-          {completedChallenges.length}
-        </div>
-
-        <div
-          style={{
-            background: 'rgba(0,0,0,0.35)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            borderRadius: 28,
-            padding: 28,
-            marginBottom: 28,
-            boxShadow: '0 0 40px rgba(0, 100, 255, 0.12)',
-          }}
-        >
-          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 24 }}>
-            Submit Challenge
-          </h2>
-
-          <form onSubmit={handleChallengeSubmit}>
-            <div style={{ display: 'grid', gap: 18 }}>
-              <select
-                value={challengeForm.challenger}
-                onChange={(e) => updateChallengeField('challenger', e.target.value)}
-                style={inputStyle}
-                required
-              >
-                <option value="">Select challenger</option>
-                {PLAYERS.map((player) => (
-                  <option key={player.name} value={player.name}>
-                    {player.name} (#{player.rank})
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={challengeForm.opponent}
-                onChange={(e) => updateChallengeField('opponent', e.target.value)}
-                style={inputStyle}
-                required
-              >
-                <option value="">Select opponent</option>
-                {PLAYERS.map((player) => (
-                  <option key={player.name} value={player.name}>
-                    {player.name} (#{player.rank})
-                  </option>
-                ))}
-              </select>
-
-              <input
-                type="date"
-                value={challengeForm.match_date}
-                onChange={(e) => updateChallengeField('match_date', e.target.value)}
-                style={inputStyle}
-              />
-
-              <button
-                type="submit"
-                disabled={submittingChallenge}
+            <div>
+              <div
                 style={{
-                  ...buttonStyle,
-                  opacity: submittingChallenge ? 0.7 : 1,
-                  cursor: submittingChallenge ? 'not-allowed' : 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '8px 12px',
+                  borderRadius: 999,
+                  background: 'rgba(168,240,255,0.08)',
+                  border: '1px solid rgba(168,240,255,0.14)',
+                  color: '#bdefff',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  marginBottom: 14,
                 }}
               >
-                {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
-              </button>
+                NDA 2026 Tennis
+              </div>
+
+              <h1
+                className="match-center-title"
+                style={{
+                  fontSize: 48,
+                  fontWeight: 900,
+                  letterSpacing: '-0.03em',
+                  margin: 0,
+                  lineHeight: 0.95,
+                }}
+              >
+                Match Center
+              </h1>
             </div>
-          </form>
-        </div>
 
-        <section style={{ marginBottom: 28 }}>
-          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 16 }}>
-            Active Challenges
-          </h2>
+            <a
+              href="/"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                minHeight: 54,
+                padding: '0 20px',
+                borderRadius: 16,
+                textDecoration: 'none',
+                fontWeight: 900,
+                fontSize: 15,
+                color: '#eef6ff',
+                background:
+                  'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+                border: '2px solid rgba(219,231,247,0.38)',
+                boxShadow:
+                  '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
+              }}
+            >
+              ← Back to Live Rankings
+            </a>
+          </div>
 
-          {loading ? (
-            <div style={cardStyle}>Loading...</div>
-          ) : activeChallenges.length === 0 ? (
-            <div style={cardStyle}>No active challenges found.</div>
-          ) : (
-            <div style={listStyle}>
-              {activeChallenges.map((row, index) => (
+          <div
+            style={{
+              height: 1,
+              background:
+                'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(168,240,255,0.18) 22%, rgba(255,255,255,0.08) 50%, rgba(168,240,255,0.18) 78%, rgba(255,255,255,0) 100%)',
+              marginBottom: 24,
+            }}
+          />
+
+          {challengeMessage ? (
+            <div
+              style={{
+                marginBottom: 24,
+                padding: '18px 20px',
+                borderRadius: 18,
+                background: 'rgba(17,40,74,0.78)',
+                border: '1px solid rgba(91,171,255,0.26)',
+                fontSize: 17,
+                fontWeight: 700,
+                boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
+              }}
+            >
+              {challengeMessage}
+            </div>
+          ) : null}
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+              gap: 12,
+              marginBottom: 28,
+            }}
+          >
+            <MetaBox label="Feed Rows" value={String(feedRows.length)} />
+            <MetaBox label="Active" value={String(activeChallenges.length)} />
+            <MetaBox label="Completed" value={String(completedChallenges.length)} />
+          </div>
+
+          <div style={{ display: 'grid', gap: 24 }}>
+            <SectionCard title="Submit Challenge" accent="rgba(168,240,255,0.10)">
+              <form onSubmit={handleChallengeSubmit}>
                 <div
-                  key={`active-${index}`}
-                  style={{ ...cardStyle, cursor: 'pointer' }}
-                  onClick={() => {
-                    setSelectedMatch(row)
-                    setResultForm({
-                      winner: '',
-                      score: '',
-                    })
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+                    gap: 16,
+                    marginBottom: 16,
                   }}
                 >
-                  <div style={rowTitleStyle}>
-                    {row.challenger} (#{row.challenger_rank}) vs {row.opponent} (#
-                    {row.opponent_rank})
+                  <div>
+                    <label style={labelStyle}>Challenger</label>
+                    <select
+                      value={challengeForm.challenger}
+                      onChange={(e) => updateChallengeField('challenger', e.target.value)}
+                      style={inputStyle}
+                      required
+                    >
+                      <option value="">Select challenger</option>
+                      {PLAYERS.map((player) => (
+                        <option key={player.name} value={player.name}>
+                          {player.name} (#{player.rank})
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div style={metaStyle}>Status: {row.status || 'ACTIVE'}</div>
-                  <div style={metaStyle}>Approval: {row.approval || 'PENDING'}</div>
-                  <div style={metaStyle}>Eligible: {row.eligible || 'YES'}</div>
-                  <div style={metaStyle}>Match Date: {row.match_date || '-'}</div>
-                  <div style={metaStyle}>Deadline: {row.deadline || '-'}</div>
-                  <div style={{ ...metaStyle, marginTop: 10, fontWeight: 700 }}>
-                    Click to enter result
+
+                  <div>
+                    <label style={labelStyle}>Opponent</label>
+                    <select
+                      value={challengeForm.opponent}
+                      onChange={(e) => updateChallengeField('opponent', e.target.value)}
+                      style={inputStyle}
+                      required
+                    >
+                      <option value="">Select opponent</option>
+                      {PLAYERS.map((player) => (
+                        <option key={player.name} value={player.name}>
+                          {player.name} (#{player.rank})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Match Date</label>
+                    <input
+                      type="date"
+                      value={challengeForm.match_date}
+                      onChange={(e) => updateChallengeField('match_date', e.target.value)}
+                      style={inputStyle}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Deadline</label>
+                    <input
+                      type="date"
+                      value={challengeForm.deadline}
+                      onChange={(e) => updateChallengeField('deadline', e.target.value)}
+                      style={inputStyle}
+                    />
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
 
-        <section>
-          <h2 style={{ fontSize: 28, fontWeight: 800, marginBottom: 16 }}>
-            Completed Challenges
-          </h2>
-
-          {loading ? (
-            <div style={cardStyle}>Loading...</div>
-          ) : completedChallenges.length === 0 ? (
-            <div style={cardStyle}>No completed challenges found.</div>
-          ) : (
-            <div style={listStyle}>
-              {completedChallenges.map((row, index) => (
-                <div key={`completed-${index}`} style={cardStyle}>
-                  <div style={rowTitleStyle}>
-                    {row.challenger} (#{row.challenger_rank}) vs {row.opponent} (#
-                    {row.opponent_rank})
-                  </div>
-                  <div style={metaStyle}>Status: {row.status || '-'}</div>
-                  <div style={metaStyle}>Winner: {row.winner || '-'}</div>
-                  <div style={metaStyle}>Score: {row.score || '-'}</div>
-                  <div style={metaStyle}>Archived: {row.archived || 'NO'}</div>
-                  <div style={metaStyle}>Match Date: {row.match_date || '-'}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
-      </div>
-
-      {selectedMatch ? (
-        <div style={modalOverlayStyle}>
-          <div style={modalStyle}>
-            <h3 style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>
-              Enter Match Result
-            </h3>
-
-            <div style={{ marginBottom: 12, opacity: 0.7 }}>
-              Source row: {selectedMatch.source_row || 'missing'}
-            </div>
-
-            <div style={{ marginBottom: 16, fontSize: 18 }}>
-              {selectedMatch.challenger} vs {selectedMatch.opponent}
-            </div>
-
-            <form onSubmit={handleResultSubmit}>
-              <div style={{ display: 'grid', gap: 16 }}>
-                <select
-                  value={resultForm.winner}
-                  onChange={(e) =>
-                    setResultForm((prev) => ({ ...prev, winner: e.target.value }))
-                  }
-                  style={inputStyle}
-                  required
+                <button
+                  type="submit"
+                  disabled={submittingChallenge}
+                  style={{
+                    ...buttonStyle,
+                    opacity: submittingChallenge ? 0.7 : 1,
+                    cursor: submittingChallenge ? 'not-allowed' : 'pointer',
+                  }}
                 >
-                  <option value="">Select winner</option>
-                  <option value={selectedMatch.challenger}>
-                    {selectedMatch.challenger}
-                  </option>
-                  <option value={selectedMatch.opponent}>
-                    {selectedMatch.opponent}
-                  </option>
-                </select>
+                  {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
+                </button>
+              </form>
+            </SectionCard>
 
-                <input
-                  type="text"
-                  placeholder="Enter score, e.g. 6-3, 6-4"
-                  value={resultForm.score}
-                  onChange={(e) =>
-                    setResultForm((prev) => ({ ...prev, score: e.target.value }))
-                  }
-                  style={inputStyle}
-                  required
-                />
-
-                <div style={{ display: 'grid', gap: 12 }}>
-                  <button
-                    type="submit"
-                    style={buttonStyle}
-                    disabled={submittingResult}
-                  >
-                    {submittingResult ? 'Saving...' : 'Save Result'}
-                  </button>
-
-                  <button
-                    type="button"
-                    style={secondaryButtonStyle}
-                    onClick={() => setSelectedMatch(null)}
-                  >
-                    Cancel
-                  </button>
+            <SectionCard
+              title="Active Challenges"
+              accent="rgba(168,240,255,0.08)"
+              right={
+                <Pill
+                  accent="#aef2ff"
+                  background="rgba(174,242,255,0.10)"
+                  borderColor="rgba(174,242,255,0.18)"
+                >
+                  {loading ? 'Loading...' : `${activeChallenges.length} Active`}
+                </Pill>
+              }
+            >
+              {loading ? (
+                <div style={emptyStateStyle}>Loading active challenges...</div>
+              ) : activeChallenges.length === 0 ? (
+                <div style={emptyStateStyle}>No active challenges found.</div>
+              ) : (
+                <div style={listStyle}>
+                  {activeChallenges.map((row, index) => (
+                    <MatchCard
+                      key={`active-${index}`}
+                      row={row}
+                      onClick={() => {
+                        setSelectedMatch(row)
+                        setResultForm({
+                          winner: '',
+                          score: '',
+                        })
+                      }}
+                    />
+                  ))}
                 </div>
-              </div>
-            </form>
+              )}
+            </SectionCard>
+
+            <SectionCard
+              title="Completed Challenges"
+              accent="rgba(255,255,255,0.05)"
+              right={
+                <Pill muted>
+                  {loading ? 'Loading...' : `${completedChallenges.length} Completed`}
+                </Pill>
+              }
+            >
+              {loading ? (
+                <div style={emptyStateStyle}>Loading completed challenges...</div>
+              ) : completedChallenges.length === 0 ? (
+                <div style={emptyStateStyle}>No completed challenges found.</div>
+              ) : (
+                <div style={listStyle}>
+                  {completedChallenges.map((row, index) => (
+                    <MatchCard key={`completed-${index}`} row={row} completed />
+                  ))}
+                </div>
+              )}
+            </SectionCard>
           </div>
         </div>
-      ) : null}
-    </div>
+
+        {selectedMatch ? (
+          <div style={modalOverlayStyle}>
+            <div style={modalStyle}>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 12,
+                  alignItems: 'center',
+                  marginBottom: 18,
+                  flexWrap: 'wrap',
+                }}
+              >
+                <h3 style={{ fontSize: 26, fontWeight: 850, margin: 0 }}>
+                  Enter Match Result
+                </h3>
+                <Pill muted>Row: {selectedMatch.source_row || 'missing'}</Pill>
+              </div>
+
+              <div
+                style={{
+                  fontSize: 18,
+                  fontWeight: 750,
+                  lineHeight: 1.45,
+                  marginBottom: 18,
+                }}
+              >
+                {formatMatchLabel(selectedMatch)}
+              </div>
+
+              <form onSubmit={handleResultSubmit}>
+                <div style={{ display: 'grid', gap: 16 }}>
+                  <div>
+                    <label style={labelStyle}>Winner</label>
+                    <select
+                      value={resultForm.winner}
+                      onChange={(e) =>
+                        setResultForm((prev) => ({ ...prev, winner: e.target.value }))
+                      }
+                      style={inputStyle}
+                      required
+                    >
+                      <option value="">Select winner</option>
+                      <option value={selectedMatch.challenger}>
+                        {selectedMatch.challenger}
+                      </option>
+                      <option value={selectedMatch.opponent}>
+                        {selectedMatch.opponent}
+                      </option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={labelStyle}>Score</label>
+                    <input
+                      type="text"
+                      placeholder="Enter score, e.g. 6-3, 6-4"
+                      value={resultForm.score}
+                      onChange={(e) =>
+                        setResultForm((prev) => ({ ...prev, score: e.target.value }))
+                      }
+                      style={inputStyle}
+                      required
+                    />
+                  </div>
+
+                  <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
+                    <button
+                      type="submit"
+                      style={buttonStyle}
+                      disabled={submittingResult}
+                    >
+                      {submittingResult ? 'Saving...' : 'Save Result'}
+                    </button>
+
+                    <button
+                      type="button"
+                      style={secondaryButtonStyle}
+                      onClick={() => setSelectedMatch(null)}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        ) : null}
+      </div>
+    </>
   )
+}
+
+const labelStyle = {
+  display: 'block',
+  marginBottom: 8,
+  fontSize: 12,
+  fontWeight: 800,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'rgba(220,232,255,0.72)',
 }
 
 const inputStyle = {
   width: '100%',
-  height: 60,
+  height: 58,
   borderRadius: 18,
-  border: 'none',
+  border: '1px solid rgba(255,255,255,0.12)',
   outline: 'none',
   padding: '0 18px',
-  fontSize: 18,
-  background: '#f3f4f6',
+  fontSize: 17,
+  background: 'rgba(243,244,246,0.96)',
   color: '#111827',
+  boxSizing: 'border-box',
 }
 
 const buttonStyle = {
   width: '100%',
-  height: 60,
+  height: 58,
   borderRadius: 18,
-  border: 'none',
+  border: '1px solid rgba(255,255,255,0.08)',
   fontSize: 18,
-  fontWeight: 800,
+  fontWeight: 850,
   background: '#dbe7f7',
   color: '#182235',
   cursor: 'pointer',
+  boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
 }
 
 const secondaryButtonStyle = {
   width: '100%',
-  height: 60,
+  height: 58,
   borderRadius: 18,
-  border: '1px solid #4b648f',
-  fontSize: 18,
-  fontWeight: 700,
-  background: 'transparent',
+  border: '1px solid rgba(255,255,255,0.18)',
+  fontSize: 17,
+  fontWeight: 750,
+  background: 'rgba(255,255,255,0.04)',
   color: 'white',
   cursor: 'pointer',
 }
@@ -597,42 +1059,35 @@ const listStyle = {
   gap: 16,
 }
 
-const cardStyle = {
-  background: 'rgba(17, 40, 74, 0.7)',
-  border: '1px solid #234b86',
-  borderRadius: 18,
+const emptyStateStyle = {
+  borderRadius: 20,
   padding: 18,
-}
-
-const rowTitleStyle = {
-  fontSize: 20,
-  fontWeight: 800,
-  marginBottom: 10,
-}
-
-const metaStyle = {
-  fontSize: 15,
-  opacity: 0.95,
-  marginBottom: 6,
+  background: 'rgba(17,40,74,0.68)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  fontSize: 16,
+  color: 'rgba(238,246,255,0.88)',
 }
 
 const modalOverlayStyle = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(0,0,0,0.6)',
+  background: 'rgba(0,0,0,0.60)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
   padding: 16,
   zIndex: 1000,
+  backdropFilter: 'blur(6px)',
+  WebkitBackdropFilter: 'blur(6px)',
 }
 
 const modalStyle = {
   width: '100%',
-  maxWidth: 520,
-  background: '#0f223f',
-  border: '1px solid #234b86',
-  borderRadius: 24,
+  maxWidth: 560,
+  background:
+    'linear-gradient(180deg, rgba(15,34,63,0.96) 0%, rgba(10,23,43,0.98) 100%)',
+  border: '1px solid rgba(91,171,255,0.24)',
+  borderRadius: 26,
   padding: 24,
   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
 }
