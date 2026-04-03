@@ -61,6 +61,13 @@ export default function MatchCenterPage() {
   const [challengeMessage, setChallengeMessage] = useState('')
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
 
+  const [selectedMatch, setSelectedMatch] = useState(null)
+  const [resultForm, setResultForm] = useState({
+    winner: '',
+    score: '',
+  })
+  const [submittingResult, setSubmittingResult] = useState(false)
+
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
     challenger_rank: '',
@@ -172,12 +179,7 @@ export default function MatchCenterPage() {
         throw new Error(data.error || data.raw || 'Challenge submit failed')
       }
 
-      const writtenRow = data.appsScript?.row || data.row || ''
-      setChallengeMessage(
-        writtenRow
-          ? `Challenge submitted successfully (row ${writtenRow})`
-          : 'Challenge submitted successfully'
-      )
+      setChallengeMessage('Challenge submitted successfully')
 
       setChallengeForm({
         challenger: '',
@@ -188,12 +190,56 @@ export default function MatchCenterPage() {
         deadline: '',
       })
 
-      setTimeout(loadData, 1500)
+      setTimeout(loadData, 1000)
     } catch (err) {
       console.error('Challenge submit failed:', err)
       setChallengeMessage(err.message || 'Challenge submit failed')
     } finally {
       setSubmittingChallenge(false)
+    }
+  }
+
+  async function handleResultSubmit(e) {
+    e.preventDefault()
+    if (!selectedMatch) return
+
+    setSubmittingResult(true)
+    setChallengeMessage('')
+
+    try {
+      if (!resultForm.winner || !resultForm.score) {
+        throw new Error('Please select winner and enter score')
+      }
+
+      const payload = {
+        action: 'complete_match',
+        source_row: selectedMatch.source_row,
+        winner: resultForm.winner,
+        score: resultForm.score,
+      }
+
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      })
+
+      const data = await res.json()
+
+      if (!data.success) {
+        throw new Error(data.error || 'Failed to submit result')
+      }
+
+      setChallengeMessage('Match result saved successfully')
+      setSelectedMatch(null)
+      setResultForm({ winner: '', score: '' })
+
+      setTimeout(loadData, 1000)
+    } catch (err) {
+      console.error('Result submit failed:', err)
+      setChallengeMessage(err.message || 'Failed to submit result')
+    } finally {
+      setSubmittingResult(false)
     }
   }
 
@@ -321,7 +367,17 @@ export default function MatchCenterPage() {
           ) : (
             <div style={listStyle}>
               {activeChallenges.map((row, index) => (
-                <div key={`active-${index}`} style={cardStyle}>
+                <div
+                  key={`active-${index}`}
+                  style={{ ...cardStyle, cursor: 'pointer' }}
+                  onClick={() => {
+                    setSelectedMatch(row)
+                    setResultForm({
+                      winner: '',
+                      score: '',
+                    })
+                  }}
+                >
                   <div style={rowTitleStyle}>
                     {row.challenger} (#{row.challenger_rank}) vs {row.opponent} (#
                     {row.opponent_rank})
@@ -331,6 +387,9 @@ export default function MatchCenterPage() {
                   <div style={metaStyle}>Eligible: {row.eligible || 'YES'}</div>
                   <div style={metaStyle}>Match Date: {row.match_date || '-'}</div>
                   <div style={metaStyle}>Deadline: {row.deadline || '-'}</div>
+                  <div style={{ ...metaStyle, marginTop: 10, fontWeight: 700 }}>
+                    Click to enter result
+                  </div>
                 </div>
               ))}
             </div>
@@ -365,6 +424,70 @@ export default function MatchCenterPage() {
           )}
         </section>
       </div>
+
+      {selectedMatch ? (
+        <div style={modalOverlayStyle}>
+          <div style={modalStyle}>
+            <h3 style={{ fontSize: 24, fontWeight: 800, marginBottom: 16 }}>
+              Enter Match Result
+            </h3>
+
+            <div style={{ marginBottom: 16, fontSize: 18 }}>
+              {selectedMatch.challenger} vs {selectedMatch.opponent}
+            </div>
+
+            <form onSubmit={handleResultSubmit}>
+              <div style={{ display: 'grid', gap: 16 }}>
+                <select
+                  value={resultForm.winner}
+                  onChange={(e) =>
+                    setResultForm((prev) => ({ ...prev, winner: e.target.value }))
+                  }
+                  style={inputStyle}
+                  required
+                >
+                  <option value="">Select winner</option>
+                  <option value={selectedMatch.challenger}>
+                    {selectedMatch.challenger}
+                  </option>
+                  <option value={selectedMatch.opponent}>
+                    {selectedMatch.opponent}
+                  </option>
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Enter score, e.g. 6-3, 6-4"
+                  value={resultForm.score}
+                  onChange={(e) =>
+                    setResultForm((prev) => ({ ...prev, score: e.target.value }))
+                  }
+                  style={inputStyle}
+                  required
+                />
+
+                <div style={{ display: 'grid', gap: 12 }}>
+                  <button
+                    type="submit"
+                    style={buttonStyle}
+                    disabled={submittingResult}
+                  >
+                    {submittingResult ? 'Saving...' : 'Save Result'}
+                  </button>
+
+                  <button
+                    type="button"
+                    style={secondaryButtonStyle}
+                    onClick={() => setSelectedMatch(null)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -390,6 +513,19 @@ const buttonStyle = {
   fontWeight: 800,
   background: '#dbe7f7',
   color: '#182235',
+  cursor: 'pointer',
+}
+
+const secondaryButtonStyle = {
+  width: '100%',
+  height: 60,
+  borderRadius: 18,
+  border: '1px solid #4b648f',
+  fontSize: 18,
+  fontWeight: 700,
+  background: 'transparent',
+  color: 'white',
+  cursor: 'pointer',
 }
 
 const listStyle = {
@@ -414,4 +550,25 @@ const metaStyle = {
   fontSize: 15,
   opacity: 0.95,
   marginBottom: 6,
+}
+
+const modalOverlayStyle = {
+  position: 'fixed',
+  inset: 0,
+  background: 'rgba(0,0,0,0.6)',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  padding: 16,
+  zIndex: 1000,
+}
+
+const modalStyle = {
+  width: '100%',
+  maxWidth: 520,
+  background: '#0f223f',
+  border: '1px solid #234b86',
+  borderRadius: 24,
+  padding: 24,
+  boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
 }
