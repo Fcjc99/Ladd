@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
+const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
 const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 const PLAYERS = [
