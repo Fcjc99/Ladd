@@ -1,6 +1,6 @@
-export async function POST(request) {
+export async function POST(req) {
   try {
-    const body = await request.json()
+    const body = await req.json()
     const submitUrl = process.env.NEXT_PUBLIC_MATCH_SUBMIT_URL
 
     if (!submitUrl) {
@@ -13,11 +13,9 @@ export async function POST(request) {
     const res = await fetch(submitUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain;charset=utf-8',
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
-      redirect: 'follow',
-      cache: 'no-store',
     })
 
     const text = await res.text()
@@ -36,21 +34,10 @@ export async function POST(request) {
       )
     }
 
-    if (!data.success) {
-      return Response.json(
-        {
-          success: false,
-          error: data.error || 'Apps Script rejected request',
-          raw: data,
-        },
-        { status: 400 }
-      )
-    }
-
-    return Response.json(data)
+    return Response.json(data, { status: res.ok ? 200 : 500 })
   } catch (error) {
     return Response.json(
-      { success: false, error: error.message || 'Submit failed' },
+      { success: false, error: error.message },
       { status: 500 }
     )
   }
