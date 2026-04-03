@@ -114,11 +114,7 @@ function parseScore(scoreText) {
   const text = String(scoreText || '').trim()
   if (!text) return []
 
-  const normalized = text
-    .replace(/\s+/g, ' ')
-    .replace(/,/g, ' ')
-    .trim()
-
+  const normalized = text.replace(/\s+/g, ' ').replace(/,/g, ' ').trim()
   const sets = normalized.match(/\d+\s*-\s*\d+/g)
   if (!sets) return []
 
@@ -315,13 +311,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
                 size={56}
                 borderColor={challengerTheme.accentBorder}
               />
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 850,
-                  color: '#eef6ff',
-                }}
-              >
+              <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff' }}>
                 {row.challenger}
               </div>
             </div>
@@ -345,13 +335,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
                 size={56}
                 borderColor={opponentTheme.accentBorder}
               />
-              <div
-                style={{
-                  fontSize: 18,
-                  fontWeight: 850,
-                  color: '#eef6ff',
-                }}
-              >
+              <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff' }}>
                 {row.opponent}
               </div>
             </div>
@@ -392,45 +376,10 @@ function ScorePanel({ row }) {
 
   if (!sets.length) {
     return (
-      <div
-        style={{
-          minWidth: 260,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-        }}
-      >
-        <div
-          style={{
-            width: '100%',
-            maxWidth: 260,
-            borderRadius: 20,
-            padding: '16px 18px',
-            background: 'rgba(255,255,255,0.05)',
-            border: '1px solid rgba(255,255,255,0.10)',
-          }}
-        >
-          <div
-            style={{
-              fontSize: 11,
-              fontWeight: 800,
-              letterSpacing: '0.14em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.56)',
-              marginBottom: 10,
-              textAlign: 'center',
-            }}
-          >
-            Reported Score
-          </div>
-          <div
-            style={{
-              fontSize: 18,
-              fontWeight: 850,
-              color: '#eef6ff',
-              textAlign: 'center',
-            }}
-          >
+      <div className="completed-score-panel" style={scorePanelOuterStyle}>
+        <div style={scorePanelInnerStyle}>
+          <div style={scoreTitleStyle}>Reported Score</div>
+          <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff', textAlign: 'center' }}>
             {row.score || '-'}
           </div>
         </div>
@@ -439,37 +388,9 @@ function ScorePanel({ row }) {
   }
 
   return (
-    <div
-      style={{
-        minWidth: 260,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-      }}
-    >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: 300,
-          borderRadius: 20,
-          padding: '16px 18px',
-          background: 'rgba(255,255,255,0.05)',
-          border: '1px solid rgba(255,255,255,0.10)',
-        }}
-      >
-        <div
-          style={{
-            fontSize: 11,
-            fontWeight: 800,
-            letterSpacing: '0.14em',
-            textTransform: 'uppercase',
-            color: 'rgba(220,232,255,0.56)',
-            marginBottom: 12,
-            textAlign: 'center',
-          }}
-        >
-          Reported Score
-        </div>
+    <div className="completed-score-panel" style={scorePanelOuterStyle}>
+      <div style={scorePanelInnerStyle}>
+        <div style={scoreTitleStyle}>Reported Score</div>
 
         <div style={{ display: 'grid', gap: 10 }}>
           {sets.map((set, index) => {
@@ -495,8 +416,8 @@ function ScorePanel({ row }) {
                 />
                 <div
                   style={{
-                    width: 44,
-                    height: 44,
+                    width: 46,
+                    height: 46,
                     borderRadius: '50%',
                     display: 'grid',
                     placeItems: 'center',
@@ -551,41 +472,44 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
       }}
     >
       <div
-        className="completed-match-card-grid"
+        className="completed-card-layout"
         style={{
           display: 'grid',
-          gridTemplateColumns: '150px minmax(260px, 1fr) 320px',
-          gap: 18,
+          gridTemplateColumns: '190px minmax(260px, 1fr) 320px',
+          gap: 24,
           alignItems: 'center',
         }}
       >
         <div
+          className="completed-photo-wrap"
           style={{
             display: 'flex',
             justifyContent: 'center',
             alignItems: 'center',
-            minHeight: 150,
           }}
         >
           <PlayerPhoto
             name={winnerName}
             photoUrl={getPlayerPhotoUrl(winnerName)}
-            size={140}
+            size={150}
             borderColor={winnerTheme.accentBorder}
           />
         </div>
 
         <div
+          className="completed-text-wrap"
           style={{
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
             minHeight: 150,
           }}
         >
           <div
             style={{
-              fontSize: 32,
+              fontSize: 34,
               fontWeight: 900,
               color: '#eef6ff',
               lineHeight: 1.02,
@@ -599,7 +523,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
             style={{
               fontSize: 12,
               fontWeight: 800,
-              letterSpacing: '0.14em',
+              letterSpacing: '0.16em',
               textTransform: 'uppercase',
               color: 'rgba(190,220,255,0.70)',
               marginBottom: 8,
@@ -610,17 +534,24 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
 
           <div
             style={{
-              fontSize: 28,
+              fontSize: 30,
               fontWeight: 850,
               color: '#dce8ff',
-              lineHeight: 1.05,
+              lineHeight: 1.04,
               marginBottom: 14,
             }}
           >
             {loserName || '-'}
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: 8,
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}
+          >
             <Pill accent="#bdefff">Completed</Pill>
             <Pill muted>Match Date: {row.match_date || '-'}</Pill>
           </div>
@@ -860,22 +791,26 @@ export default function MatchCenterPage() {
     <>
       <style>{`
         @media (max-width: 980px) {
-          .completed-match-card-grid {
-            grid-template-columns: 120px 1fr !important;
+          .completed-card-layout {
+            grid-template-columns: 1fr !important;
+            justify-items: center;
           }
 
-          .completed-match-score-panel {
-            grid-column: 1 / -1;
+          .completed-photo-wrap,
+          .completed-text-wrap,
+          .completed-score-panel {
+            width: 100%;
+          }
+
+          .completed-text-wrap {
+            text-align: center !important;
+            align-items: center !important;
           }
         }
 
         @media (max-width: 700px) {
           .match-center-title {
             font-size: 34px !important;
-          }
-
-          .completed-match-card-grid {
-            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
@@ -1223,6 +1158,32 @@ export default function MatchCenterPage() {
       </div>
     </>
   )
+}
+
+const scorePanelOuterStyle = {
+  minWidth: 260,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}
+
+const scorePanelInnerStyle = {
+  width: '100%',
+  maxWidth: 300,
+  borderRadius: 20,
+  padding: '16px 18px',
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.10)',
+}
+
+const scoreTitleStyle = {
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'rgba(220,232,255,0.56)',
+  marginBottom: 12,
+  textAlign: 'center',
 }
 
 const labelStyle = {
