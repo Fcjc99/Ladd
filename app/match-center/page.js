@@ -2,26 +2,26 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = '1jHgb5MdCVlGWHxLng9O3Hq_yJOEJGO7KOYUqkmvZfp4'
+const sheetId = '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
 const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 const PLAYERS = [
-  { name: 'Ali', rank: 1 },
-  { name: 'Basil', rank: 2 },
-  { name: 'Cameron', rank: 3 },
-  { name: 'Dylan', rank: 4 },
-  { name: 'Ethan', rank: 5 },
-  { name: 'Faris', rank: 6 },
-  { name: 'Gabe', rank: 7 },
-  { name: 'Hassan', rank: 8 },
-  { name: 'Isaac', rank: 9 },
-  { name: 'Jared', rank: 10 },
-  { name: 'Kai', rank: 11 },
-  { name: 'Leo', rank: 12 },
-  { name: 'Mason', rank: 13 },
-  { name: 'Noah', rank: 14 },
-  { name: 'Omar', rank: 15 },
-  { name: 'Zane', rank: 16 },
+  { name: 'Sophia', rank: 1 },
+  { name: 'Skye', rank: 2 },
+  { name: 'Viv', rank: 3 },
+  { name: 'Julia', rank: 4 },
+  { name: 'Clara', rank: 5 },
+  { name: 'Christi', rank: 6 },
+  { name: 'Caroline', rank: 7 },
+  { name: 'Logan', rank: 8 },
+  { name: 'Ella', rank: 9 },
+  { name: 'Elizabeth', rank: 10 },
+  { name: 'Karen', rank: 11 },
+  { name: 'Aislinn', rank: 12 },
+  { name: 'ChristyC', rank: 13 },
+  { name: 'Bree', rank: 14 },
+  { name: 'Ellie', rank: 15 },
+  { name: 'Julianna', rank: 16 },
 ]
 
 function normalizeText(value) {
@@ -164,8 +164,6 @@ export default function MatchCenterPage() {
         archived: 'NO',
       }
 
-      console.log('Submitting challenge payload:', payload)
-
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -173,7 +171,6 @@ export default function MatchCenterPage() {
       })
 
       const data = await res.json()
-      console.log('Submit response:', data)
 
       if (!data.success) {
         throw new Error(data.error || data.raw || 'Challenge submit failed')
