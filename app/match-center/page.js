@@ -199,49 +199,54 @@ export default function MatchCenterPage() {
     }
   }
 
-  async function handleResultSubmit(e) {
-    e.preventDefault()
-    if (!selectedMatch) return
+async function handleResultSubmit(e) {
+  e.preventDefault()
+  if (!selectedMatch) return
 
-    setSubmittingResult(true)
-    setChallengeMessage('')
+  setSubmittingResult(true)
+  setChallengeMessage('')
 
-    try {
-      if (!resultForm.winner || !resultForm.score) {
-        throw new Error('Please select winner and enter score')
-      }
-
-      const payload = {
-        action: 'complete_match',
-        source_row: selectedMatch.source_row,
-        winner: resultForm.winner,
-        score: resultForm.score,
-      }
-
-      const res = await fetch('/api/submit', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-
-      const data = await res.json()
-
-      if (!data.success) {
-        throw new Error(data.error || 'Failed to submit result')
-      }
-
-      setChallengeMessage('Match result saved successfully')
-      setSelectedMatch(null)
-      setResultForm({ winner: '', score: '' })
-
-      setTimeout(loadData, 1000)
-    } catch (err) {
-      console.error('Result submit failed:', err)
-      setChallengeMessage(err.message || 'Failed to submit result')
-    } finally {
-      setSubmittingResult(false)
+  try {
+    if (!selectedMatch.source_row) {
+      throw new Error('Missing source_row from ChallengeFeed')
     }
+
+    if (!resultForm.winner || !resultForm.score) {
+      throw new Error('Please select winner and enter score')
+    }
+
+    const payload = {
+      action: 'complete_match',
+      source_row: Number(selectedMatch.source_row),
+      winner: resultForm.winner,
+      score: resultForm.score,
+    }
+
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    const data = await res.json()
+    console.log('Result submit response:', data)
+
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to submit result')
+    }
+
+    setChallengeMessage(`Match result saved successfully (row ${data.appsScript?.row || data.row || payload.source_row})`)
+    setSelectedMatch(null)
+    setResultForm({ winner: '', score: '' })
+
+    setTimeout(loadData, 1000)
+  } catch (err) {
+    console.error('Result submit failed:', err)
+    setChallengeMessage(err.message || 'Failed to submit result')
+  } finally {
+    setSubmittingResult(false)
   }
+}
 
   return (
     <div
