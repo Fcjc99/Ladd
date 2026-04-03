@@ -66,28 +66,29 @@ function getTierStyles(rank) {
     return {
       shell: {
         position: 'relative',
-        padding: 6,
-        borderRadius: 40,
+        padding: 7,
+        borderRadius: 42,
         background:
-          'linear-gradient(135deg, #f8ffff 0%, #b8f1ff 16%, #ffffff 30%, #7edbff 52%, #7ca8ff 76%, #f5ffff 100%)',
+          'linear-gradient(135deg, #fbffff 0%, #d6f7ff 12%, #ffffff 26%, #8fe6ff 48%, #8ea9ff 72%, #ecfcff 100%)',
         boxShadow:
-          '0 0 22px rgba(149,236,255,0.48), 0 0 78px rgba(76,138,255,0.24), 0 18px 48px rgba(0,0,0,0.28)',
+          '0 0 24px rgba(149,236,255,0.42), 0 0 84px rgba(76,138,255,0.24), 0 18px 48px rgba(0,0,0,0.30)',
         animation: 'diamondPulse 3.6s ease-in-out infinite',
       },
       frame: {
-        borderRadius: 34,
+        borderRadius: 35,
         background:
-          'linear-gradient(180deg, rgba(14,34,68,0.78) 0%, rgba(8,21,44,0.92) 100%)',
-        border: '2px solid rgba(221,250,255,0.55)',
+          'radial-gradient(circle at 50% 38%, rgba(145,220,255,0.22) 0%, rgba(92,154,255,0.16) 24%, rgba(255,255,255,0.02) 56%, rgba(255,255,255,0) 74%), linear-gradient(180deg, rgba(18,42,80,0.82) 0%, rgba(9,22,44,0.94) 100%)',
+        border: '3px solid rgba(225,251,255,0.62)',
       },
       accent: '#aef2ff',
       badge: {
         background:
-          'linear-gradient(135deg, #ffffff 0%, #dff9ff 42%, #99e8ff 100%)',
-        color: '#0f2342',
+          'linear-gradient(135deg, #ffffff 0%, #e2f9ff 45%, #a3ebff 100%)',
+        color: '#102444',
       },
       title: 'Diamond Elite',
-      glow: 'rgba(168,240,255,0.42)',
+      glow: 'rgba(168,240,255,0.50)',
+      corner: '#a8f2ff',
     }
   }
 
@@ -95,19 +96,19 @@ function getTierStyles(rank) {
     return {
       shell: {
         position: 'relative',
-        padding: 5,
-        borderRadius: 36,
+        padding: 6,
+        borderRadius: 38,
         background:
-          'linear-gradient(135deg, #fff3c9 0%, #f7de88 18%, #e8b647 42%, #bb7d1d 72%, #ffe7a6 100%)',
+          'linear-gradient(135deg, #fff2c8 0%, #f7df8a 16%, #e6b547 42%, #ba7b1c 72%, #ffe4a4 100%)',
         boxShadow:
-          '0 0 18px rgba(247,215,108,0.30), 0 0 54px rgba(202,146,32,0.18), 0 14px 36px rgba(0,0,0,0.24)',
+          '0 0 20px rgba(247,215,108,0.28), 0 0 58px rgba(202,146,32,0.16), 0 16px 40px rgba(0,0,0,0.24)',
         animation: 'goldPulse 4.1s ease-in-out infinite',
       },
       frame: {
-        borderRadius: 30,
+        borderRadius: 31,
         background:
-          'linear-gradient(180deg, rgba(44,31,11,0.92) 0%, rgba(23,17,8,0.97) 100%)',
-        border: '2px solid rgba(255,231,162,0.42)',
+          'linear-gradient(180deg, rgba(48,33,11,0.92) 0%, rgba(22,16,7,0.98) 100%)',
+        border: '3px solid rgba(255,231,162,0.44)',
       },
       accent: '#f6d56f',
       badge: {
@@ -116,7 +117,8 @@ function getTierStyles(rank) {
         color: '#3d2c00',
       },
       title: 'Gold Rank',
-      glow: 'rgba(247,215,108,0.20)',
+      glow: 'rgba(247,215,108,0.22)',
+      corner: '#f6d56f',
     }
   }
 
@@ -124,19 +126,19 @@ function getTierStyles(rank) {
     return {
       shell: {
         position: 'relative',
-        padding: 5,
-        borderRadius: 36,
+        padding: 6,
+        borderRadius: 38,
         background:
-          'linear-gradient(135deg, #ffffff 0%, #e7edf5 18%, #bec9d8 46%, #8d9bb1 72%, #f4f7fa 100%)',
+          'linear-gradient(135deg, #ffffff 0%, #e8eef6 18%, #c2ccda 46%, #8f9bb0 72%, #f4f7fb 100%)',
         boxShadow:
-          '0 0 18px rgba(221,230,239,0.24), 0 0 50px rgba(143,157,179,0.16), 0 14px 36px rgba(0,0,0,0.22)',
+          '0 0 20px rgba(220,229,239,0.22), 0 0 52px rgba(143,157,179,0.16), 0 16px 40px rgba(0,0,0,0.22)',
         animation: 'silverPulse 4.3s ease-in-out infinite',
       },
       frame: {
-        borderRadius: 30,
+        borderRadius: 31,
         background:
-          'linear-gradient(180deg, rgba(34,41,53,0.95) 0%, rgba(20,24,33,0.98) 100%)',
-        border: '2px solid rgba(232,239,247,0.34)',
+          'linear-gradient(180deg, rgba(36,42,54,0.95) 0%, rgba(20,24,33,0.98) 100%)',
+        border: '3px solid rgba(233,240,247,0.36)',
       },
       accent: '#dde6f0',
       badge: {
@@ -146,6 +148,7 @@ function getTierStyles(rank) {
       },
       title: 'Silver Rank',
       glow: 'rgba(220,229,239,0.18)',
+      corner: '#dfe7f0',
     }
   }
 
@@ -173,6 +176,7 @@ function getTierStyles(rank) {
         color: '#3f1f0d',
       },
       title: 'Bronze Rank',
+      corner: '#d29667',
     }
   }
 
@@ -195,40 +199,8 @@ function getTierStyles(rank) {
       color: '#182235',
     },
     title: 'Ranked',
+    corner: '#7fa7dd',
   }
-}
-
-function CornerShard({ color = '#9be8ff', top, right, bottom, left, rotate = 0, size = 24 }) {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        top,
-        right,
-        bottom,
-        left,
-        width: size,
-        height: size,
-        pointerEvents: 'none',
-        transform: `rotate(${rotate}deg)`,
-        filter: `drop-shadow(0 0 8px ${color})`,
-        opacity: 0.95,
-      }}
-    >
-      <svg viewBox="0 0 40 40" width="100%" height="100%" fill="none" aria-hidden="true">
-        <path
-          d="M4 34L4 8L10 14L16 6L22 12L34 4L28 18L36 22L20 22L12 30L4 34Z"
-          fill={color}
-          fillOpacity="0.70"
-        />
-        <path
-          d="M6 32L6 10L11 15L16 8L21 13L31 6L26 18L32 21L20 21L12 28L6 32Z"
-          stroke={color}
-          strokeWidth="2"
-        />
-      </svg>
-    </div>
-  )
 }
 
 function CrownIcon() {
@@ -256,7 +228,47 @@ function CrownIcon() {
   )
 }
 
-function PlayerPhoto({ photoUrl, player, size = 86, radius = 24, borderColor = 'rgba(255,255,255,0.14)' }) {
+function CornerShard({ color, top, left, right, bottom, rotate = 0, size = 28, opacity = 0.9 }) {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top,
+        left,
+        right,
+        bottom,
+        width: size,
+        height: size,
+        transform: `rotate(${rotate}deg)`,
+        pointerEvents: 'none',
+        filter: `drop-shadow(0 0 8px ${color})`,
+        opacity,
+      }}
+    >
+      <svg viewBox="0 0 40 40" width="100%" height="100%" fill="none" aria-hidden="true">
+        <path
+          d="M5 34L5 10L12 15L17 8L22 13L34 5L28 19L35 23L20 23L13 30L5 34Z"
+          fill={color}
+          fillOpacity="0.42"
+        />
+        <path
+          d="M7 31L7 12L12 16L17 10L22 14L31 8L27 19L31 22L20 22L13 28L7 31Z"
+          stroke={color}
+          strokeWidth="2.2"
+        />
+      </svg>
+    </div>
+  )
+}
+
+function PlayerPhoto({
+  photoUrl,
+  player,
+  size = 86,
+  radius = 26,
+  borderColor = 'rgba(255,255,255,0.14)',
+  champion = false,
+}) {
   return (
     <div
       style={{
@@ -264,10 +276,12 @@ function PlayerPhoto({ photoUrl, player, size = 86, radius = 24, borderColor = '
         height: size,
         borderRadius: radius,
         overflow: 'hidden',
-        border: `1px solid ${borderColor}`,
+        border: `2px solid ${borderColor}`,
         background:
           'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
-        boxShadow: '0 12px 28px rgba(0,0,0,0.22)',
+        boxShadow: champion
+          ? `0 0 0 3px rgba(255,255,255,0.06), 0 16px 36px rgba(0,0,0,0.28), 0 0 26px ${borderColor}`
+          : '0 14px 34px rgba(0,0,0,0.24)',
         flexShrink: 0,
       }}
     >
@@ -289,7 +303,7 @@ function PlayerPhoto({ photoUrl, player, size = 86, radius = 24, borderColor = '
             height: '100%',
             display: 'grid',
             placeItems: 'center',
-            color: 'rgba(255,255,255,0.7)',
+            color: 'rgba(255,255,255,0.72)',
             fontWeight: 800,
             fontSize: Math.max(18, size * 0.22),
             letterSpacing: '-0.03em',
@@ -314,23 +328,24 @@ function FlagInline({ flagUrl, player, width = 30, height = 20, radius = 6 }) {
         height,
         objectFit: 'cover',
         borderRadius: radius,
-        border: '1px solid rgba(255,255,255,0.14)',
-        boxShadow: '0 6px 16px rgba(0,0,0,0.18)',
+        border: '1px solid rgba(255,255,255,0.16)',
+        boxShadow: '0 8px 18px rgba(0,0,0,0.18)',
         flexShrink: 0,
       }}
     />
   )
 }
 
-function InfoPill({ children, accent, muted = false }) {
+function Pill({ children, accent, muted = false, compact = false }) {
   return (
     <div
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        padding: '10px 14px',
+        justifyContent: 'center',
+        padding: compact ? '8px 14px' : '10px 16px',
         borderRadius: 999,
-        fontSize: 14,
+        fontSize: compact ? 13 : 14,
         fontWeight: 800,
         background: muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
         border: '1px solid rgba(255,255,255,0.10)',
@@ -344,21 +359,24 @@ function InfoPill({ children, accent, muted = false }) {
   )
 }
 
-function IdentityBlock({
+function CompactIdentity({
   row,
-  titleSize = 34,
+  titleSize = 26,
   subtitle = '',
-  photoSize = 92,
+  photoSize = 74,
   flagWidth = 34,
   flagHeight = 22,
   photoBorderColor,
+  centered = false,
+  champion = false,
 }) {
   return (
     <div
       style={{
         display: 'flex',
-        alignItems: 'center',
-        gap: 18,
+        flexDirection: 'column',
+        alignItems: centered ? 'center' : 'flex-start',
+        textAlign: centered ? 'center' : 'left',
         minWidth: 0,
       }}
     >
@@ -367,54 +385,54 @@ function IdentityBlock({
         player={row.player}
         size={photoSize}
         borderColor={photoBorderColor}
+        champion={champion}
       />
 
-      <div style={{ minWidth: 0 }}>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: centered ? 'center' : 'flex-start',
+          gap: 10,
+          flexWrap: 'wrap',
+          minWidth: 0,
+          marginTop: 18,
+        }}
+      >
         <div
           style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 10,
-            flexWrap: 'wrap',
-            minWidth: 0,
+            fontSize: titleSize,
+            fontWeight: 900,
+            letterSpacing: '-0.03em',
+            lineHeight: 1,
+            wordBreak: 'break-word',
           }}
         >
-          <div
-            style={{
-              fontSize: titleSize,
-              fontWeight: 900,
-              letterSpacing: '-0.03em',
-              lineHeight: 1.02,
-              minWidth: 0,
-              wordBreak: 'break-word',
-            }}
-          >
-            {row.player || 'Unknown'}
-          </div>
-
-          <FlagInline
-            flagUrl={row.flag_url}
-            player={row.player}
-            width={flagWidth}
-            height={flagHeight}
-          />
+          {row.player || 'Unknown'}
         </div>
 
-        {subtitle ? (
-          <div
-            style={{
-              marginTop: 8,
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: '0.18em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.72)',
-            }}
-          >
-            {subtitle}
-          </div>
-        ) : null}
+        <FlagInline
+          flagUrl={row.flag_url}
+          player={row.player}
+          width={flagWidth}
+          height={flagHeight}
+        />
       </div>
+
+      {subtitle ? (
+        <div
+          style={{
+            marginTop: 10,
+            fontSize: 12,
+            fontWeight: 800,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(220,232,255,0.72)',
+          }}
+        >
+          {subtitle}
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -423,7 +441,6 @@ function TopRankCard({ row, rank }) {
   const tierStyles = getTierStyles(rank)
   const moveDisplay = getMoveDisplay(row.move)
   const isFirst = rank === 1
-  const shardColor = rank === 1 ? '#9feeff' : rank === 2 ? '#f6d56f' : '#dfe8f3'
 
   return (
     <div style={tierStyles.shell}>
@@ -432,8 +449,8 @@ function TopRankCard({ row, rank }) {
           ...tierStyles.frame,
           position: 'relative',
           overflow: 'hidden',
-          padding: isFirst ? 28 : 24,
-          minHeight: isFirst ? 250 : 220,
+          padding: isFirst ? '24px 26px 22px' : '22px 24px 20px',
+          minHeight: isFirst ? 520 : 420,
         }}
       >
         {isFirst ? (
@@ -442,71 +459,83 @@ function TopRankCard({ row, rank }) {
               style={{
                 position: 'absolute',
                 inset: 0,
-                background:
-                  'radial-gradient(circle at 50% 36%, rgba(160,240,255,0.28) 0%, rgba(95,165,255,0.22) 25%, rgba(255,255,255,0.04) 52%, rgba(255,255,255,0) 72%)',
                 pointerEvents: 'none',
+                background:
+                  'radial-gradient(circle at 50% 45%, rgba(164,240,255,0.18) 0%, rgba(114,176,255,0.14) 28%, rgba(255,255,255,0.02) 54%, rgba(255,255,255,0) 78%)',
               }}
             />
             <div
               style={{
                 position: 'absolute',
                 inset: 0,
+                pointerEvents: 'none',
                 background:
-                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(190,244,255,0.14) 22%, rgba(255,255,255,0) 46%, rgba(141,190,255,0.12) 65%, rgba(255,255,255,0) 100%)',
-                animation: 'heroSweep 5.6s linear infinite',
+                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(189,245,255,0.12) 16%, rgba(255,255,255,0) 36%, rgba(160,208,255,0.10) 55%, rgba(255,255,255,0) 78%, rgba(189,245,255,0.12) 100%)',
+                animation: 'championSweep 6s linear infinite',
+                mixBlendMode: 'screen',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                inset: 6,
+                borderRadius: 30,
+                border: '1px solid rgba(188,244,255,0.20)',
+                boxShadow: 'inset 0 0 24px rgba(168,240,255,0.10)',
                 pointerEvents: 'none',
               }}
             />
           </>
         ) : null}
 
-        <CornerShard top={10} left={10} color={shardColor} size={isFirst ? 30 : 24} />
-        <CornerShard top={10} right={10} color={shardColor} rotate={90} size={isFirst ? 30 : 24} />
-        <CornerShard bottom={10} left={10} color={shardColor} rotate={270} size={isFirst ? 30 : 24} />
-        <CornerShard bottom={10} right={10} color={shardColor} rotate={180} size={isFirst ? 30 : 24} />
+        <CornerShard top={10} left={10} color={tierStyles.corner} size={isFirst ? 34 : 26} />
+        <CornerShard top={10} right={10} color={tierStyles.corner} rotate={90} size={isFirst ? 34 : 26} />
+        <CornerShard bottom={10} left={10} color={tierStyles.corner} rotate={270} size={isFirst ? 34 : 26} />
+        <CornerShard bottom={10} right={10} color={tierStyles.corner} rotate={180} size={isFirst ? 34 : 26} />
 
         {isFirst ? (
           <>
-            <CornerShard top={22} left={30} color={shardColor} rotate={15} size={16} />
-            <CornerShard top={22} right={30} color={shardColor} rotate={105} size={16} />
-            <CornerShard bottom={22} left={30} color={shardColor} rotate={255} size={16} />
-            <CornerShard bottom={22} right={30} color={shardColor} rotate={195} size={16} />
+            <CornerShard top={24} left={32} color={tierStyles.corner} rotate={16} size={18} opacity={0.86} />
+            <CornerShard top={24} right={32} color={tierStyles.corner} rotate={105} size={18} opacity={0.86} />
+            <CornerShard bottom={24} left={32} color={tierStyles.corner} rotate={255} size={18} opacity={0.86} />
+            <CornerShard bottom={24} right={32} color={tierStyles.corner} rotate={195} size={18} opacity={0.86} />
           </>
         ) : null}
 
         <div
-          className="top-rank-grid"
+          className="top-rank-content"
           style={{
-            display: 'grid',
-            gridTemplateColumns: isFirst ? '120px minmax(300px, 1fr)' : '106px minmax(280px, 1fr)',
-            gap: isFirst ? 24 : 20,
-            alignItems: 'center',
             position: 'relative',
             zIndex: 1,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            minHeight: isFirst ? 470 : 372,
           }}
         >
           <div
             style={{
+              width: '100%',
               display: 'flex',
-              flexDirection: 'column',
               alignItems: 'flex-start',
-              gap: 12,
+              justifyContent: 'space-between',
             }}
           >
             <div
               style={{
-                minWidth: isFirst ? 104 : 92,
-                height: isFirst ? 104 : 92,
-                borderRadius: isFirst ? 28 : 24,
+                minWidth: isFirst ? 88 : 78,
+                height: isFirst ? 88 : 78,
+                borderRadius: isFirst ? 24 : 22,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 900,
-                fontSize: isFirst ? 44 : 36,
+                fontSize: isFirst ? 40 : 32,
                 letterSpacing: '-0.04em',
                 position: 'relative',
                 ...tierStyles.badge,
-                boxShadow: `0 16px 34px rgba(0,0,0,0.22), 0 0 24px ${tierStyles.glow || 'rgba(255,255,255,0.12)'}`,
+                boxShadow: `0 14px 30px rgba(0,0,0,0.22), 0 0 22px ${tierStyles.glow || 'rgba(255,255,255,0.12)'}`,
               }}
             >
               {isFirst ? (
@@ -514,10 +543,10 @@ function TopRankCard({ row, rank }) {
                   <div
                     style={{
                       position: 'absolute',
-                      top: 10,
-                      right: 10,
+                      top: 8,
+                      right: 8,
                       color: '#1a4765',
-                      opacity: 0.95,
+                      opacity: 0.96,
                     }}
                   >
                     <CrownIcon />
@@ -529,44 +558,56 @@ function TopRankCard({ row, rank }) {
               )}
             </div>
 
-            <div
-              style={{
-                padding: '10px 16px',
-                borderRadius: 999,
-                fontSize: 14,
-                fontWeight: 800,
-                background: moveDisplay.bg,
-                border: `1px solid ${moveDisplay.border}`,
-                color: moveDisplay.color,
-                whiteSpace: 'nowrap',
-              }}
-            >
-              {moveDisplay.label}
-            </div>
+            <Pill compact accent={moveDisplay.color}>
+              <span
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  padding: '0',
+                  borderRadius: 999,
+                  background: 'transparent',
+                  color: moveDisplay.color,
+                }}
+              >
+                {moveDisplay.label}
+              </span>
+            </Pill>
           </div>
 
-          <div style={{ minWidth: 0 }}>
-            <IdentityBlock
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              marginTop: isFirst ? 10 : 4,
+              marginBottom: 10,
+            }}
+          >
+            <CompactIdentity
               row={row}
-              titleSize={isFirst ? 58 : 42}
+              titleSize={isFirst ? 64 : 44}
               subtitle={tierStyles.title}
-              photoSize={isFirst ? 106 : 92}
-              flagWidth={isFirst ? 42 : 36}
+              photoSize={isFirst ? 190 : 138}
+              flagWidth={isFirst ? 44 : 38}
               flagHeight={isFirst ? 28 : 24}
               photoBorderColor={tierStyles.accent}
+              centered
+              champion={isFirst}
             />
+          </div>
 
-            <div
-              style={{
-                display: 'flex',
-                gap: 12,
-                flexWrap: 'wrap',
-                marginTop: isFirst ? 20 : 18,
-              }}
-            >
-              <InfoPill accent={tierStyles.accent}>{tierStyles.title}</InfoPill>
-              <InfoPill muted>Status: {row.status || '-'}</InfoPill>
-            </div>
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'center',
+              gap: 12,
+              flexWrap: 'wrap',
+              marginTop: 4,
+            }}
+          >
+            <Pill accent={tierStyles.accent}>{tierStyles.title}</Pill>
+            <Pill muted>Status: {row.status || '-'}</Pill>
           </div>
         </div>
       </div>
@@ -595,10 +636,10 @@ function BronzeCard({ row, rank }) {
         </div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <IdentityBlock
+          <CompactIdentity
             row={row}
             titleSize={24}
-            subtitle="Bronze Rank"
+            subtitle=""
             photoSize={74}
             flagWidth={32}
             flagHeight={20}
@@ -606,8 +647,7 @@ function BronzeCard({ row, rank }) {
           />
 
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginTop: 16 }}>
-            <InfoPill accent={tierStyles.accent}>Bronze Rank</InfoPill>
-            <InfoPill muted>Status: {row.status || '-'}</InfoPill>
+            <Pill muted>Status: {row.status || '-'}</Pill>
           </div>
         </div>
 
@@ -641,7 +681,7 @@ function CompactCard({ row, rank }) {
         <div style={compactBadgeStyle}>#{rank}</div>
 
         <div style={{ flex: 1, minWidth: 0 }}>
-          <IdentityBlock
+          <CompactIdentity
             row={row}
             titleSize={22}
             subtitle=""
@@ -750,72 +790,72 @@ export default function HomePage() {
       <style>{`
         @keyframes diamondPulse {
           0% {
-            box-shadow: 0 0 22px rgba(149,236,255,0.34), 0 0 58px rgba(76,138,255,0.16), 0 18px 48px rgba(0,0,0,0.28);
+            box-shadow: 0 0 24px rgba(149,236,255,0.34), 0 0 64px rgba(76,138,255,0.18), 0 18px 48px rgba(0,0,0,0.30);
           }
           50% {
-            box-shadow: 0 0 34px rgba(149,236,255,0.56), 0 0 92px rgba(76,138,255,0.28), 0 18px 48px rgba(0,0,0,0.30);
+            box-shadow: 0 0 38px rgba(149,236,255,0.56), 0 0 98px rgba(76,138,255,0.30), 0 18px 48px rgba(0,0,0,0.32);
           }
           100% {
-            box-shadow: 0 0 22px rgba(149,236,255,0.34), 0 0 58px rgba(76,138,255,0.16), 0 18px 48px rgba(0,0,0,0.28);
+            box-shadow: 0 0 24px rgba(149,236,255,0.34), 0 0 64px rgba(76,138,255,0.18), 0 18px 48px rgba(0,0,0,0.30);
           }
         }
 
         @keyframes goldPulse {
           0% {
-            box-shadow: 0 0 18px rgba(247,215,108,0.24), 0 0 48px rgba(202,146,32,0.14), 0 14px 36px rgba(0,0,0,0.24);
+            box-shadow: 0 0 18px rgba(247,215,108,0.22), 0 0 48px rgba(202,146,32,0.12), 0 16px 40px rgba(0,0,0,0.24);
           }
           50% {
-            box-shadow: 0 0 26px rgba(247,215,108,0.38), 0 0 68px rgba(202,146,32,0.22), 0 14px 36px rgba(0,0,0,0.24);
+            box-shadow: 0 0 28px rgba(247,215,108,0.34), 0 0 68px rgba(202,146,32,0.20), 0 16px 40px rgba(0,0,0,0.24);
           }
           100% {
-            box-shadow: 0 0 18px rgba(247,215,108,0.24), 0 0 48px rgba(202,146,32,0.14), 0 14px 36px rgba(0,0,0,0.24);
+            box-shadow: 0 0 18px rgba(247,215,108,0.22), 0 0 48px rgba(202,146,32,0.12), 0 16px 40px rgba(0,0,0,0.24);
           }
         }
 
         @keyframes silverPulse {
           0% {
-            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 14px 36px rgba(0,0,0,0.22);
+            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 16px 40px rgba(0,0,0,0.22);
           }
           50% {
-            box-shadow: 0 0 24px rgba(220,229,239,0.28), 0 0 58px rgba(143,157,179,0.18), 0 14px 36px rgba(0,0,0,0.22);
+            box-shadow: 0 0 24px rgba(220,229,239,0.28), 0 0 58px rgba(143,157,179,0.18), 0 16px 40px rgba(0,0,0,0.22);
           }
           100% {
-            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 14px 36px rgba(0,0,0,0.22);
+            box-shadow: 0 0 18px rgba(220,229,239,0.18), 0 0 42px rgba(143,157,179,0.12), 0 16px 40px rgba(0,0,0,0.22);
           }
         }
 
-        @keyframes heroSweep {
+        @keyframes championSweep {
           0% {
-            transform: translateX(-35%);
+            transform: translateX(-30%);
             opacity: 0;
           }
-          20% {
-            opacity: 0.35;
+          18% {
+            opacity: 0.16;
           }
-          50% {
-            opacity: 0.7;
+          45% {
+            opacity: 0.40;
           }
           100% {
-            transform: translateX(35%);
+            transform: translateX(30%);
             opacity: 0;
           }
         }
 
-        @media (max-width: 980px) {
-          .top-rank-grid {
-            grid-template-columns: 1fr !important;
-          }
-        }
-
-        @media (max-width: 720px) {
+        @media (max-width: 900px) {
           .ranking-page-title {
-            font-size: 42px !important;
+            font-size: 44px !important;
           }
         }
 
         @media (max-width: 680px) {
           .bronze-grid {
             grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 640px) {
+          .top-rank-content {
+            min-height: auto !important;
           }
         }
       `}</style>
