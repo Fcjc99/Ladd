@@ -1,154 +1,207 @@
-"use client";
+'use client'
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
-const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
+const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID || '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
+const rankingUrl = `https://opensheet.elk.sh/${sheetId}/Live%20Ranking`
 
-function tierClass(rank) {
-  const n = Number(rank);
-  if (n === 1) return "tier tier-r1";
-  if (n === 2) return "tier tier-r2";
-  if (n === 3) return "tier tier-r3";
-  if (n >= 4 && n <= 7) return "tier tier-r47";
-  return "tier tier-normal";
+function toNumber(value) {
+  const n = Number(String(value ?? '').trim())
+  return Number.isFinite(n) ? n : null
 }
 
-function moveBadge(move) {
-  const n = Number(move);
-  if (Number.isNaN(n)) return { label: String(move ?? "•"), className: "move move-flat" };
-  if (n > 0) return { label: `▲ ${n}`, className: "move move-up" };
-  if (n < 0) return { label: `▼ ${Math.abs(n)}`, className: "move move-down" };
-  return { label: "•", className: "move move-flat" };
-}
+export default function HomePage() {
+  const [rows, setRows] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
-function fallbackAvatar(name = "") {
-  const letter = (name || "?").trim().charAt(0).toUpperCase() || "?";
-  const svg = `
-    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96">
-      <rect width="100%" height="100%" rx="18" fill="#0f172a"/>
-      <text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle"
-        font-family="Arial, sans-serif" font-size="42" font-weight="700" fill="#cbd5e1">${letter}</text>
-    </svg>
-  `;
-  return `data:image/svg+xml;utf8,${encodeURIComponent(svg)}`;
-}
+  async function loadRankings() {
+    try {
+      setLoading(true)
+      setError('')
 
-function PlayerCard({ player, index }) {
-  const rank = Number(player.RANK || index + 1);
-  const photo = player.PHOTO?.trim() ? player.PHOTO : fallbackAvatar(player.PLAYER);
-  const status = player.STATUS || "";
-  const move = moveBadge(player.MOVE);
+      const res = await fetch(rankingUrl, { cache: 'no-store' })
+      const data = await res.json()
+
+      if (!Array.isArray(data)) {
+        throw new Error('Live Ranking did not return an array')
+      }
+
+      setRows(data)
+    } catch (err) {
+      console.error('Failed to load Live Ranking:', err)
+      setError(err.message || 'Failed to load rankings')
+      setRows([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  useEffect(() => {
+    loadRankings()
+  }, [])
+
+  const rankingRows = useMemo(() => {
+    const cleaned = rows.filter((row) => {
+      const values = Object.values(row || {})
+      return values.some((v) => String(v || '').trim() !== '')
+    })
+
+    return cleaned.sort((a, b) => {
+      const rankA =
+        toNumber(a.rank) ??
+        toNumber(a.Rank) ??
+        toNumber(a.ranking) ??
+        toNumber(a.Ranking) ??
+        9999
+
+      const rankB =
+        toNumber(b.rank) ??
+        toNumber(b.Rank) ??
+        toNumber(b.ranking) ??
+        toNumber(b.Ranking) ??
+        9999
+
+      return rankA - rankB
+    })
+  }, [rows])
 
   return (
     <div
-      className={`player-card ${tierClass(rank)}`}
-      style={{ animationDelay: `${Math.min(index * 45, 500)}ms` }}
+      style={{
+        minHeight: '100vh',
+        background:
+          'radial-gradient(circle at top, #0b2447 0%, #07111f 40%, #02060d 100%)',
+        color: 'white',
+        padding: '32px 16px 60px',
+      }}
     >
-      <div className="rank-col">
-        <div className="rank-num">{rank}</div>
-      </div>
+      <div style={{ maxWidth: 1000, margin: '0 auto' }}>
+        <h1 style={{ fontSize: 40, fontWeight: 800, marginBottom: 20 }}>
+          Live Ranking
+        </h1>
 
-      <div className="photo-wrap">
-        <img
-          src={photo}
-          alt={player.PLAYER || "Player"}
-          className="photo"
-          onError={(e) => {
-            e.currentTarget.src = fallbackAvatar(player.PLAYER);
+        <div
+          style={{
+            marginBottom: 24,
+            padding: '18px 20px',
+            borderRadius: 16,
+            background: '#11284a',
+            border: '1px solid #234b86',
+            fontSize: 16,
+            fontWeight: 600,
           }}
-        />
-      </div>
-
-      <div className="info">
-        <div className="name-row">
-          <div className="player-name">{player.PLAYER}</div>
-          {rank === 1 && <span className="mini-badge">DIAMOND</span>}
-          {rank === 2 && <span className="mini-badge">GOLD</span>}
-          {rank === 3 && <span className="mini-badge">SILVER</span>}
-          {rank >= 4 && rank <= 7 && <span className="mini-badge">COPPER</span>}
+        >
+          Sheet ID: {sheetId}
         </div>
-        <div className="status-row">{status}</div>
-      </div>
 
-      <div className="right-col">
-        <div className={move.className}>{move.label}</div>
-      </div>
-    </div>
-  );
-}
-
-export default function Home() {
-  const [players, setPlayers] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    let mounted = true;
-
-    const load = async () => {
-      try {
-        const res = await fetch(SHEET_URL, { cache: "no-store" });
-        const data = await res.json();
-        if (!mounted) return;
-        setPlayers(Array.isArray(data) ? data : []);
-      } catch {
-        if (!mounted) return;
-        setPlayers([]);
-      } finally {
-        if (mounted) setLoading(false);
-      }
-    };
-
-    load();
-    const id = setInterval(load, 10000);
-    return () => {
-      mounted = false;
-      clearInterval(id);
-    };
-  }, []);
-
-  return (
-    <main className="app-shell">
-      <div className="bg-glow bg-glow-1" />
-      <div className="bg-glow bg-glow-2" />
-
-      <section className="container">
-        <div className="hero">
-          <div>
-            <div className="eyebrow">LIVE LADDER</div>
-            <h1 className="title">Live Rankings</h1>
-            <p className="subtitle">Hybrid esports UI powered by your Google Sheet</p>
+        {error ? (
+          <div
+            style={{
+              marginBottom: 24,
+              padding: '18px 20px',
+              borderRadius: 16,
+              background: '#4a1120',
+              border: '1px solid #86234b',
+              fontSize: 16,
+              fontWeight: 600,
+            }}
+          >
+            {error}
           </div>
-          <div style={{ display: "flex", gap: 10 }}>
-            <div className="hero-chip">Top 16</div>
-            <a href="/match-center" className="hero-chip" style={{ textDecoration: "none" }}>
-              Match Center
-            </a>
-          </div>
-        </div>
+        ) : null}
 
         {loading ? (
-          <div className="list">
-            {Array.from({ length: 10 }).map((_, i) => (
-              <div className="player-card skeleton" key={i}>
-                <div className="rank-col"><div className="sk sk-rank" /></div>
-                <div className="photo-wrap"><div className="sk sk-photo" /></div>
-                <div className="info">
-                  <div className="sk sk-name" />
-                  <div className="sk sk-status" />
-                </div>
-                <div className="right-col"><div className="sk sk-move" /></div>
-              </div>
-            ))}
-          </div>
+          <div style={cardStyle}>Loading rankings...</div>
+        ) : rankingRows.length === 0 ? (
+          <div style={cardStyle}>No ranking rows found.</div>
         ) : (
-          <div className="list">
-            {players.map((player, index) => (
-              <PlayerCard key={`${player.PLAYER}-${player.RANK}-${index}`} player={player} index={index} />
-            ))}
+          <div style={{ display: 'grid', gap: 16 }}>
+            {rankingRows.map((row, index) => {
+              const rank =
+                row.rank ??
+                row.Rank ??
+                row.ranking ??
+                row.Ranking ??
+                index + 1
+
+              const player =
+                row.player ??
+                row.Player ??
+                row.name ??
+                row.Name ??
+                row.player_name ??
+                row['Player Name'] ??
+                'Unknown'
+
+              const record =
+                row.record ??
+                row.Record ??
+                row.wins_losses ??
+                row['W-L'] ??
+                ''
+
+              const points =
+                row.points ??
+                row.Points ??
+                row.score ??
+                row.Score ??
+                ''
+
+              return (
+                <div key={`rank-${index}`} style={cardStyle}>
+                  <div style={rowTopStyle}>
+                    <div style={rankBadgeStyle}>#{rank}</div>
+                    <div>
+                      <div style={playerNameStyle}>{player}</div>
+                      {record ? <div style={metaStyle}>Record: {record}</div> : null}
+                      {points ? <div style={metaStyle}>Points: {points}</div> : null}
+                    </div>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         )}
-      </section>
-    </main>
-  );
+      </div>
+    </div>
+  )
+}
+
+const cardStyle = {
+  background: 'rgba(17, 40, 74, 0.7)',
+  border: '1px solid #234b86',
+  borderRadius: 18,
+  padding: 18,
+}
+
+const rowTopStyle = {
+  display: 'flex',
+  alignItems: 'center',
+  gap: 16,
+}
+
+const rankBadgeStyle = {
+  minWidth: 72,
+  height: 72,
+  borderRadius: 18,
+  background: '#dbe7f7',
+  color: '#182235',
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  fontWeight: 800,
+  fontSize: 24,
+}
+
+const playerNameStyle = {
+  fontSize: 24,
+  fontWeight: 800,
+  marginBottom: 6,
+}
+
+const metaStyle = {
+  fontSize: 15,
+  opacity: 0.95,
+  marginBottom: 4,
 }
