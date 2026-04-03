@@ -17,17 +17,20 @@ export default function HomePage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [rawDebug, setRawDebug] = useState('')
 
   async function loadRankings() {
     try {
       setLoading(true)
       setError('')
+      setRawDebug('')
 
       const res = await fetch(rankingUrl, { cache: 'no-store' })
       const data = await res.json()
 
       if (!Array.isArray(data)) {
-        throw new Error('LiveRankingFeed did not return an array')
+        setRawDebug(JSON.stringify(data))
+        throw new Error('Live Ranking did not return an array')
       }
 
       setRows(data)
@@ -81,6 +84,21 @@ export default function HomePage() {
           Sheet ID: {sheetId}
         </div>
 
+        <div
+          style={{
+            marginBottom: 24,
+            padding: '18px 20px',
+            borderRadius: 16,
+            background: '#11284a',
+            border: '1px solid #234b86',
+            fontSize: 16,
+            fontWeight: 600,
+            wordBreak: 'break-all',
+          }}
+        >
+          Feed URL: {rankingUrl}
+        </div>
+
         {error ? (
           <div
             style={{
@@ -94,6 +112,23 @@ export default function HomePage() {
             }}
           >
             {error}
+          </div>
+        ) : null}
+
+        {rawDebug ? (
+          <div
+            style={{
+              marginBottom: 24,
+              padding: '18px 20px',
+              borderRadius: 16,
+              background: '#2b1e06',
+              border: '1px solid #8a6a1f',
+              fontSize: 14,
+              whiteSpace: 'pre-wrap',
+              wordBreak: 'break-word',
+            }}
+          >
+            Raw response: {rawDebug}
           </div>
         ) : null}
 
