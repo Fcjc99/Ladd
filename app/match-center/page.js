@@ -188,9 +188,10 @@ function MetaBox({ label, value }) {
   )
 }
 
-function SectionCard({ title, children, right, accent = 'rgba(91,171,255,0.12)' }) {
+function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,255,0.12)' }) {
   return (
     <section
+      className="glass-section fade-in"
       style={{
         background: 'rgba(255,255,255,0.05)',
         border: '1px solid rgba(255,255,255,0.09)',
@@ -205,13 +206,35 @@ function SectionCard({ title, children, right, accent = 'rgba(91,171,255,0.12)' 
         style={{
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           gap: 12,
           flexWrap: 'wrap',
           marginBottom: 20,
         }}
       >
-        <h2 style={{ fontSize: 28, fontWeight: 850, margin: 0 }}>{title}</h2>
+        <div>
+          <h2
+            style={{
+              fontSize: 28,
+              fontWeight: 850,
+              margin: 0,
+              lineHeight: 1.05,
+            }}
+          >
+            {title}
+          </h2>
+          {subtitle ? (
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 14,
+                color: 'rgba(220,232,255,0.66)',
+              }}
+            >
+              {subtitle}
+            </div>
+          ) : null}
+        </div>
         {right}
       </div>
       {children}
@@ -222,6 +245,7 @@ function SectionCard({ title, children, right, accent = 'rgba(91,171,255,0.12)' 
 function PlayerPhoto({ name, photoUrl, size = 74, borderColor = 'rgba(255,255,255,0.14)' }) {
   return (
     <div
+      className="photo-hover"
       style={{
         width: size,
         height: size,
@@ -232,6 +256,7 @@ function PlayerPhoto({ name, photoUrl, size = 74, borderColor = 'rgba(255,255,25
           'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
         boxShadow: `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${borderColor}`,
         flexShrink: 0,
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
       }}
     >
       {photoUrl ? (
@@ -274,13 +299,14 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
   return (
     <div
       onClick={onClick}
+      className="interactive-card active-card fade-in"
       style={{
         background:
-          'linear-gradient(180deg, rgba(17,40,74,0.92) 0%, rgba(12,26,48,0.94) 100%)',
-        border: '1px solid rgba(91,171,255,0.20)',
+          'linear-gradient(180deg, rgba(20,48,88,0.96) 0%, rgba(11,28,54,0.96) 100%)',
+        border: '1px solid rgba(91,171,255,0.24)',
         borderRadius: 24,
         padding: 18,
-        boxShadow: '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.05)',
+        boxShadow: '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.06)',
         cursor: 'pointer',
       }}
     >
@@ -342,7 +368,13 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
           </div>
 
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Pill accent="#bdefff">{row.status || 'Active'}</Pill>
+            <Pill
+              accent="#bdefff"
+              background="rgba(174,242,255,0.10)"
+              borderColor="rgba(174,242,255,0.18)"
+            >
+              {row.status || 'Active'}
+            </Pill>
             {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
             {row.eligible ? <Pill muted>Eligible: {row.eligible}</Pill> : null}
           </div>
@@ -462,9 +494,10 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
 
   return (
     <div
+      className="interactive-card completed-card fade-in"
       style={{
         background:
-          'linear-gradient(180deg, rgba(17,40,74,0.88) 0%, rgba(12,26,48,0.90) 100%)',
+          'linear-gradient(180deg, rgba(14,26,47,0.94) 0%, rgba(10,20,36,0.96) 100%)',
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 24,
         padding: 18,
@@ -558,6 +591,132 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
         </div>
 
         <ScorePanel row={row} />
+      </div>
+    </div>
+  )
+}
+
+function EmptyState({ title, subtitle }) {
+  return (
+    <div
+      className="fade-in"
+      style={{
+        borderRadius: 22,
+        padding: 26,
+        background: 'rgba(17,40,74,0.64)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: 56,
+          height: 56,
+          margin: '0 auto 14px',
+          borderRadius: 18,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          fontSize: 24,
+        }}
+      >
+        🎾
+      </div>
+      <div
+        style={{
+          fontSize: 20,
+          fontWeight: 850,
+          color: '#eef6ff',
+          marginBottom: 8,
+        }}
+      >
+        {title}
+      </div>
+      <div
+        style={{
+          fontSize: 15,
+          color: 'rgba(220,232,255,0.70)',
+        }}
+      >
+        {subtitle}
+      </div>
+    </div>
+  )
+}
+
+function ChallengeSkeleton() {
+  return (
+    <div
+      className="skeleton-card"
+      style={{
+        borderRadius: 24,
+        padding: 18,
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.04)',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 14, marginBottom: 16 }}>
+        <div style={{ flex: 1 }}>
+          <div className="skeleton-line" style={{ width: '72%', height: 18, marginBottom: 12 }} />
+          <div style={{ display: 'flex', gap: 8 }}>
+            <div className="skeleton-pill" />
+            <div className="skeleton-pill" />
+            <div className="skeleton-pill" />
+          </div>
+        </div>
+        <div className="skeleton-pill" style={{ width: 150 }} />
+      </div>
+      <div className="skeleton-line" style={{ width: '38%', height: 16 }} />
+    </div>
+  )
+}
+
+function CompletedSkeleton() {
+  return (
+    <div
+      className="skeleton-card"
+      style={{
+        borderRadius: 24,
+        padding: 18,
+        border: '1px solid rgba(255,255,255,0.08)',
+        background: 'rgba(255,255,255,0.04)',
+      }}
+    >
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '190px minmax(260px, 1fr) 320px',
+          gap: 24,
+          alignItems: 'center',
+        }}
+      >
+        <div
+          className="skeleton-block"
+          style={{
+            width: 150,
+            height: 150,
+            borderRadius: 32,
+            margin: '0 auto',
+          }}
+        />
+        <div>
+          <div className="skeleton-line" style={{ width: '52%', height: 24, margin: '0 auto 10px' }} />
+          <div className="skeleton-line" style={{ width: '28%', height: 12, margin: '0 auto 10px' }} />
+          <div className="skeleton-line" style={{ width: '42%', height: 22, margin: '0 auto 14px' }} />
+          <div style={{ display: 'flex', justifyContent: 'center', gap: 8 }}>
+            <div className="skeleton-pill" style={{ width: 100 }} />
+            <div className="skeleton-pill" style={{ width: 160 }} />
+          </div>
+        </div>
+        <div
+          className="skeleton-block"
+          style={{
+            width: '100%',
+            height: 120,
+            borderRadius: 20,
+          }}
+        />
       </div>
     </div>
   )
@@ -790,6 +949,104 @@ export default function MatchCenterPage() {
   return (
     <>
       <style>{`
+        @keyframes shimmer {
+          0% { background-position: 200% 0; }
+          100% { background-position: -200% 0; }
+        }
+
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @keyframes modalFade {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes modalScale {
+          from {
+            opacity: 0;
+            transform: scale(0.97) translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+          }
+        }
+
+        .fade-in {
+          animation: fadeInUp 0.28s ease;
+        }
+
+        .interactive-card {
+          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .interactive-card:hover {
+          transform: translateY(-3px);
+        }
+
+        .active-card:hover {
+          border-color: rgba(132, 216, 255, 0.34) !important;
+          box-shadow: 0 18px 36px rgba(0,0,0,0.24), 0 0 28px rgba(56,189,248,0.10) !important;
+        }
+
+        .completed-card:hover {
+          border-color: rgba(255,255,255,0.14) !important;
+          box-shadow: 0 16px 32px rgba(0,0,0,0.22) !important;
+        }
+
+        .photo-hover:hover {
+          transform: scale(1.02);
+        }
+
+        .glass-section {
+          transition: box-shadow 0.2s ease, border-color 0.2s ease;
+        }
+
+        .glass-section:hover {
+          border-color: rgba(255,255,255,0.12);
+        }
+
+        .skeleton-card,
+        .skeleton-block,
+        .skeleton-line,
+        .skeleton-pill {
+          background: linear-gradient(
+            90deg,
+            rgba(255,255,255,0.06) 0%,
+            rgba(255,255,255,0.12) 35%,
+            rgba(255,255,255,0.06) 70%
+          );
+          background-size: 200% 100%;
+          animation: shimmer 1.3s linear infinite;
+        }
+
+        .skeleton-line {
+          border-radius: 999px;
+        }
+
+        .skeleton-pill {
+          width: 88px;
+          height: 34px;
+          border-radius: 999px;
+        }
+
+        .modal-overlay-anim {
+          animation: modalFade 0.18s ease;
+        }
+
+        .modal-card-anim {
+          animation: modalScale 0.2s ease;
+        }
+
         @media (max-width: 980px) {
           .completed-card-layout {
             grid-template-columns: 1fr !important;
@@ -826,6 +1083,7 @@ export default function MatchCenterPage() {
       >
         <div style={{ maxWidth: 980, margin: '0 auto' }}>
           <div
+            className="fade-in"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -871,6 +1129,7 @@ export default function MatchCenterPage() {
 
             <a
               href="/"
+              className="interactive-card"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -904,6 +1163,7 @@ export default function MatchCenterPage() {
 
           {challengeMessage ? (
             <div
+              className="fade-in"
               style={{
                 marginBottom: 24,
                 padding: '18px 20px',
@@ -920,6 +1180,7 @@ export default function MatchCenterPage() {
           ) : null}
 
           <div
+            className="fade-in"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
@@ -933,7 +1194,11 @@ export default function MatchCenterPage() {
           </div>
 
           <div style={{ display: 'grid', gap: 24 }}>
-            <SectionCard title="Submit Challenge" accent="rgba(168,240,255,0.10)">
+            <SectionCard
+              title="Submit Challenge"
+              subtitle="Select challenger, opponent, and scheduled date."
+              accent="rgba(168,240,255,0.10)"
+            >
               <form onSubmit={handleChallengeSubmit}>
                 <div
                   style={{
@@ -991,6 +1256,7 @@ export default function MatchCenterPage() {
                 <button
                   type="submit"
                   disabled={submittingChallenge}
+                  className="interactive-card"
                   style={{
                     ...buttonStyle,
                     opacity: submittingChallenge ? 0.7 : 1,
@@ -1016,9 +1282,16 @@ export default function MatchCenterPage() {
               }
             >
               {loading ? (
-                <div style={emptyStateStyle}>Loading active challenges...</div>
+                <div style={listStyle}>
+                  {[1, 2].map((i) => (
+                    <ChallengeSkeleton key={i} />
+                  ))}
+                </div>
               ) : activeChallenges.length === 0 ? (
-                <div style={emptyStateStyle}>No active challenges found.</div>
+                <EmptyState
+                  title="No active challenges"
+                  subtitle="New matchups will appear here once a challenge is submitted."
+                />
               ) : (
                 <div style={listStyle}>
                   {activeChallenges.map((row, index) => (
@@ -1049,9 +1322,16 @@ export default function MatchCenterPage() {
               }
             >
               {loading ? (
-                <div style={emptyStateStyle}>Loading completed challenges...</div>
+                <div style={listStyle}>
+                  {[1, 2].map((i) => (
+                    <CompletedSkeleton key={i} />
+                  ))}
+                </div>
               ) : completedChallenges.length === 0 ? (
-                <div style={emptyStateStyle}>No completed challenges found.</div>
+                <EmptyState
+                  title="No completed challenges"
+                  subtitle="Finished match results will appear here after they are reported."
+                />
               ) : (
                 <div style={listStyle}>
                   {completedChallenges.map((row, index) => (
@@ -1068,8 +1348,8 @@ export default function MatchCenterPage() {
         </div>
 
         {selectedMatch ? (
-          <div style={modalOverlayStyle}>
-            <div style={modalStyle}>
+          <div className="modal-overlay-anim" style={modalOverlayStyle}>
+            <div className="modal-card-anim" style={modalStyle}>
               <div
                 style={{
                   display: 'flex',
@@ -1138,6 +1418,7 @@ export default function MatchCenterPage() {
                       type="submit"
                       style={buttonStyle}
                       disabled={submittingResult}
+                      className="interactive-card"
                     >
                       {submittingResult ? 'Saving...' : 'Save Result'}
                     </button>
@@ -1146,6 +1427,7 @@ export default function MatchCenterPage() {
                       type="button"
                       style={secondaryButtonStyle}
                       onClick={() => setSelectedMatch(null)}
+                      className="interactive-card"
                     >
                       Cancel
                     </button>
@@ -1237,15 +1519,6 @@ const secondaryButtonStyle = {
 const listStyle = {
   display: 'grid',
   gap: 16,
-}
-
-const emptyStateStyle = {
-  borderRadius: 20,
-  padding: 18,
-  background: 'rgba(17,40,74,0.68)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  fontSize: 16,
-  color: 'rgba(238,246,255,0.88)',
 }
 
 const modalOverlayStyle = {
