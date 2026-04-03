@@ -87,8 +87,6 @@ function getTierStyles(rank) {
         background:
           'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(202,244,255,0.9) 40%, rgba(135,225,255,0.92) 100%)',
         color: '#0f2342',
-        boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.8), 0 0 20px rgba(120, 222, 255, 0.35)',
       },
       accent: '#9cecff',
       title: 'Diamond Elite',
@@ -105,7 +103,6 @@ function getTierStyles(rank) {
           'linear-gradient(135deg, #fff4bf 0%, #f6d86c 24%, #cf9e22 60%, #fff0a1 100%)',
         boxShadow:
           '0 0 16px rgba(246, 216, 108, 0.34), 0 0 34px rgba(207, 158, 34, 0.18)',
-        animation: 'goldGlow 3.8s ease-in-out infinite',
       },
       inner: {
         background:
@@ -132,7 +129,6 @@ function getTierStyles(rank) {
           'linear-gradient(135deg, #f1f4f8 0%, #cfd7e2 30%, #a6b3c5 68%, #eef2f7 100%)',
         boxShadow:
           '0 0 14px rgba(207, 215, 226, 0.24), 0 0 28px rgba(166, 179, 197, 0.14)',
-        animation: 'silverGlow 4.2s ease-in-out infinite',
       },
       inner: {
         background:
@@ -225,19 +221,16 @@ export default function HomePage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [rawDebug, setRawDebug] = useState('')
 
   async function loadRankings() {
     try {
       setLoading(true)
       setError('')
-      setRawDebug('')
 
       const res = await fetch(rankingUrl, { cache: 'no-store' })
       const data = await res.json()
 
       if (!Array.isArray(data)) {
-        setRawDebug(JSON.stringify(data))
         throw new Error('Live Ranking did not return an array')
       }
 
@@ -278,71 +271,6 @@ export default function HomePage() {
           100% {
             box-shadow: 0 0 20px rgba(141, 230, 255, 0.35), 0 0 48px rgba(83, 156, 255, 0.16);
             transform: translateY(0px);
-          }
-        }
-
-        @keyframes goldGlow {
-          0% {
-            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(207, 158, 34, 0.16);
-          }
-          50% {
-            box-shadow: 0 0 22px rgba(246, 216, 108, 0.58), 0 0 40px rgba(207, 158, 34, 0.22);
-          }
-          100% {
-            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(207, 158, 34, 0.16);
-          }
-        }
-
-        @keyframes silverGlow {
-          0% {
-            box-shadow: 0 0 10px rgba(207, 215, 226, 0.24), 0 0 18px rgba(166, 179, 197, 0.12);
-          }
-          50% {
-            box-shadow: 0 0 18px rgba(207, 215, 226, 0.4), 0 0 34px rgba(166, 179, 197, 0.18);
-          }
-          100% {
-            box-shadow: 0 0 10px rgba(207, 215, 226, 0.24), 0 0 18px rgba(166, 179, 197, 0.12);
-          }
-        }
-
-        @keyframes shimmerSweep {
-          0% {
-            transform: translateX(-130%);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.18;
-          }
-          50% {
-            opacity: 0.44;
-          }
-          100% {
-            transform: translateX(150%);
-            opacity: 0;
-          }
-        }
-
-        @keyframes auraSpin {
-          0% {
-            transform: translate(-50%, -50%) rotate(0deg);
-          }
-          100% {
-            transform: translate(-50%, -50%) rotate(360deg);
-          }
-        }
-
-        @keyframes auraPulse {
-          0% {
-            opacity: 0.55;
-            filter: blur(10px);
-          }
-          50% {
-            opacity: 0.95;
-            filter: blur(14px);
-          }
-          100% {
-            opacity: 0.55;
-            filter: blur(10px);
           }
         }
       `}</style>
@@ -415,23 +343,6 @@ export default function HomePage() {
             </div>
           ) : null}
 
-          {rawDebug ? (
-            <div
-              style={{
-                marginBottom: 24,
-                padding: '18px 20px',
-                borderRadius: 16,
-                background: '#2b1e06',
-                border: '1px solid #8a6a1f',
-                fontSize: 14,
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word',
-              }}
-            >
-              Raw response: {rawDebug}
-            </div>
-          ) : null}
-
           {loading ? (
             <div style={loadingCardStyle}>Loading rankings...</div>
           ) : rankingRows.length === 0 ? (
@@ -453,76 +364,11 @@ export default function HomePage() {
                         overflow: 'hidden',
                       }}
                     >
-                      {tier === 'diamond' ? (
-                        <>
-                          <div
-                            style={{
-                              position: 'absolute',
-                              top: '50%',
-                              left: '50%',
-                              width: 280,
-                              height: 280,
-                              borderRadius: '50%',
-                              background:
-                                'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(178,240,255,0.5) 65deg, rgba(132,177,255,0.9) 140deg, rgba(255,255,255,0.08) 220deg, rgba(178,240,255,0.4) 300deg, rgba(255,255,255,0) 360deg)',
-                              animation:
-                                'auraSpin 11s linear infinite, auraPulse 3.2s ease-in-out infinite',
-                              pointerEvents: 'none',
-                            }}
-                          />
-                          <div
-                            style={{
-                              position: 'absolute',
-                              inset: 0,
-                              pointerEvents: 'none',
-                              overflow: 'hidden',
-                              borderRadius: 30,
-                            }}
-                          >
-                            <div
-                              style={{
-                                position: 'absolute',
-                                top: 0,
-                                bottom: 0,
-                                width: '34%',
-                                background:
-                                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%)',
-                                animation: 'shimmerSweep 4.5s linear infinite',
-                              }}
-                            />
-                          </div>
-                        </>
-                      ) : rank <= 3 ? (
-                        <div
-                          style={{
-                            position: 'absolute',
-                            inset: 0,
-                            pointerEvents: 'none',
-                            overflow: 'hidden',
-                            borderRadius: 28,
-                          }}
-                        >
-                          <div
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              bottom: 0,
-                              width: '34%',
-                              background:
-                                'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0) 100%)',
-                              animation: 'shimmerSweep 4.5s linear infinite',
-                            }}
-                          />
-                        </div>
-                      ) : null}
-
                       <div
                         style={{
                           display: 'flex',
                           alignItems: 'center',
                           gap: 18,
-                          position: 'relative',
-                          zIndex: 1,
                         }}
                       >
                         <div
@@ -530,7 +376,6 @@ export default function HomePage() {
                             ...rankBadgeStyle,
                             ...tierStyles.badge,
                             position: 'relative',
-                            overflow: 'hidden',
                             flexShrink: 0,
                           }}
                         >
@@ -547,13 +392,61 @@ export default function HomePage() {
                               >
                                 <CrownIcon />
                               </div>
-                              <span style={{ position: 'relative', zIndex: 1 }}>
-                                #{rank}
-                              </span>
+                              #{rank}
                             </>
                           ) : (
                             `#${rank}`
                           )}
+                        </div>
+
+                        <div
+                          style={{
+                            width: 64,
+                            height: 64,
+                            borderRadius: 16,
+                            overflow: 'hidden',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            background: 'rgba(255,255,255,0.06)',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {row.photo_url ? (
+                            <img
+                              src={row.photo_url}
+                              alt={row.player || 'Player'}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                              }}
+                            />
+                          ) : null}
+                        </div>
+
+                        <div
+                          style={{
+                            width: 96,
+                            height: 64,
+                            borderRadius: 16,
+                            overflow: 'hidden',
+                            border: '1px solid rgba(255,255,255,0.12)',
+                            background: 'rgba(255,255,255,0.06)',
+                            flexShrink: 0,
+                          }}
+                        >
+                          {row.flag_url ? (
+                            <img
+                              src={row.flag_url}
+                              alt={`${row.player || 'Player'} flag`}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                display: 'block',
+                              }}
+                            />
+                          ) : null}
                         </div>
 
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -569,55 +462,12 @@ export default function HomePage() {
                           >
                             <div
                               style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 14,
-                                minWidth: 0,
+                                fontSize: rank <= 3 ? 30 : 26,
+                                fontWeight: 900,
+                                letterSpacing: '-0.02em',
                               }}
                             >
-                              <div
-                                style={{
-                                  width: 58,
-                                  height: 58,
-                                  borderRadius: 18,
-                                  overflow: 'hidden',
-                                  border: '1px solid rgba(255,255,255,0.12)',
-                                  background: 'rgba(255,255,255,0.06)',
-                                  boxShadow:
-                                    tier === 'diamond'
-                                      ? '0 0 20px rgba(156,236,255,0.16)'
-                                      : 'none',
-                                  flexShrink: 0,
-                                }}
-                              >
-                                {row.photo_url ? (
-                                  <img
-                                    src={row.photo_url}
-                                    alt={row.player || 'Player'}
-                                    style={{
-                                      width: '100%',
-                                      height: '100%',
-                                      objectFit: 'cover',
-                                      display: 'block',
-                                    }}
-                                  />
-                                ) : null}
-                              </div>
-
-                              <div
-                                style={{
-                                  fontSize: rank <= 3 ? 30 : 26,
-                                  fontWeight: 900,
-                                  letterSpacing: '-0.02em',
-                                  textShadow:
-                                    tier === 'diamond'
-                                      ? '0 0 16px rgba(156,236,255,0.18)'
-                                      : 'none',
-                                  minWidth: 0,
-                                }}
-                              >
-                                {row.player || 'Unknown'}
-                              </div>
+                              {row.player || 'Unknown'}
                             </div>
 
                             <div
@@ -630,7 +480,6 @@ export default function HomePage() {
                                 background: moveDisplay.bg,
                                 border: `1px solid ${moveDisplay.border}`,
                                 color: moveDisplay.color,
-                                backdropFilter: 'blur(8px)',
                               }}
                             >
                               {moveDisplay.label}
@@ -651,13 +500,9 @@ export default function HomePage() {
                                 borderRadius: 999,
                                 fontSize: 13,
                                 fontWeight: 800,
-                                background:
-                                  tier === 'diamond'
-                                    ? 'rgba(255,255,255,0.1)'
-                                    : 'rgba(255,255,255,0.06)',
+                                background: 'rgba(255,255,255,0.08)',
                                 border: '1px solid rgba(255,255,255,0.12)',
                                 color: tierStyles.accent,
-                                backdropFilter: 'blur(10px)',
                               }}
                             >
                               {tierStyles.title}
