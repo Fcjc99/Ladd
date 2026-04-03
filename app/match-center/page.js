@@ -127,10 +127,67 @@ export default function Page() {
     return matches.filter((m) => normalize(m.status) === 'completed')
   }, [matches])
 
-  async function handleChallengeSubmit(e) {
-    e.preventDefault()
-    setSubmittingChallenge(true)
-    setChallengeMessage('')
+ async function handleChallengeSubmit(e) {
+  e.preventDefault()
+  setSubmittingChallenge(true)
+  setChallengeMessage('')
+
+  try {
+    const payload = {
+      action: 'challenge',
+      challenger: challengeForm.challenger,
+      challenger_rank: challengeForm.challenger_rank,
+      opponent: challengeForm.opponent,
+      opponent_rank: challengeForm.opponent_rank,
+      match_date: challengeForm.match_date,
+      deadline: challengeForm.deadline,
+      eligible: 'YES',
+      approval: 'PENDING',
+      status: 'ACTIVE',
+      winner: '',
+      score: '',
+      active: 'YES',
+      archived: 'NO',
+    }
+
+    console.log('Submitting challenge payload:', payload)
+
+    const res = await fetch('/api/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    })
+
+    const data = await res.json()
+    console.log('Submit response:', data)
+
+    if (!data.success) {
+      throw new Error(data.error || data.raw || 'Challenge submit failed')
+    }
+
+    const writtenRow = data.appsScript?.row || data.row || ''
+    setChallengeMessage(
+      writtenRow
+        ? `Challenge submitted successfully (row ${writtenRow})`
+        : 'Challenge submitted successfully'
+    )
+
+    setChallengeForm({
+      challenger: '',
+      challenger_rank: '',
+      opponent: '',
+      opponent_rank: '',
+      match_date: '',
+      deadline: '',
+    })
+
+    setTimeout(loadData, 1500)
+  } catch (err) {
+    setChallengeMessage(err.message || 'Challenge submit failed')
+  } finally {
+    setSubmittingChallenge(false)
+  }
+}
 
     try {
       const res = await fetch('/api/submit', {
