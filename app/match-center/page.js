@@ -23,6 +23,25 @@ const PLAYERS = [
   { name: 'Mia', rank: 15 },
   { name: 'Ava', rank: 16 },
 ]
+<a
+  href="/"
+  style={{
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 46,
+    padding: '0 16px',
+    borderRadius: 14,
+    textDecoration: 'none',
+    fontWeight: 800,
+    fontSize: 14,
+    color: '#eef6ff',
+    background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.18)',
+  }}
+>
+  ← Back to  Live Rankings
+</a>
 
 function normalizeText(value) {
   return String(value || '').trim()
