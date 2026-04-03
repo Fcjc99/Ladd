@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 
-const SHEET_URL =
-  "https://opensheet.elk.sh/1lRG3_Tdfi95eu8LyLM9e8fic_IB8mpRj2s9YzOGiIDQ/App%20Feed";
+const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
+const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 function tierClass(rank) {
   const n = Number(rank);
