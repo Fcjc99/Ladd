@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react'
 
-const sheetId = process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID
+const sheetId = '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
 const feedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 const PLAYERS = [
@@ -17,11 +17,11 @@ const PLAYERS = [
   { name: 'Ella', rank: 9 },
   { name: 'Elizabeth', rank: 10 },
   { name: 'Karen', rank: 11 },
-  { name: 'Aislinn', rank: 12 },
-  { name: 'ChristyC', rank: 13 },
-  { name: 'Bree', rank: 14 },
-  { name: 'Ellie', rank: 15 },
-  { name: 'Julianna', rank: 16 },
+  { name: 'Ellie', rank: 12 },
+  { name: 'Julianna', rank: 13 },
+  { name: 'Lulu', rank: 14 },
+  { name: 'Mia', rank: 15 },
+  { name: 'Ava', rank: 16 },
 ]
 
 function normalizeText(value) {
@@ -32,13 +32,9 @@ function normalizeUpper(value) {
   return normalizeText(value).toUpperCase()
 }
 
-function isTruthyYes(value) {
-  const v = normalizeUpper(value)
-  return v === 'YES' || v === 'TRUE' || v === '1'
-}
-
 function isArchived(row) {
-  return isTruthyYes(row.archived)
+  const archived = normalizeUpper(row.archived)
+  return archived === 'YES' || archived === 'TRUE'
 }
 
 function isCompleted(row) {
@@ -53,8 +49,8 @@ function isActive(row) {
   const status = normalizeUpper(row.status)
   const active = normalizeUpper(row.active)
 
-  if (active === 'YES') return true
-  if (status === 'ACTIVE' || status === 'PENDING') return true
+  if (active === 'YES' || active === 'ACTIVE') return true
+  if (status === 'ACTIVE' || status === 'PENDING' || status === 'SCHEDULED') return true
 
   return false
 }
