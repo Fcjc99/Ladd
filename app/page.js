@@ -21,134 +21,6 @@ function getTier(rank) {
   return 'standard'
 }
 
-function getTierStyles(rank) {
-  const tier = getTier(rank)
-
-  if (tier === 'diamond') {
-    return {
-      wrapper: {
-        position: 'relative',
-        padding: 2,
-        borderRadius: 28,
-        background:
-          'linear-gradient(135deg, rgba(195,245,255,1) 0%, rgba(126,212,255,1) 18%, rgba(255,255,255,1) 34%, rgba(142,234,255,1) 52%, rgba(123,150,255,1) 72%, rgba(225,247,255,1) 100%)',
-        boxShadow:
-          '0 0 18px rgba(147, 233, 255, 0.65), 0 0 36px rgba(88, 166, 255, 0.35)',
-        animation: 'diamondGlow 3.2s ease-in-out infinite',
-      },
-      inner: {
-        background:
-          'linear-gradient(180deg, rgba(13,34,63,0.98) 0%, rgba(9,22,44,0.98) 100%)',
-      },
-      badge: {
-        background:
-          'linear-gradient(135deg, #f8feff 0%, #c9f4ff 35%, #8fdfff 70%, #dff8ff 100%)',
-        color: '#0f2342',
-        boxShadow:
-          'inset 0 1px 0 rgba(255,255,255,0.85), 0 0 18px rgba(116, 227, 255, 0.45)',
-      },
-      title: 'Diamond Rank',
-      accent: '#93e9ff',
-    }
-  }
-
-  if (tier === 'gold') {
-    return {
-      wrapper: {
-        position: 'relative',
-        padding: 2,
-        borderRadius: 28,
-        background:
-          'linear-gradient(135deg, #fff2ba 0%, #f6d86c 24%, #d5a928 58%, #fff0a3 100%)',
-        boxShadow:
-          '0 0 14px rgba(246, 216, 108, 0.45), 0 0 28px rgba(213, 169, 40, 0.25)',
-        animation: 'goldGlow 3.6s ease-in-out infinite',
-      },
-      inner: {
-        background:
-          'linear-gradient(180deg, rgba(24,27,42,0.98) 0%, rgba(18,20,33,0.98) 100%)',
-      },
-      badge: {
-        background:
-          'linear-gradient(135deg, #fff7d6 0%, #f4d566 60%, #ddb13d 100%)',
-        color: '#3d2c00',
-      },
-      title: 'Gold Rank',
-      accent: '#f6d86c',
-    }
-  }
-
-  if (tier === 'silver') {
-    return {
-      wrapper: {
-        position: 'relative',
-        padding: 2,
-        borderRadius: 28,
-        background:
-          'linear-gradient(135deg, #f1f4f8 0%, #cfd7e2 30%, #a6b3c5 68%, #eef2f7 100%)',
-        boxShadow:
-          '0 0 12px rgba(207, 215, 226, 0.35), 0 0 22px rgba(166, 179, 197, 0.2)',
-        animation: 'silverGlow 4s ease-in-out infinite',
-      },
-      inner: {
-        background:
-          'linear-gradient(180deg, rgba(22,29,45,0.98) 0%, rgba(15,21,34,0.98) 100%)',
-      },
-      badge: {
-        background:
-          'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
-        color: '#253245',
-      },
-      title: 'Silver Rank',
-      accent: '#d7e0ec',
-    }
-  }
-
-  if (tier === 'bronze') {
-    return {
-      wrapper: {
-        position: 'relative',
-        padding: 2,
-        borderRadius: 28,
-        background:
-          'linear-gradient(135deg, #f0c8a7 0%, #c78550 32%, #9b5a2e 70%, #e0b08a 100%)',
-        boxShadow:
-          '0 0 12px rgba(199, 133, 80, 0.26), 0 0 22px rgba(155, 90, 46, 0.18)',
-      },
-      inner: {
-        background:
-          'linear-gradient(180deg, rgba(28,23,24,0.98) 0%, rgba(22,18,19,0.98) 100%)',
-      },
-      badge: {
-        background:
-          'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
-        color: '#3f1f0d',
-      },
-      title: 'Bronze Rank',
-      accent: '#d29667',
-    }
-  }
-
-  return {
-    wrapper: {
-      position: 'relative',
-      padding: 1,
-      borderRadius: 28,
-      background: 'rgba(35, 75, 134, 0.7)',
-    },
-    inner: {
-      background:
-        'linear-gradient(180deg, rgba(17,40,74,0.95) 0%, rgba(12,26,48,0.95) 100%)',
-    },
-    badge: {
-      background: '#dbe7f7',
-      color: '#182235',
-    },
-    title: 'Ranked',
-    accent: '#7fa7dd',
-  }
-}
-
 function getMoveDisplay(moveValue) {
   const move = toNumber(moveValue)
 
@@ -185,6 +57,168 @@ function getMoveDisplay(moveValue) {
     border: 'rgba(255,255,255,0.12)',
     color: '#d9e7ff',
   }
+}
+
+function getTierStyles(rank) {
+  const tier = getTier(rank)
+
+  if (tier === 'diamond') {
+    return {
+      wrapper: {
+        position: 'relative',
+        padding: 2,
+        borderRadius: 34,
+        background:
+          'linear-gradient(135deg, rgba(245,252,255,1) 0%, rgba(183,235,255,1) 20%, rgba(255,255,255,1) 36%, rgba(121,214,255,1) 54%, rgba(143,175,255,1) 75%, rgba(236,250,255,1) 100%)',
+        boxShadow:
+          '0 0 24px rgba(141, 230, 255, 0.45), 0 0 64px rgba(83, 156, 255, 0.22)',
+        animation: 'diamondGlow 4s ease-in-out infinite',
+      },
+      inner: {
+        background:
+          'linear-gradient(180deg, rgba(16,34,66,0.72) 0%, rgba(9,20,42,0.82) 100%)',
+        border: '1px solid rgba(255,255,255,0.18)',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.24), inset 0 -1px 0 rgba(255,255,255,0.04)',
+        backdropFilter: 'blur(18px)',
+        WebkitBackdropFilter: 'blur(18px)',
+      },
+      badge: {
+        background:
+          'linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(202,244,255,0.9) 40%, rgba(135,225,255,0.92) 100%)',
+        color: '#0f2342',
+        boxShadow:
+          'inset 0 1px 0 rgba(255,255,255,0.8), 0 0 20px rgba(120, 222, 255, 0.35)',
+      },
+      accent: '#9cecff',
+      title: 'Diamond Elite',
+    }
+  }
+
+  if (tier === 'gold') {
+    return {
+      wrapper: {
+        position: 'relative',
+        padding: 2,
+        borderRadius: 30,
+        background:
+          'linear-gradient(135deg, #fff4bf 0%, #f6d86c 24%, #cf9e22 60%, #fff0a1 100%)',
+        boxShadow:
+          '0 0 16px rgba(246, 216, 108, 0.34), 0 0 34px rgba(207, 158, 34, 0.18)',
+        animation: 'goldGlow 3.8s ease-in-out infinite',
+      },
+      inner: {
+        background:
+          'linear-gradient(180deg, rgba(33,28,20,0.9) 0%, rgba(21,18,14,0.94) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      },
+      badge: {
+        background:
+          'linear-gradient(135deg, #fff7d6 0%, #f4d566 60%, #ddb13d 100%)',
+        color: '#3d2c00',
+      },
+      accent: '#f6d86c',
+      title: 'Gold Rank',
+    }
+  }
+
+  if (tier === 'silver') {
+    return {
+      wrapper: {
+        position: 'relative',
+        padding: 2,
+        borderRadius: 30,
+        background:
+          'linear-gradient(135deg, #f1f4f8 0%, #cfd7e2 30%, #a6b3c5 68%, #eef2f7 100%)',
+        boxShadow:
+          '0 0 14px rgba(207, 215, 226, 0.24), 0 0 28px rgba(166, 179, 197, 0.14)',
+        animation: 'silverGlow 4.2s ease-in-out infinite',
+      },
+      inner: {
+        background:
+          'linear-gradient(180deg, rgba(28,32,41,0.92) 0%, rgba(19,22,29,0.95) 100%)',
+        border: '1px solid rgba(255,255,255,0.07)',
+      },
+      badge: {
+        background:
+          'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
+        color: '#253245',
+      },
+      accent: '#d7e0ec',
+      title: 'Silver Rank',
+    }
+  }
+
+  if (tier === 'bronze') {
+    return {
+      wrapper: {
+        position: 'relative',
+        padding: 2,
+        borderRadius: 28,
+        background:
+          'linear-gradient(135deg, #f0c8a7 0%, #c78550 32%, #9b5a2e 70%, #e0b08a 100%)',
+        boxShadow:
+          '0 0 12px rgba(199, 133, 80, 0.2), 0 0 22px rgba(155, 90, 46, 0.12)',
+      },
+      inner: {
+        background:
+          'linear-gradient(180deg, rgba(35,24,19,0.94) 0%, rgba(24,17,14,0.96) 100%)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      },
+      badge: {
+        background:
+          'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
+        color: '#3f1f0d',
+      },
+      accent: '#d29667',
+      title: 'Bronze Rank',
+    }
+  }
+
+  return {
+    wrapper: {
+      position: 'relative',
+      padding: 1,
+      borderRadius: 26,
+      background: 'rgba(35, 75, 134, 0.7)',
+    },
+    inner: {
+      background:
+        'linear-gradient(180deg, rgba(17,40,74,0.95) 0%, rgba(12,26,48,0.95) 100%)',
+      border: '1px solid rgba(255,255,255,0.06)',
+    },
+    badge: {
+      background: '#dbe7f7',
+      color: '#182235',
+    },
+    accent: '#7fa7dd',
+    title: 'Ranked',
+  }
+}
+
+function CrownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      <path
+        d="M4 18L2.5 7.5L8 11L12 4L16 11L21.5 7.5L20 18H4Z"
+        fill="currentColor"
+        opacity="0.95"
+      />
+      <path
+        d="M5 20H19"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
 }
 
 export default function HomePage() {
@@ -234,57 +268,81 @@ export default function HomePage() {
       <style>{`
         @keyframes diamondGlow {
           0% {
-            box-shadow: 0 0 18px rgba(147, 233, 255, 0.45), 0 0 36px rgba(88, 166, 255, 0.18);
+            box-shadow: 0 0 20px rgba(141, 230, 255, 0.35), 0 0 48px rgba(83, 156, 255, 0.16);
             transform: translateY(0px);
           }
           50% {
-            box-shadow: 0 0 28px rgba(147, 233, 255, 0.8), 0 0 54px rgba(88, 166, 255, 0.32);
+            box-shadow: 0 0 34px rgba(141, 230, 255, 0.7), 0 0 84px rgba(83, 156, 255, 0.28);
             transform: translateY(-2px);
           }
           100% {
-            box-shadow: 0 0 18px rgba(147, 233, 255, 0.45), 0 0 36px rgba(88, 166, 255, 0.18);
+            box-shadow: 0 0 20px rgba(141, 230, 255, 0.35), 0 0 48px rgba(83, 156, 255, 0.16);
             transform: translateY(0px);
           }
         }
 
         @keyframes goldGlow {
           0% {
-            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(213, 169, 40, 0.16);
+            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(207, 158, 34, 0.16);
           }
           50% {
-            box-shadow: 0 0 22px rgba(246, 216, 108, 0.6), 0 0 38px rgba(213, 169, 40, 0.26);
+            box-shadow: 0 0 22px rgba(246, 216, 108, 0.58), 0 0 40px rgba(207, 158, 34, 0.22);
           }
           100% {
-            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(213, 169, 40, 0.16);
+            box-shadow: 0 0 12px rgba(246, 216, 108, 0.35), 0 0 24px rgba(207, 158, 34, 0.16);
           }
         }
 
         @keyframes silverGlow {
           0% {
-            box-shadow: 0 0 10px rgba(207, 215, 226, 0.25), 0 0 18px rgba(166, 179, 197, 0.12);
+            box-shadow: 0 0 10px rgba(207, 215, 226, 0.24), 0 0 18px rgba(166, 179, 197, 0.12);
           }
           50% {
-            box-shadow: 0 0 18px rgba(207, 215, 226, 0.42), 0 0 30px rgba(166, 179, 197, 0.18);
+            box-shadow: 0 0 18px rgba(207, 215, 226, 0.4), 0 0 34px rgba(166, 179, 197, 0.18);
           }
           100% {
-            box-shadow: 0 0 10px rgba(207, 215, 226, 0.25), 0 0 18px rgba(166, 179, 197, 0.12);
+            box-shadow: 0 0 10px rgba(207, 215, 226, 0.24), 0 0 18px rgba(166, 179, 197, 0.12);
           }
         }
 
         @keyframes shimmerSweep {
           0% {
-            transform: translateX(-120%);
+            transform: translateX(-130%);
             opacity: 0;
           }
           20% {
-            opacity: 0.2;
+            opacity: 0.18;
           }
           50% {
-            opacity: 0.45;
+            opacity: 0.44;
           }
           100% {
-            transform: translateX(140%);
+            transform: translateX(150%);
             opacity: 0;
+          }
+        }
+
+        @keyframes auraSpin {
+          0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          100% {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+
+        @keyframes auraPulse {
+          0% {
+            opacity: 0.55;
+            filter: blur(10px);
+          }
+          50% {
+            opacity: 0.95;
+            filter: blur(14px);
+          }
+          100% {
+            opacity: 0.55;
+            filter: blur(10px);
           }
         }
       `}</style>
@@ -351,6 +409,7 @@ export default function HomePage() {
             <div style={{ display: 'grid', gap: 18 }}>
               {rankingRows.map((row, index) => {
                 const rank = toNumber(row.rank) ?? index + 1
+                const tier = getTier(rank)
                 const tierStyles = getTierStyles(rank)
                 const moveDisplay = getMoveDisplay(row.move)
 
@@ -363,14 +422,52 @@ export default function HomePage() {
                         overflow: 'hidden',
                       }}
                     >
-                      {rank <= 3 ? (
+                      {tier === 'diamond' ? (
+                        <>
+                          <div
+                            style={{
+                              position: 'absolute',
+                              top: '50%',
+                              left: '50%',
+                              width: 280,
+                              height: 280,
+                              borderRadius: '50%',
+                              background:
+                                'conic-gradient(from 0deg, rgba(255,255,255,0) 0deg, rgba(178,240,255,0.5) 65deg, rgba(132,177,255,0.9) 140deg, rgba(255,255,255,0.08) 220deg, rgba(178,240,255,0.4) 300deg, rgba(255,255,255,0) 360deg)',
+                              animation: 'auraSpin 11s linear infinite, auraPulse 3.2s ease-in-out infinite',
+                              pointerEvents: 'none',
+                            }}
+                          />
+                          <div
+                            style={{
+                              position: 'absolute',
+                              inset: 0,
+                              pointerEvents: 'none',
+                              overflow: 'hidden',
+                              borderRadius: 30,
+                            }}
+                          >
+                            <div
+                              style={{
+                                position: 'absolute',
+                                top: 0,
+                                bottom: 0,
+                                width: '34%',
+                                background:
+                                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%)',
+                                animation: 'shimmerSweep 4.5s linear infinite',
+                              }}
+                            />
+                          </div>
+                        </>
+                      ) : rank <= 3 ? (
                         <div
                           style={{
                             position: 'absolute',
                             inset: 0,
                             pointerEvents: 'none',
                             overflow: 'hidden',
-                            borderRadius: 26,
+                            borderRadius: 28,
                           }}
                         >
                           <div
@@ -378,10 +475,10 @@ export default function HomePage() {
                               position: 'absolute',
                               top: 0,
                               bottom: 0,
-                              width: '38%',
+                              width: '34%',
                               background:
-                                'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0) 100%)',
-                              animation: 'shimmerSweep 3.8s linear infinite',
+                                'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.16) 50%, rgba(255,255,255,0) 100%)',
+                              animation: 'shimmerSweep 4.5s linear infinite',
                             }}
                           />
                         </div>
@@ -400,9 +497,30 @@ export default function HomePage() {
                           style={{
                             ...rankBadgeStyle,
                             ...tierStyles.badge,
+                            position: 'relative',
+                            overflow: 'hidden',
                           }}
                         >
-                          #{rank}
+                          {tier === 'diamond' ? (
+                            <>
+                              <div
+                                style={{
+                                  position: 'absolute',
+                                  top: 8,
+                                  right: 8,
+                                  color: '#14405d',
+                                  opacity: 0.9,
+                                }}
+                              >
+                                <CrownIcon />
+                              </div>
+                              <span style={{ position: 'relative', zIndex: 1 }}>
+                                #{rank}
+                              </span>
+                            </>
+                          ) : (
+                            `#${rank}`
+                          )}
                         </div>
 
                         <div style={{ flex: 1, minWidth: 0 }}>
@@ -421,6 +539,10 @@ export default function HomePage() {
                                 fontSize: rank <= 3 ? 30 : 26,
                                 fontWeight: 900,
                                 letterSpacing: '-0.02em',
+                                textShadow:
+                                  tier === 'diamond'
+                                    ? '0 0 16px rgba(156,236,255,0.18)'
+                                    : 'none',
                               }}
                             >
                               {row.player || 'Unknown'}
@@ -436,6 +558,7 @@ export default function HomePage() {
                                 background: moveDisplay.bg,
                                 border: `1px solid ${moveDisplay.border}`,
                                 color: moveDisplay.color,
+                                backdropFilter: 'blur(8px)',
                               }}
                             >
                               {moveDisplay.label}
@@ -456,9 +579,13 @@ export default function HomePage() {
                                 borderRadius: 999,
                                 fontSize: 13,
                                 fontWeight: 800,
-                                background: 'rgba(255,255,255,0.06)',
-                                border: '1px solid rgba(255,255,255,0.1)',
+                                background:
+                                  tier === 'diamond'
+                                    ? 'rgba(255,255,255,0.1)'
+                                    : 'rgba(255,255,255,0.06)',
+                                border: '1px solid rgba(255,255,255,0.12)',
                                 color: tierStyles.accent,
+                                backdropFilter: 'blur(10px)',
                               }}
                             >
                               {tierStyles.title}
@@ -492,6 +619,31 @@ export default function HomePage() {
   )
 }
 
+function CrownIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="22"
+      height="22"
+      fill="none"
+      aria-hidden="true"
+      style={{ display: 'block' }}
+    >
+      <path
+        d="M4 18L2.5 7.5L8 11L12 4L16 11L21.5 7.5L20 18H4Z"
+        fill="currentColor"
+        opacity="0.95"
+      />
+      <path
+        d="M5 20H19"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+      />
+    </svg>
+  )
+}
+
 const loadingCardStyle = {
   background: 'rgba(17, 40, 74, 0.7)',
   border: '1px solid #234b86',
@@ -501,16 +653,14 @@ const loadingCardStyle = {
 
 const eliteCardStyle = {
   position: 'relative',
-  borderRadius: 26,
+  borderRadius: 30,
   padding: 22,
-  border: '1px solid rgba(255,255,255,0.06)',
-  backdropFilter: 'blur(6px)',
 }
 
 const rankBadgeStyle = {
-  minWidth: 88,
-  height: 88,
-  borderRadius: 24,
+  minWidth: 92,
+  height: 92,
+  borderRadius: 26,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
