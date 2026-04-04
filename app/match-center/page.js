@@ -251,13 +251,7 @@ function matchesSearch(row, query) {
   return haystack.includes(q)
 }
 
-function Pill({
-  children,
-  accent = '#dce8ff',
-  muted = false,
-  background,
-  borderColor,
-}) {
+) {
   return (
     <div
       style={{
@@ -282,42 +276,7 @@ function Pill({
   )
 }
 
-function MetaBox({ label, value, accent = 'rgba(168,240,255,0.08)' }) {
-  return (
-    <div
-      style={{
-        borderRadius: 22,
-        padding: '14px 16px',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.035))',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: `0 0 24px ${accent}, inset 0 1px 0 rgba(255,255,255,0.04)`,
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(220,232,255,0.56)',
-          marginBottom: 8,
-        }}
-      >
-        {label}
-      </div>
-      <div
-        style={{
-          fontSize: 15,
-          fontWeight: 750,
-          color: '#eef6ff',
-          wordBreak: 'break-word',
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  )
-}
+
 
 function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,255,0.12)' }) {
   return (
@@ -395,61 +354,7 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
   )
 }
 
-function PlayerPhoto({
-  name,
-  photoUrl,
-  size = 74,
-  borderColor = 'rgba(255,255,255,0.14)',
-  onClick,
-}) {
-  return (
-    <div
-      className="photo-hover"
-      onClick={onClick}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: Math.round(size * 0.22),
-        overflow: 'hidden',
-        border: `2px solid ${borderColor}`,
-        background:
-          'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
-        boxShadow: `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${borderColor}`,
-        flexShrink: 0,
-        transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-        cursor: onClick ? 'pointer' : 'default',
-      }}
-    >
-      {photoUrl ? (
-        <img
-          src={photoUrl}
-          alt={name || 'Player'}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'grid',
-            placeItems: 'center',
-            color: 'rgba(255,255,255,0.75)',
-            fontWeight: 900,
-            fontSize: Math.max(18, size * 0.22),
-            letterSpacing: '-0.03em',
-          }}
-        >
-          {(name || '?').slice(0, 1).toUpperCase()}
-        </div>
-      )}
-    </div>
-  )
-}
+
 
 function RankChip({ rank }) {
   const theme = getRankTheme(rank)
