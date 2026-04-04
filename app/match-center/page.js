@@ -266,12 +266,20 @@ function getPlayerFormString(playerName, recentMatches) {
   return relevant.length ? relevant.join(' ') : '—'
 }
 
-function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,255,0.12)' }) {
+function SectionCard({
+  title,
+  subtitle,
+  children,
+  right,
+  accent = 'rgba(91,171,255,0.12)',
+  zIndex = 1,
+}) {
   return (
     <section
       className="glass-section fade-in"
       style={{
         position: 'relative',
+        zIndex,
         background:
           'linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.035) 100%)',
         border: '1px solid rgba(255,255,255,0.09)',
@@ -1170,7 +1178,7 @@ function PlayerPicker({
   })
 
   return (
-    <div ref={ref} style={{ position: 'relative', zIndex: open ? 50 : 1 }}>
+    <div ref={ref} style={{ position: 'relative', zIndex: open ? 5000 : 1 }}>
       <label style={labelStyle}>{label}</label>
 
       <button
@@ -1251,7 +1259,7 @@ function PlayerPicker({
             top: 'calc(100% + 8px)',
             left: 0,
             right: 0,
-            zIndex: 2000,
+            zIndex: 6000,
             borderRadius: 18,
             background:
               'linear-gradient(180deg, rgba(15,34,63,0.98) 0%, rgba(10,23,43,0.99) 100%)',
@@ -2444,6 +2452,7 @@ export default function MatchCenterPage() {
               title="Submit Challenge"
               subtitle="Choose challenger, opponent, and scheduled date."
               accent="rgba(168,240,255,0.10)"
+              zIndex={30}
             >
               <form onSubmit={handleChallengeSubmit}>
                 <div
@@ -2531,6 +2540,7 @@ export default function MatchCenterPage() {
                   : 'No pending results'
               }
               accent="rgba(168,240,255,0.08)"
+              zIndex={10}
               right={
                 <Pill
                   accent="#aef2ff"
@@ -2610,6 +2620,7 @@ export default function MatchCenterPage() {
                   : 'No reported results yet'
               }
               accent="rgba(255,255,255,0.05)"
+              zIndex={5}
               right={
                 <Pill muted>
                   {loading ? 'Loading...' : `${completedChallenges.length} Completed`}
@@ -3152,4 +3163,4 @@ const modalStyle = {
   borderRadius: 26,
   padding: 24,
   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-}
+              }
