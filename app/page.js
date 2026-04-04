@@ -1334,7 +1334,7 @@ export default function HomePage() {
                   color: 'rgba(220,232,255,0.72)',
                 }}
               >
-                Elite ladder standings with premium player presentation, movement tracking, and Match Center access.
+                2026 NDA TENNIS
               </div>
             </div>
 
