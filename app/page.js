@@ -31,61 +31,83 @@ function getRankTheme(rank) {
   if (n === 1) {
     return {
       accent: '#aef2ff',
-      accentSoft: 'rgba(174,242,255,0.24)',
-      accentBorder: 'rgba(174,242,255,0.52)',
-      badgeBg:
-        'linear-gradient(135deg, #ffffff 0%, #eafcff 34%, #c8f7ff 70%, #94e9ff 100%)',
-      badgeColor: '#102444',
-      glow: 'rgba(174,242,255,0.24)',
+      accentStrong: '#dffbff',
+      soft: 'rgba(174,242,255,0.22)',
+      border: 'rgba(174,242,255,0.52)',
+      glow: 'rgba(174,242,255,0.26)',
+      pillBg:
+        'linear-gradient(180deg, rgba(245,254,255,1) 0%, rgba(205,247,255,1) 58%, rgba(151,233,255,1) 100%)',
+      pillColor: '#0f2341',
       cardBg:
-        'linear-gradient(180deg, rgba(19,48,90,0.985) 0%, rgba(10,24,45,0.995) 100%)',
+        'linear-gradient(180deg, rgba(16,44,84,0.99) 0%, rgba(7,22,43,0.995) 100%)',
+      platformBg:
+        'linear-gradient(180deg, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.035) 100%)',
     }
   }
 
   if (n === 2) {
     return {
       accent: '#f6d56f',
-      accentSoft: 'rgba(246,213,111,0.18)',
-      accentBorder: 'rgba(246,213,111,0.40)',
-      badgeBg: 'linear-gradient(135deg, #fff8df 0%, #f9e38e 56%, #d8a528 100%)',
-      badgeColor: '#3d2c00',
-      glow: 'rgba(246,213,111,0.16)',
-      cardBg: 'linear-gradient(180deg, rgba(50,39,17,0.96) 0%, rgba(24,19,10,0.98) 100%)',
+      accentStrong: '#fff0b8',
+      soft: 'rgba(246,213,111,0.16)',
+      border: 'rgba(246,213,111,0.42)',
+      glow: 'rgba(246,213,111,0.18)',
+      pillBg:
+        'linear-gradient(180deg, rgba(255,250,228,1) 0%, rgba(249,225,140,1) 56%, rgba(219,170,48,1) 100%)',
+      pillColor: '#3b2a00',
+      cardBg:
+        'linear-gradient(180deg, rgba(53,40,15,0.98) 0%, rgba(24,18,9,0.99) 100%)',
+      platformBg:
+        'linear-gradient(180deg, rgba(246,213,111,0.11) 0%, rgba(255,255,255,0.03) 100%)',
     }
   }
 
   if (n === 3) {
     return {
       accent: '#dde6f0',
-      accentSoft: 'rgba(221,230,240,0.16)',
-      accentBorder: 'rgba(221,230,240,0.36)',
-      badgeBg: 'linear-gradient(135deg, #f8fbff 0%, #e1e9f2 58%, #b7c5d7 100%)',
-      badgeColor: '#253245',
-      glow: 'rgba(221,230,240,0.12)',
-      cardBg: 'linear-gradient(180deg, rgba(31,39,52,0.96) 0%, rgba(15,20,28,0.98) 100%)',
+      accentStrong: '#f7fbff',
+      soft: 'rgba(221,230,240,0.14)',
+      border: 'rgba(221,230,240,0.38)',
+      glow: 'rgba(221,230,240,0.14)',
+      pillBg:
+        'linear-gradient(180deg, rgba(250,252,255,1) 0%, rgba(225,233,241,1) 58%, rgba(184,197,214,1) 100%)',
+      pillColor: '#263445',
+      cardBg:
+        'linear-gradient(180deg, rgba(33,40,52,0.98) 0%, rgba(16,20,28,0.99) 100%)',
+      platformBg:
+        'linear-gradient(180deg, rgba(221,230,240,0.10) 0%, rgba(255,255,255,0.03) 100%)',
     }
   }
 
   if (n >= 4 && n <= 7) {
     return {
       accent: '#d29667',
-      accentSoft: 'rgba(210,150,103,0.12)',
-      accentBorder: 'rgba(210,150,103,0.24)',
-      badgeBg: 'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
-      badgeColor: '#3f1f0d',
+      accentStrong: '#f3d5bf',
+      soft: 'rgba(210,150,103,0.10)',
+      border: 'rgba(210,150,103,0.24)',
       glow: 'rgba(210,150,103,0.08)',
-      cardBg: 'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+      pillBg:
+        'linear-gradient(180deg, rgba(243,213,191,1) 0%, rgba(210,150,103,1) 58%, rgba(181,111,66,1) 100%)',
+      pillColor: '#3f1f0d',
+      cardBg:
+        'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+      platformBg:
+        'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
     }
   }
 
   return {
     accent: '#b8c9e6',
-    accentSoft: 'rgba(184,201,230,0.10)',
-    accentBorder: 'rgba(184,201,230,0.16)',
-    badgeBg: 'linear-gradient(135deg, #eff5ff 0%, #dbe7f7 100%)',
-    badgeColor: '#182235',
+    accentStrong: '#eff5ff',
+    soft: 'rgba(184,201,230,0.08)',
+    border: 'rgba(184,201,230,0.16)',
     glow: 'rgba(184,201,230,0.06)',
-    cardBg: 'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+    pillBg: 'linear-gradient(180deg, #eff5ff 0%, #dbe7f7 100%)',
+    pillColor: '#182235',
+    cardBg:
+      'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+    platformBg:
+      'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
   }
 }
 
@@ -121,7 +143,6 @@ function getMoveInfo(moveValue) {
         border: 'rgba(110,255,190,0.18)',
       }
     }
-
     if (n < 0) {
       return {
         label: `↓ ${Math.abs(n)}`,
@@ -138,110 +159,6 @@ function getMoveInfo(moveValue) {
     bg: 'rgba(255,255,255,0.05)',
     border: 'rgba(255,255,255,0.08)',
   }
-}
-
-function CrownIcon() {
-  return (
-    <div
-      style={{
-        position: 'absolute',
-        top: -12,
-        left: '50%',
-        transform: 'translateX(-50%)',
-        fontSize: 14,
-        lineHeight: 1,
-        filter: 'drop-shadow(0 0 10px rgba(246,213,111,0.38))',
-        zIndex: 3,
-      }}
-    >
-      👑
-    </div>
-  )
-}
-
-function Photo({
-  name,
-  url,
-  size = 76,
-  borderColor = 'rgba(255,255,255,0.14)',
-  special = false,
-}) {
-  return (
-    <div
-      className={special ? 'photo-shell photo-shell-leader' : 'photo-shell'}
-      style={{
-        width: size,
-        height: size,
-        borderRadius: Math.round(size * 0.26),
-        position: 'relative',
-        flexShrink: 0,
-        display: 'grid',
-        placeItems: 'center',
-        padding: special ? 8 : 0,
-        background: special
-          ? `linear-gradient(145deg, rgba(255,255,255,0.96) 0%, ${borderColor} 45%, rgba(255,255,255,0.12) 100%)`
-          : 'transparent',
-        boxShadow: special
-          ? `0 26px 54px rgba(0,0,0,0.34), 0 0 38px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.42)`
-          : 'none',
-      }}
-    >
-      {special ? (
-        <>
-          <div className="leader-photo-rim" />
-          <div className="leader-photo-depth" />
-          <div className="leader-photo-breath" />
-        </>
-      ) : null}
-
-      <div
-        className="photo-hover"
-        style={{
-          width: special ? size - 16 : size,
-          height: special ? size - 16 : size,
-          borderRadius: Math.round(size * 0.22),
-          overflow: 'hidden',
-          border: `2px solid ${borderColor}`,
-          background:
-            'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
-          boxShadow: special
-            ? `0 18px 38px rgba(0,0,0,0.30), 0 0 28px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.24)`
-            : `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${borderColor}`,
-          transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
-        {url ? (
-          <img
-            src={url}
-            alt={name || 'Player'}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              display: 'block',
-            }}
-          />
-        ) : (
-          <div
-            style={{
-              width: '100%',
-              height: '100%',
-              display: 'grid',
-              placeItems: 'center',
-              color: 'rgba(255,255,255,0.78)',
-              fontWeight: 900,
-              fontSize: Math.max(18, size * 0.22),
-              letterSpacing: '-0.03em',
-            }}
-          >
-            {(name || '?').slice(0, 1).toUpperCase()}
-          </div>
-        )}
-      </div>
-    </div>
-  )
 }
 
 function SmallStat({ label, value }) {
@@ -281,49 +198,6 @@ function SmallStat({ label, value }) {
   )
 }
 
-function RankBadge({ rank }) {
-  const theme = getRankTheme(rank)
-  const n = Number(rank)
-  const isLeader = n === 1
-  const isSecond = n === 2
-  const isThird = n === 3
-
-  return (
-    <div
-      className={`rank-badge-3d ${isLeader ? 'rank-badge-1' : ''} ${isSecond ? 'rank-badge-2' : ''} ${isThird ? 'rank-badge-3' : ''}`}
-      style={{
-        minWidth: isLeader ? 56 : 42,
-        height: isLeader ? 56 : 42,
-        padding: isLeader ? '0 16px' : '0 12px',
-        borderRadius: 999,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: theme.badgeBg,
-        color: theme.badgeColor,
-        fontSize: isLeader ? 15 : 13,
-        fontWeight: 900,
-        border: `1px solid ${theme.accentBorder}`,
-        position: 'relative',
-        overflow: 'hidden',
-        transform: isLeader ? 'translateY(-1px)' : 'none',
-        boxShadow: isLeader
-          ? `0 16px 30px rgba(0,0,0,0.24), 0 0 26px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.70), inset 0 -8px 12px rgba(0,0,0,0.16)`
-          : isSecond
-            ? '0 12px 22px rgba(0,0,0,0.18), 0 0 14px rgba(246,213,111,0.16), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -7px 10px rgba(0,0,0,0.14)'
-            : isThird
-              ? '0 12px 22px rgba(0,0,0,0.18), 0 0 14px rgba(221,230,240,0.14), inset 0 1px 0 rgba(255,255,255,0.30), inset 0 -7px 10px rgba(0,0,0,0.14)'
-              : '0 10px 18px rgba(0,0,0,0.14)',
-      }}
-    >
-      {isLeader ? <CrownIcon /> : null}
-      <div className="rank-badge-sheen" />
-      {isLeader ? <div className="rank-badge-circle-trace" /> : null}
-      <span style={{ position: 'relative', zIndex: 2 }}>#{rank}</span>
-    </div>
-  )
-}
-
 function MoveChip({ move }) {
   const info = getMoveInfo(move)
 
@@ -351,6 +225,163 @@ function MoveChip({ move }) {
   )
 }
 
+function RankBadge({ rank }) {
+  const n = Number(rank)
+  const theme = getRankTheme(rank)
+  const isLeader = n === 1
+  const isSecond = n === 2
+  const isThird = n === 3
+
+  return (
+    <div
+      className={`rank-badge ${isLeader ? 'rank-badge-1' : ''} ${isSecond ? 'rank-badge-2' : ''} ${isThird ? 'rank-badge-3' : ''}`}
+      style={{
+        minWidth: isLeader ? 58 : 42,
+        height: isLeader ? 58 : 42,
+        padding: isLeader ? '0 16px' : '0 12px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        position: 'relative',
+        background: theme.pillBg,
+        color: theme.pillColor,
+        border: `1px solid ${theme.border}`,
+        boxShadow: isLeader
+          ? `0 16px 28px rgba(0,0,0,0.24), 0 0 24px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.78), inset 0 -10px 14px rgba(0,0,0,0.16)`
+          : `0 12px 22px rgba(0,0,0,0.18), 0 0 16px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -8px 10px rgba(0,0,0,0.14)`,
+        overflow: 'visible',
+      }}
+    >
+      {isLeader ? (
+        <div
+          style={{
+            position: 'absolute',
+            top: -12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: 14,
+            filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.34))',
+            zIndex: 4,
+            lineHeight: 1,
+          }}
+        >
+          👑
+        </div>
+      ) : null}
+
+      <div className="rank-pill-top-sheen" />
+
+      {isLeader ? <div className="rank-pill-trace" /> : null}
+
+      <span
+        style={{
+          position: 'relative',
+          zIndex: 3,
+          fontSize: isLeader ? 15 : 13,
+          fontWeight: 900,
+        }}
+      >
+        #{rank}
+      </span>
+    </div>
+  )
+}
+
+function PlayerPhoto({
+  name,
+  url,
+  rank,
+  size = 100,
+}) {
+  const theme = getRankTheme(rank)
+  const isLeader = Number(rank) === 1
+
+  return (
+    <div
+      className={isLeader ? 'leader-photo-shell' : ''}
+      style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        borderRadius: Math.round(size * 0.28),
+        display: 'grid',
+        placeItems: 'center',
+      }}
+    >
+      {isLeader ? <div className="leader-photo-bloom" /> : null}
+
+      <div
+        style={{
+          position: 'relative',
+          width: isLeader ? size : size,
+          height: isLeader ? size : size,
+          borderRadius: Math.round(size * 0.28),
+          padding: isLeader ? 8 : 0,
+          background: isLeader
+            ? `linear-gradient(145deg, ${theme.accentStrong} 0%, ${theme.border} 42%, rgba(255,255,255,0.08) 100%)`
+            : 'transparent',
+          boxShadow: isLeader
+            ? `0 26px 52px rgba(0,0,0,0.34), 0 0 38px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`
+            : 'none',
+          borderRadius: Math.round(size * 0.28),
+        }}
+      >
+        {isLeader ? <div className="leader-photo-outer-ring" /> : null}
+        {isLeader ? <div className="leader-photo-inner-bevel" /> : null}
+        {isLeader ? <div className="leader-photo-halo" /> : null}
+
+        <div
+          className="photo-hover"
+          style={{
+            width: isLeader ? size - 16 : size,
+            height: isLeader ? size - 16 : size,
+            borderRadius: Math.round(size * 0.22),
+            overflow: 'hidden',
+            border: `2px solid ${theme.border}`,
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+            boxShadow: isLeader
+              ? `0 18px 36px rgba(0,0,0,0.28), 0 0 26px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.24)`
+              : `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${theme.glow}`,
+            position: 'relative',
+            zIndex: 2,
+            transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+          }}
+        >
+          {url ? (
+            <img
+              src={url}
+              alt={name || 'Player'}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'rgba(255,255,255,0.78)',
+                fontWeight: 900,
+                fontSize: Math.max(18, size * 0.22),
+                letterSpacing: '-0.03em',
+              }}
+            >
+              {(name || '?').slice(0, 1).toUpperCase()}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PodiumCard({ row, place }) {
   const rank = toNumber(row.rank)
   const theme = getRankTheme(rank)
@@ -358,76 +389,55 @@ function PodiumCard({ row, place }) {
   const isSecond = rank === 2
   const isThird = rank === 3
 
-  const heights = {
+  const heightMap = {
     1: 452,
-    2: 360,
-    3: 342,
+    2: 364,
+    3: 346,
   }
 
   return (
     <div
-      className={`interactive-card podium-card podium-${place} ${
-        isLeader ? 'podium-leader' : ''
-      } ${isSecond ? 'podium-second' : ''} ${isThird ? 'podium-third' : ''}`}
+      className={`interactive-card podium-card ${isLeader ? 'podium-card-1' : ''} ${isSecond ? 'podium-card-2' : ''} ${isThird ? 'podium-card-3' : ''} podium-${place}`}
       style={{
         position: 'relative',
-        minHeight: heights[place],
-        borderRadius: 32,
-        padding: place === 1 ? '30px 22px 22px' : '20px 18px 18px',
+        minHeight: heightMap[place],
+        borderRadius: 34,
+        padding: place === 1 ? '30px 22px 22px' : '22px 18px 18px',
         background: theme.cardBg,
-        border: `1px solid ${theme.accentBorder}`,
-        boxShadow: isLeader
-          ? `
-            0 36px 84px rgba(0,0,0,0.38),
-            0 0 58px ${theme.glow},
-            inset 0 1px 0 rgba(255,255,255,0.18),
-            inset 0 -10px 24px rgba(0,0,0,0.20)
-          `
-          : `
-            0 22px 54px rgba(0,0,0,0.28),
-            0 0 28px ${theme.glow},
-            inset 0 1px 0 rgba(255,255,255,0.10),
-            inset 0 -8px 20px rgba(0,0,0,0.18)
-          `,
+        border: `1px solid ${theme.border}`,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         transform: isLeader ? 'translateY(-6px)' : 'translateY(0)',
+        boxShadow: isLeader
+          ? `0 40px 90px rgba(0,0,0,0.42), 0 0 58px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.20)`
+          : `0 24px 56px rgba(0,0,0,0.28), 0 0 28px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`,
       }}
     >
-      {isLeader ? <div className="podium-leader-border-trace" /> : null}
-      <div className={`podium-breath ${isLeader ? 'podium-breath-leader' : isSecond ? 'podium-breath-second' : isThird ? 'podium-breath-third' : ''}`} />
+      <div className="podium-frame-outer" />
+      <div className="podium-frame-inner" />
+      <div className="podium-bottom-lip" />
+      <div className="podium-top-highlight" />
 
-      <div className={`podium-frame ${isLeader ? 'podium-frame-leader' : ''}`} />
-      <div className={`podium-inner-edge ${isLeader ? 'podium-inner-edge-leader' : ''}`} />
-      <div className={`podium-outer-3d ${isLeader ? 'podium-outer-3d-leader' : isSecond ? 'podium-outer-3d-second' : isThird ? 'podium-outer-3d-third' : ''}`} />
-
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: isLeader
-            ? 'linear-gradient(180deg, rgba(174,242,255,0.11) 0%, rgba(255,255,255,0.00) 34%)'
-            : isSecond
-              ? 'linear-gradient(180deg, rgba(246,213,111,0.08) 0%, rgba(255,255,255,0.00) 30%)'
-              : isThird
-                ? 'linear-gradient(180deg, rgba(221,230,240,0.07) 0%, rgba(255,255,255,0.00) 28%)'
-                : 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.00) 28%)',
-          pointerEvents: 'none',
-        }}
-      />
+      {isLeader ? <div className="podium-hero-breath" /> : null}
+      {isSecond ? <div className="podium-breath-gold" /> : null}
+      {isThird ? <div className="podium-breath-silver" /> : null}
+      {isLeader ? <div className="podium-hero-outline" /> : null}
 
       <div
         style={{
           position: 'absolute',
-          top: -50,
-          right: -30,
-          width: 170,
-          height: 170,
+          top: -60,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          width: isLeader ? 280 : 180,
+          height: isLeader ? 280 : 180,
           borderRadius: '50%',
-          background: theme.accentSoft,
-          filter: 'blur(46px)',
+          background: isLeader
+            ? 'radial-gradient(circle, rgba(174,242,255,0.12) 0%, rgba(174,242,255,0.00) 70%)'
+            : 'transparent',
+          filter: 'blur(28px)',
           pointerEvents: 'none',
         }}
       />
@@ -437,46 +447,42 @@ function PodiumCard({ row, place }) {
           position: 'relative',
           display: 'flex',
           justifyContent: 'space-between',
-          gap: 10,
           alignItems: 'center',
-          marginBottom: 18,
-          zIndex: 2,
+          gap: 10,
+          marginBottom: isLeader ? 20 : 18,
+          zIndex: 3,
         }}
       >
         <RankBadge rank={row.rank} />
         <MoveChip move={row.move} />
       </div>
 
-      <div style={{ position: 'relative', zIndex: 2 }}>
+      <div style={{ position: 'relative', zIndex: 3 }}>
         <div
           style={{
             display: 'flex',
             justifyContent: 'center',
-            marginBottom: 18,
+            marginBottom: isLeader ? 20 : 16,
           }}
         >
-          <Photo
+          <PlayerPhoto
             name={row.player}
             url={row.photo_url}
-            size={place === 1 ? 164 : 104}
-            borderColor={theme.accentBorder}
-            special={isLeader}
+            rank={row.rank}
+            size={isLeader ? 170 : 106}
           />
         </div>
 
         <div style={{ textAlign: 'center' }}>
           <div
-            className={isLeader ? 'leader-name-glow' : ''}
+            className={isLeader ? 'leader-name' : isSecond ? 'metal-name-gold' : isThird ? 'metal-name-silver' : ''}
             style={{
-              fontSize: place === 1 ? 36 : 26,
-              fontWeight: 900,
+              fontSize: isLeader ? 38 : 27,
+              fontWeight: isLeader ? 950 : 900,
               color: '#eef6ff',
-              lineHeight: 1.03,
-              letterSpacing: '-0.03em',
+              lineHeight: 1.02,
+              letterSpacing: '-0.035em',
               marginBottom: 10,
-              textShadow: isLeader
-                ? '0 0 12px rgba(174,242,255,0.18), 0 0 28px rgba(174,242,255,0.10)'
-                : 'none',
             }}
           >
             {row.player || '—'}
@@ -540,31 +546,28 @@ function PodiumCard({ row, place }) {
       </div>
 
       <div
+        className={`podium-platform ${isLeader ? 'podium-platform-1' : isSecond ? 'podium-platform-2' : 'podium-platform-3'}`}
         style={{
           position: 'relative',
-          zIndex: 2,
+          zIndex: 3,
           marginTop: 18,
-          height: place === 1 ? 84 : 60,
-          borderRadius: 22,
-          background: isLeader
-            ? 'linear-gradient(180deg, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.03) 100%)'
-            : isSecond
-              ? 'linear-gradient(180deg, rgba(246,213,111,0.10) 0%, rgba(255,255,255,0.03) 100%)'
-              : 'linear-gradient(180deg, rgba(221,230,240,0.09) 0%, rgba(255,255,255,0.03) 100%)',
-          border: '1px solid rgba(255,255,255,0.10)',
-          boxShadow:
-            'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 14px rgba(0,0,0,0.18)',
+          height: isLeader ? 88 : 62,
+          borderRadius: 24,
+          background: theme.platformBg,
+          border: `1px solid ${isLeader ? 'rgba(174,242,255,0.16)' : isSecond ? 'rgba(246,213,111,0.16)' : 'rgba(221,230,240,0.14)'}`,
           display: 'grid',
           placeItems: 'center',
+          boxShadow:
+            'inset 0 1px 0 rgba(255,255,255,0.12), inset 0 -10px 16px rgba(0,0,0,0.18)',
         }}
       >
         <div
           style={{
-            fontSize: place === 1 ? 14 : 13,
+            fontSize: isLeader ? 14 : 13,
             fontWeight: 900,
-            letterSpacing: '0.16em',
+            letterSpacing: '0.18em',
             textTransform: 'uppercase',
-            color: 'rgba(220,232,255,0.64)',
+            color: 'rgba(220,232,255,0.68)',
           }}
         >
           Rank {row.rank}
@@ -575,8 +578,7 @@ function PodiumCard({ row, place }) {
 }
 
 function LadderRow({ row }) {
-  const rank = toNumber(row.rank)
-  const theme = getRankTheme(rank)
+  const theme = getRankTheme(row.rank)
 
   return (
     <div
@@ -593,20 +595,13 @@ function LadderRow({ row }) {
         boxShadow: `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
       }}
     >
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 12,
-          minWidth: 0,
-        }}
-      >
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
-        <Photo
+        <PlayerPhoto
           name={row.player}
           url={row.photo_url}
+          rank={row.rank}
           size={58}
-          borderColor={theme.accentBorder}
         />
       </div>
 
@@ -752,348 +747,217 @@ export default function LiveRankingPage() {
         }
 
         @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+          from { opacity: 0; transform: translateY(8px); }
+          to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes leaderGlowPulse {
-          0% {
-            box-shadow:
-              0 16px 30px rgba(0,0,0,0.24),
-              0 0 22px rgba(174,242,255,0.18),
-              inset 0 1px 0 rgba(255,255,255,0.70),
-              inset 0 -8px 12px rgba(0,0,0,0.16);
-          }
-          50% {
-            box-shadow:
-              0 18px 34px rgba(0,0,0,0.28),
-              0 0 34px rgba(174,242,255,0.34),
-              inset 0 1px 0 rgba(255,255,255,0.76),
-              inset 0 -8px 12px rgba(0,0,0,0.16);
-          }
-          100% {
-            box-shadow:
-              0 16px 30px rgba(0,0,0,0.24),
-              0 0 22px rgba(174,242,255,0.18),
-              inset 0 1px 0 rgba(255,255,255,0.70),
-              inset 0 -8px 12px rgba(0,0,0,0.16);
-          }
+        @keyframes heroBreath {
+          0% { opacity: 0.42; transform: scale(0.995); }
+          50% { opacity: 0.82; transform: scale(1.01); }
+          100% { opacity: 0.42; transform: scale(0.995); }
         }
 
-        @keyframes podiumGlowPulse2 {
-          0% {
-            box-shadow:
-              0 12px 22px rgba(0,0,0,0.18),
-              0 0 14px rgba(246,213,111,0.14),
-              inset 0 1px 0 rgba(255,255,255,0.34),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
-          50% {
-            box-shadow:
-              0 13px 24px rgba(0,0,0,0.19),
-              0 0 22px rgba(246,213,111,0.24),
-              inset 0 1px 0 rgba(255,255,255,0.38),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
-          100% {
-            box-shadow:
-              0 12px 22px rgba(0,0,0,0.18),
-              0 0 14px rgba(246,213,111,0.14),
-              inset 0 1px 0 rgba(255,255,255,0.34),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
+        @keyframes softGoldBreath {
+          0% { opacity: 0.30; transform: scale(0.997); }
+          50% { opacity: 0.55; transform: scale(1.006); }
+          100% { opacity: 0.30; transform: scale(0.997); }
         }
 
-        @keyframes podiumGlowPulse3 {
-          0% {
-            box-shadow:
-              0 12px 22px rgba(0,0,0,0.18),
-              0 0 14px rgba(221,230,240,0.12),
-              inset 0 1px 0 rgba(255,255,255,0.30),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
-          50% {
-            box-shadow:
-              0 13px 24px rgba(0,0,0,0.19),
-              0 0 22px rgba(221,230,240,0.20),
-              inset 0 1px 0 rgba(255,255,255,0.34),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
-          100% {
-            box-shadow:
-              0 12px 22px rgba(0,0,0,0.18),
-              0 0 14px rgba(221,230,240,0.12),
-              inset 0 1px 0 rgba(255,255,255,0.30),
-              inset 0 -7px 10px rgba(0,0,0,0.14);
-          }
+        @keyframes softSilverBreath {
+          0% { opacity: 0.28; transform: scale(0.997); }
+          50% { opacity: 0.50; transform: scale(1.006); }
+          100% { opacity: 0.28; transform: scale(0.997); }
         }
 
-        @keyframes leaderNameGlow {
-          0% {
-            text-shadow:
-              0 0 12px rgba(174,242,255,0.16),
-              0 0 26px rgba(174,242,255,0.10);
-          }
-          50% {
-            text-shadow:
-              0 0 18px rgba(174,242,255,0.28),
-              0 0 40px rgba(174,242,255,0.16);
-          }
-          100% {
-            text-shadow:
-              0 0 12px rgba(174,242,255,0.16),
-              0 0 26px rgba(174,242,255,0.10);
-          }
+        @keyframes heroNameGlow {
+          0% { text-shadow: 0 0 12px rgba(174,242,255,0.16), 0 0 26px rgba(174,242,255,0.10); }
+          50% { text-shadow: 0 0 18px rgba(174,242,255,0.30), 0 0 40px rgba(174,242,255,0.16); }
+          100% { text-shadow: 0 0 12px rgba(174,242,255,0.16), 0 0 26px rgba(174,242,255,0.10); }
         }
 
-        @keyframes leaderCardBreath {
+        @keyframes heroOutlineTrace {
           0% {
-            opacity: 0.40;
-            transform: scale(0.995);
-          }
-          50% {
-            opacity: 0.82;
-            transform: scale(1.008);
-          }
-          100% {
-            opacity: 0.40;
-            transform: scale(0.995);
-          }
-        }
-
-        @keyframes outerBorderPulse {
-          0% {
-            opacity: 0.42;
+            opacity: 0.35;
             box-shadow:
-              0 0 0 1px rgba(255,255,255,0.00),
-              0 0 0 rgba(255,255,255,0.00);
+              0 0 0 1px rgba(174,242,255,0.00),
+              0 0 0 rgba(174,242,255,0.00);
           }
           50% {
             opacity: 1;
             box-shadow:
-              0 0 0 1px currentColor,
-              0 0 26px currentColor;
+              0 0 0 1px rgba(174,242,255,0.80),
+              0 0 28px rgba(174,242,255,0.22);
           }
           100% {
-            opacity: 0.42;
+            opacity: 0.35;
             box-shadow:
-              0 0 0 1px rgba(255,255,255,0.00),
-              0 0 0 rgba(255,255,255,0.00);
+              0 0 0 1px rgba(174,242,255,0.00),
+              0 0 0 rgba(174,242,255,0.00);
           }
         }
 
-        @keyframes rankCircleTrace {
-          0% {
-            clip-path: inset(0 100% 0 0 round 999px);
-            opacity: 0.85;
-          }
-          25% {
-            clip-path: inset(0 0 100% 0 round 999px);
-            opacity: 1;
-          }
-          50% {
-            clip-path: inset(0 0 0 100% round 999px);
-            opacity: 0.92;
-          }
-          75% {
-            clip-path: inset(100% 0 0 0 round 999px);
-            opacity: 1;
-          }
-          100% {
-            clip-path: inset(0 100% 0 0 round 999px);
-            opacity: 0.85;
-          }
+        @keyframes rankTrace {
+          0% { clip-path: inset(0 100% 0 0 round 999px); opacity: 0.85; }
+          25% { clip-path: inset(0 0 100% 0 round 999px); opacity: 1; }
+          50% { clip-path: inset(0 0 0 100% round 999px); opacity: 0.92; }
+          75% { clip-path: inset(100% 0 0 0 round 999px); opacity: 1; }
+          100% { clip-path: inset(0 100% 0 0 round 999px); opacity: 0.85; }
         }
 
-        .fade-in {
-          animation: fadeInUp 0.28s ease;
-        }
+        .fade-in { animation: fadeInUp 0.28s ease; }
 
         .interactive-card {
           transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
         }
 
-        .interactive-card:hover {
-          transform: translateY(-3px);
+        .interactive-card:hover { transform: translateY(-3px); }
+
+        .photo-hover:hover { transform: scale(1.02); }
+
+        .leader-name {
+          animation: heroNameGlow 2.8s ease-in-out infinite;
         }
 
-        .leader-name-glow {
-          animation: leaderNameGlow 2.8s ease-in-out infinite;
+        .metal-name-gold {
+          text-shadow: 0 1px 0 rgba(255,255,255,0.12), 0 0 10px rgba(246,213,111,0.08);
         }
 
-        .podium-card {
-          position: relative;
+        .metal-name-silver {
+          text-shadow: 0 1px 0 rgba(255,255,255,0.12), 0 0 10px rgba(221,230,240,0.08);
         }
 
-        .podium-card:hover {
-          border-color: rgba(255,255,255,0.18) !important;
-          box-shadow: 0 28px 60px rgba(0,0,0,0.28) !important;
-        }
-
-        .podium-leader {
-          box-shadow:
-            0 38px 88px rgba(0,0,0,0.40),
-            0 0 62px rgba(174,242,255,0.24) !important;
-        }
-
-        .podium-second {
-          box-shadow:
-            0 24px 56px rgba(0,0,0,0.28),
-            0 0 26px rgba(246,213,111,0.14) !important;
-        }
-
-        .podium-third {
-          box-shadow:
-            0 22px 52px rgba(0,0,0,0.27),
-            0 0 24px rgba(221,230,240,0.12) !important;
-        }
-
-        .podium-frame {
+        .podium-frame-outer {
           position: absolute;
           inset: 0;
-          border-radius: 32px;
+          border-radius: 34px;
           pointer-events: none;
           box-shadow:
             inset 0 0 0 1px rgba(255,255,255,0.05),
             inset 0 1px 0 rgba(255,255,255,0.14),
-            inset 0 -1px 0 rgba(0,0,0,0.26);
+            inset 0 -1px 0 rgba(0,0,0,0.24);
         }
 
-        .podium-frame-leader {
-          box-shadow:
-            inset 0 0 0 1px rgba(174,242,255,0.14),
-            inset 0 1px 0 rgba(255,255,255,0.20),
-            inset 0 -1px 0 rgba(0,0,0,0.30);
-        }
-
-        .podium-inner-edge {
+        .podium-frame-inner {
           position: absolute;
-          inset: 8px;
-          border-radius: 24px;
+          inset: 10px;
+          border-radius: 26px;
           pointer-events: none;
           border: 1px solid rgba(255,255,255,0.05);
         }
 
-        .podium-inner-edge-leader {
-          border: 1px solid rgba(174,242,255,0.12);
-        }
-
-        .podium-outer-3d {
+        .podium-bottom-lip {
           position: absolute;
-          inset: 0;
-          border-radius: 32px;
+          left: 16px;
+          right: 16px;
+          bottom: 10px;
+          height: 18px;
+          border-radius: 0 0 26px 26px;
+          background: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.18) 100%);
           pointer-events: none;
         }
 
-        .podium-outer-3d-leader {
-          box-shadow:
-            inset 0 2px 0 rgba(255,255,255,0.20),
-            inset 2px 0 0 rgba(255,255,255,0.08),
-            inset -2px 0 0 rgba(0,0,0,0.10),
-            inset 0 -2px 0 rgba(0,0,0,0.24);
+        .podium-top-highlight {
+          position: absolute;
+          left: 10px;
+          right: 10px;
+          top: 0;
+          height: 56px;
+          border-radius: 34px 34px 22px 22px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.00) 100%);
+          pointer-events: none;
         }
 
-        .podium-outer-3d-second {
-          box-shadow:
-            inset 0 2px 0 rgba(255,255,255,0.14),
-            inset 0 -2px 0 rgba(0,0,0,0.22);
-        }
-
-        .podium-outer-3d-third {
-          box-shadow:
-            inset 0 2px 0 rgba(255,255,255,0.12),
-            inset 0 -2px 0 rgba(0,0,0,0.22);
-        }
-
-        .podium-breath {
+        .podium-hero-breath,
+        .podium-breath-gold,
+        .podium-breath-silver {
           position: absolute;
           inset: -8px;
           border-radius: 40px;
-          pointer-events: none;
           filter: blur(18px);
+          pointer-events: none;
         }
 
-        .podium-breath-leader {
-          background: radial-gradient(circle at center, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 72%);
-          animation: leaderCardBreath 3.2s ease-in-out infinite;
+        .podium-hero-breath {
+          background: radial-gradient(circle at center, rgba(174,242,255,0.18) 0%, rgba(174,242,255,0.00) 72%);
+          animation: heroBreath 3.2s ease-in-out infinite;
         }
 
-        .podium-breath-second {
-          background: radial-gradient(circle at center, rgba(246,213,111,0.10) 0%, rgba(246,213,111,0.00) 72%);
-          animation: leaderCardBreath 3.8s ease-in-out infinite;
+        .podium-breath-gold {
+          background: radial-gradient(circle at center, rgba(246,213,111,0.12) 0%, rgba(246,213,111,0.00) 72%);
+          animation: softGoldBreath 3.8s ease-in-out infinite;
         }
 
-        .podium-breath-third {
-          background: radial-gradient(circle at center, rgba(221,230,240,0.09) 0%, rgba(221,230,240,0.00) 72%);
-          animation: leaderCardBreath 3.8s ease-in-out infinite;
+        .podium-breath-silver {
+          background: radial-gradient(circle at center, rgba(221,230,240,0.10) 0%, rgba(221,230,240,0.00) 72%);
+          animation: softSilverBreath 3.8s ease-in-out infinite;
         }
 
-        .podium-leader-border-trace {
+        .podium-hero-outline {
           position: absolute;
           inset: -1px;
-          border-radius: 32px;
+          border-radius: 34px;
           pointer-events: none;
-          color: rgba(174,242,255,0.78);
-          animation: outerBorderPulse 2.8s ease-in-out infinite;
-        }
-
-        .rank-badge-3d {
-          position: relative;
+          animation: heroOutlineTrace 2.8s ease-in-out infinite;
         }
 
         .rank-badge-1 {
-          animation: leaderGlowPulse 2.8s ease-in-out infinite;
+          animation: softGoldBreath 2.8s ease-in-out infinite;
         }
 
         .rank-badge-2 {
-          animation: podiumGlowPulse2 3.4s ease-in-out infinite;
+          animation: softGoldBreath 3.4s ease-in-out infinite;
         }
 
         .rank-badge-3 {
-          animation: podiumGlowPulse3 3.4s ease-in-out infinite;
+          animation: softSilverBreath 3.4s ease-in-out infinite;
         }
 
-        .rank-badge-sheen {
+        .rank-pill-top-sheen {
           position: absolute;
           inset: 0;
           border-radius: inherit;
           background: linear-gradient(
             180deg,
-            rgba(255,255,255,0.36) 0%,
-            rgba(255,255,255,0.12) 28%,
-            rgba(255,255,255,0.00) 60%
+            rgba(255,255,255,0.38) 0%,
+            rgba(255,255,255,0.14) 28%,
+            rgba(255,255,255,0.00) 64%
           );
           pointer-events: none;
+          z-index: 1;
         }
 
-        .rank-badge-circle-trace {
+        .rank-pill-trace {
           position: absolute;
           inset: -1px;
           border-radius: 999px;
           border: 2px solid rgba(174,242,255,0.95);
-          box-shadow: 0 0 18px rgba(174,242,255,0.24);
+          box-shadow: 0 0 18px rgba(174,242,255,0.22);
           pointer-events: none;
-          animation: rankCircleTrace 2.4s linear infinite;
+          animation: rankTrace 2.5s linear infinite;
+          z-index: 2;
         }
 
-        .leader-photo-rim {
+        .leader-photo-bloom {
+          position: absolute;
+          inset: -36px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.00) 70%);
+          filter: blur(22px);
+          pointer-events: none;
+        }
+
+        .leader-photo-outer-ring {
           position: absolute;
           inset: 0;
           border-radius: inherit;
           box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.48),
-            inset 0 -10px 16px rgba(0,0,0,0.16),
+            inset 0 1px 0 rgba(255,255,255,0.46),
+            inset 0 -12px 16px rgba(0,0,0,0.16),
             0 0 34px rgba(174,242,255,0.24);
           pointer-events: none;
         }
 
-        .leader-photo-depth {
+        .leader-photo-inner-bevel {
           position: absolute;
           inset: 8px;
           border-radius: 30px;
@@ -1101,23 +965,41 @@ export default function LiveRankingPage() {
           pointer-events: none;
         }
 
-        .leader-photo-breath {
+        .leader-photo-halo {
           position: absolute;
           inset: -10px;
           border-radius: inherit;
           background: radial-gradient(circle at center, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 74%);
           filter: blur(18px);
           pointer-events: none;
-          animation: leaderCardBreath 3s ease-in-out infinite;
+          animation: heroBreath 3s ease-in-out infinite;
+        }
+
+        .podium-platform::before {
+          content: '';
+          position: absolute;
+          left: 14px;
+          right: 14px;
+          top: 0;
+          height: 1px;
+          background: rgba(255,255,255,0.16);
+          border-radius: 999px;
+        }
+
+        .podium-platform::after {
+          content: '';
+          position: absolute;
+          left: 12px;
+          right: 12px;
+          bottom: 10px;
+          height: 12px;
+          border-radius: 0 0 20px 20px;
+          background: linear-gradient(180deg, rgba(0,0,0,0.00) 0%, rgba(0,0,0,0.18) 100%);
         }
 
         .ladder-row:hover {
           border-color: rgba(255,255,255,0.14) !important;
           box-shadow: 0 18px 30px rgba(0,0,0,0.20) !important;
-        }
-
-        .photo-hover:hover {
-          transform: scale(1.02);
         }
 
         .skeleton-card {
@@ -1136,17 +1018,9 @@ export default function LiveRankingPage() {
             grid-template-columns: 1fr !important;
           }
 
-          .podium-1 {
-            order: 1 !important;
-          }
-
-          .podium-2 {
-            order: 2 !important;
-          }
-
-          .podium-3 {
-            order: 3 !important;
-          }
+          .podium-1 { order: 1 !important; }
+          .podium-2 { order: 2 !important; }
+          .podium-3 { order: 3 !important; }
         }
 
         @media (max-width: 700px) {
@@ -1369,4 +1243,4 @@ export default function LiveRankingPage() {
       </div>
     </>
   )
-          }
+}
