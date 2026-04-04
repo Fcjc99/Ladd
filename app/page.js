@@ -32,13 +32,13 @@ function getRankTheme(rank) {
     return {
       accent: '#aef2ff',
       accentSoft: 'rgba(174,242,255,0.24)',
-      accentBorder: 'rgba(174,242,255,0.46)',
+      accentBorder: 'rgba(174,242,255,0.52)',
       badgeBg:
-        'linear-gradient(135deg, #ffffff 0%, #ecfcff 32%, #c7f6ff 68%, #98ebff 100%)',
+        'linear-gradient(135deg, #ffffff 0%, #eafcff 34%, #c8f7ff 70%, #94e9ff 100%)',
       badgeColor: '#102444',
-      glow: 'rgba(174,242,255,0.22)',
+      glow: 'rgba(174,242,255,0.24)',
       cardBg:
-        'linear-gradient(180deg, rgba(20,48,89,0.985) 0%, rgba(10,24,45,0.995) 100%)',
+        'linear-gradient(180deg, rgba(19,48,90,0.985) 0%, rgba(10,24,45,0.995) 100%)',
     }
   }
 
@@ -46,10 +46,10 @@ function getRankTheme(rank) {
     return {
       accent: '#f6d56f',
       accentSoft: 'rgba(246,213,111,0.18)',
-      accentBorder: 'rgba(246,213,111,0.36)',
-      badgeBg: 'linear-gradient(135deg, #fff8de 0%, #f9e18a 55%, #d9a62d 100%)',
+      accentBorder: 'rgba(246,213,111,0.40)',
+      badgeBg: 'linear-gradient(135deg, #fff8df 0%, #f9e38e 56%, #d8a528 100%)',
       badgeColor: '#3d2c00',
-      glow: 'rgba(246,213,111,0.14)',
+      glow: 'rgba(246,213,111,0.16)',
       cardBg: 'linear-gradient(180deg, rgba(50,39,17,0.96) 0%, rgba(24,19,10,0.98) 100%)',
     }
   }
@@ -58,10 +58,10 @@ function getRankTheme(rank) {
     return {
       accent: '#dde6f0',
       accentSoft: 'rgba(221,230,240,0.16)',
-      accentBorder: 'rgba(221,230,240,0.32)',
-      badgeBg: 'linear-gradient(135deg, #f8fbff 0%, #e1e8f1 56%, #b8c5d6 100%)',
+      accentBorder: 'rgba(221,230,240,0.36)',
+      badgeBg: 'linear-gradient(135deg, #f8fbff 0%, #e1e9f2 58%, #b7c5d7 100%)',
       badgeColor: '#253245',
-      glow: 'rgba(221,230,240,0.10)',
+      glow: 'rgba(221,230,240,0.12)',
       cardBg: 'linear-gradient(180deg, rgba(31,39,52,0.96) 0%, rgba(15,20,28,0.98) 100%)',
     }
   }
@@ -140,6 +140,25 @@ function getMoveInfo(moveValue) {
   }
 }
 
+function CrownIcon() {
+  return (
+    <div
+      style={{
+        position: 'absolute',
+        top: -12,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        fontSize: 14,
+        lineHeight: 1,
+        filter: 'drop-shadow(0 0 10px rgba(246,213,111,0.38))',
+        zIndex: 3,
+      }}
+    >
+      👑
+    </div>
+  )
+}
+
 function Photo({
   name,
   url,
@@ -158,12 +177,12 @@ function Photo({
         flexShrink: 0,
         display: 'grid',
         placeItems: 'center',
-        padding: special ? 7 : 0,
+        padding: special ? 8 : 0,
         background: special
-          ? `linear-gradient(145deg, rgba(255,255,255,0.96) 0%, ${borderColor} 45%, rgba(255,255,255,0.10) 100%)`
+          ? `linear-gradient(145deg, rgba(255,255,255,0.96) 0%, ${borderColor} 45%, rgba(255,255,255,0.12) 100%)`
           : 'transparent',
         boxShadow: special
-          ? `0 24px 50px rgba(0,0,0,0.32), 0 0 34px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.40)`
+          ? `0 26px 54px rgba(0,0,0,0.34), 0 0 38px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.42)`
           : 'none',
       }}
     >
@@ -171,21 +190,22 @@ function Photo({
         <>
           <div className="leader-photo-rim" />
           <div className="leader-photo-depth" />
+          <div className="leader-photo-breath" />
         </>
       ) : null}
 
       <div
         className="photo-hover"
         style={{
-          width: special ? size - 14 : size,
-          height: special ? size - 14 : size,
+          width: special ? size - 16 : size,
+          height: special ? size - 16 : size,
           borderRadius: Math.round(size * 0.22),
           overflow: 'hidden',
           border: `2px solid ${borderColor}`,
           background:
             'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
           boxShadow: special
-            ? `0 18px 36px rgba(0,0,0,0.28), 0 0 24px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.22)`
+            ? `0 18px 38px rgba(0,0,0,0.30), 0 0 28px ${borderColor}, inset 0 1px 0 rgba(255,255,255,0.24)`
             : `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${borderColor}`,
           transition: 'transform 0.2s ease, box-shadow 0.2s ease',
           position: 'relative',
@@ -272,9 +292,9 @@ function RankBadge({ rank }) {
     <div
       className={`rank-badge-3d ${isLeader ? 'rank-badge-1' : ''} ${isSecond ? 'rank-badge-2' : ''} ${isThird ? 'rank-badge-3' : ''}`}
       style={{
-        minWidth: isLeader ? 52 : 42,
-        height: isLeader ? 52 : 42,
-        padding: isLeader ? '0 14px' : '0 12px',
+        minWidth: isLeader ? 56 : 42,
+        height: isLeader ? 56 : 42,
+        padding: isLeader ? '0 16px' : '0 12px',
         borderRadius: 999,
         display: 'inline-flex',
         alignItems: 'center',
@@ -288,7 +308,7 @@ function RankBadge({ rank }) {
         overflow: 'hidden',
         transform: isLeader ? 'translateY(-1px)' : 'none',
         boxShadow: isLeader
-          ? `0 14px 28px rgba(0,0,0,0.24), 0 0 22px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.68), inset 0 -8px 12px rgba(0,0,0,0.16)`
+          ? `0 16px 30px rgba(0,0,0,0.24), 0 0 26px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.70), inset 0 -8px 12px rgba(0,0,0,0.16)`
           : isSecond
             ? '0 12px 22px rgba(0,0,0,0.18), 0 0 14px rgba(246,213,111,0.16), inset 0 1px 0 rgba(255,255,255,0.34), inset 0 -7px 10px rgba(0,0,0,0.14)'
             : isThird
@@ -296,6 +316,7 @@ function RankBadge({ rank }) {
               : '0 10px 18px rgba(0,0,0,0.14)',
       }}
     >
+      {isLeader ? <CrownIcon /> : null}
       <div className="rank-badge-sheen" />
       {isLeader ? <div className="rank-badge-circle-trace" /> : null}
       <span style={{ position: 'relative', zIndex: 2 }}>#{rank}</span>
@@ -338,9 +359,9 @@ function PodiumCard({ row, place }) {
   const isThird = rank === 3
 
   const heights = {
-    1: 442,
-    2: 354,
-    3: 336,
+    1: 452,
+    2: 360,
+    3: 342,
   }
 
   return (
@@ -352,19 +373,19 @@ function PodiumCard({ row, place }) {
         position: 'relative',
         minHeight: heights[place],
         borderRadius: 32,
-        padding: place === 1 ? '28px 22px 22px' : '20px 18px 18px',
+        padding: place === 1 ? '30px 22px 22px' : '20px 18px 18px',
         background: theme.cardBg,
         border: `1px solid ${theme.accentBorder}`,
         boxShadow: isLeader
           ? `
-            0 34px 78px rgba(0,0,0,0.36),
-            0 0 52px ${theme.glow},
+            0 36px 84px rgba(0,0,0,0.38),
+            0 0 58px ${theme.glow},
             inset 0 1px 0 rgba(255,255,255,0.18),
             inset 0 -10px 24px rgba(0,0,0,0.20)
           `
           : `
             0 22px 54px rgba(0,0,0,0.28),
-            0 0 26px ${theme.glow},
+            0 0 28px ${theme.glow},
             inset 0 1px 0 rgba(255,255,255,0.10),
             inset 0 -8px 20px rgba(0,0,0,0.18)
           `,
@@ -376,10 +397,11 @@ function PodiumCard({ row, place }) {
       }}
     >
       {isLeader ? <div className="podium-leader-border-trace" /> : null}
-      {isLeader ? <div className="podium-leader-breath" /> : null}
+      <div className={`podium-breath ${isLeader ? 'podium-breath-leader' : isSecond ? 'podium-breath-second' : isThird ? 'podium-breath-third' : ''}`} />
 
       <div className={`podium-frame ${isLeader ? 'podium-frame-leader' : ''}`} />
       <div className={`podium-inner-edge ${isLeader ? 'podium-inner-edge-leader' : ''}`} />
+      <div className={`podium-outer-3d ${isLeader ? 'podium-outer-3d-leader' : isSecond ? 'podium-outer-3d-second' : isThird ? 'podium-outer-3d-third' : ''}`} />
 
       <div
         style={{
@@ -436,7 +458,7 @@ function PodiumCard({ row, place }) {
           <Photo
             name={row.player}
             url={row.photo_url}
-            size={place === 1 ? 150 : 100}
+            size={place === 1 ? 164 : 104}
             borderColor={theme.accentBorder}
             special={isLeader}
           />
@@ -446,14 +468,14 @@ function PodiumCard({ row, place }) {
           <div
             className={isLeader ? 'leader-name-glow' : ''}
             style={{
-              fontSize: place === 1 ? 34 : 26,
+              fontSize: place === 1 ? 36 : 26,
               fontWeight: 900,
               color: '#eef6ff',
               lineHeight: 1.03,
               letterSpacing: '-0.03em',
               marginBottom: 10,
               textShadow: isLeader
-                ? '0 0 10px rgba(174,242,255,0.16), 0 0 24px rgba(174,242,255,0.10)'
+                ? '0 0 12px rgba(174,242,255,0.18), 0 0 28px rgba(174,242,255,0.10)'
                 : 'none',
             }}
           >
@@ -743,23 +765,23 @@ export default function LiveRankingPage() {
         @keyframes leaderGlowPulse {
           0% {
             box-shadow:
-              0 14px 28px rgba(0,0,0,0.24),
-              0 0 20px rgba(174,242,255,0.18),
-              inset 0 1px 0 rgba(255,255,255,0.68),
+              0 16px 30px rgba(0,0,0,0.24),
+              0 0 22px rgba(174,242,255,0.18),
+              inset 0 1px 0 rgba(255,255,255,0.70),
               inset 0 -8px 12px rgba(0,0,0,0.16);
           }
           50% {
             box-shadow:
-              0 16px 30px rgba(0,0,0,0.26),
-              0 0 30px rgba(174,242,255,0.32),
-              inset 0 1px 0 rgba(255,255,255,0.74),
+              0 18px 34px rgba(0,0,0,0.28),
+              0 0 34px rgba(174,242,255,0.34),
+              inset 0 1px 0 rgba(255,255,255,0.76),
               inset 0 -8px 12px rgba(0,0,0,0.16);
           }
           100% {
             box-shadow:
-              0 14px 28px rgba(0,0,0,0.24),
-              0 0 20px rgba(174,242,255,0.18),
-              inset 0 1px 0 rgba(255,255,255,0.68),
+              0 16px 30px rgba(0,0,0,0.24),
+              0 0 22px rgba(174,242,255,0.18),
+              inset 0 1px 0 rgba(255,255,255,0.70),
               inset 0 -8px 12px rgba(0,0,0,0.16);
           }
         }
@@ -815,54 +837,54 @@ export default function LiveRankingPage() {
         @keyframes leaderNameGlow {
           0% {
             text-shadow:
-              0 0 10px rgba(174,242,255,0.14),
-              0 0 22px rgba(174,242,255,0.08);
+              0 0 12px rgba(174,242,255,0.16),
+              0 0 26px rgba(174,242,255,0.10);
           }
           50% {
             text-shadow:
-              0 0 16px rgba(174,242,255,0.24),
-              0 0 34px rgba(174,242,255,0.14);
+              0 0 18px rgba(174,242,255,0.28),
+              0 0 40px rgba(174,242,255,0.16);
           }
           100% {
             text-shadow:
-              0 0 10px rgba(174,242,255,0.14),
-              0 0 22px rgba(174,242,255,0.08);
+              0 0 12px rgba(174,242,255,0.16),
+              0 0 26px rgba(174,242,255,0.10);
           }
         }
 
         @keyframes leaderCardBreath {
           0% {
-            opacity: 0.45;
+            opacity: 0.40;
             transform: scale(0.995);
           }
           50% {
-            opacity: 0.78;
-            transform: scale(1.005);
+            opacity: 0.82;
+            transform: scale(1.008);
           }
           100% {
-            opacity: 0.45;
+            opacity: 0.40;
             transform: scale(0.995);
           }
         }
 
-        @keyframes leaderOuterTrace {
+        @keyframes outerBorderPulse {
           0% {
-            opacity: 0.40;
+            opacity: 0.42;
             box-shadow:
-              0 0 0 1px rgba(174,242,255,0.00),
-              0 0 0 rgba(174,242,255,0.00);
+              0 0 0 1px rgba(255,255,255,0.00),
+              0 0 0 rgba(255,255,255,0.00);
           }
           50% {
             opacity: 1;
             box-shadow:
-              0 0 0 1px rgba(174,242,255,0.75),
-              0 0 22px rgba(174,242,255,0.22);
+              0 0 0 1px currentColor,
+              0 0 26px currentColor;
           }
           100% {
-            opacity: 0.40;
+            opacity: 0.42;
             box-shadow:
-              0 0 0 1px rgba(174,242,255,0.00),
-              0 0 0 rgba(174,242,255,0.00);
+              0 0 0 1px rgba(255,255,255,0.00),
+              0 0 0 rgba(255,255,255,0.00);
           }
         }
 
@@ -916,20 +938,20 @@ export default function LiveRankingPage() {
 
         .podium-leader {
           box-shadow:
-            0 36px 82px rgba(0,0,0,0.38),
-            0 0 56px rgba(174,242,255,0.22) !important;
+            0 38px 88px rgba(0,0,0,0.40),
+            0 0 62px rgba(174,242,255,0.24) !important;
         }
 
         .podium-second {
           box-shadow:
             0 24px 56px rgba(0,0,0,0.28),
-            0 0 24px rgba(246,213,111,0.12) !important;
+            0 0 26px rgba(246,213,111,0.14) !important;
         }
 
         .podium-third {
           box-shadow:
             0 22px 52px rgba(0,0,0,0.27),
-            0 0 22px rgba(221,230,240,0.10) !important;
+            0 0 24px rgba(221,230,240,0.12) !important;
         }
 
         .podium-frame {
@@ -962,14 +984,54 @@ export default function LiveRankingPage() {
           border: 1px solid rgba(174,242,255,0.12);
         }
 
-        .podium-leader-breath {
+        .podium-outer-3d {
           position: absolute;
-          inset: -6px;
-          border-radius: 38px;
-          background: radial-gradient(circle at center, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.00) 72%);
-          filter: blur(18px);
+          inset: 0;
+          border-radius: 32px;
           pointer-events: none;
+        }
+
+        .podium-outer-3d-leader {
+          box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.20),
+            inset 2px 0 0 rgba(255,255,255,0.08),
+            inset -2px 0 0 rgba(0,0,0,0.10),
+            inset 0 -2px 0 rgba(0,0,0,0.24);
+        }
+
+        .podium-outer-3d-second {
+          box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.14),
+            inset 0 -2px 0 rgba(0,0,0,0.22);
+        }
+
+        .podium-outer-3d-third {
+          box-shadow:
+            inset 0 2px 0 rgba(255,255,255,0.12),
+            inset 0 -2px 0 rgba(0,0,0,0.22);
+        }
+
+        .podium-breath {
+          position: absolute;
+          inset: -8px;
+          border-radius: 40px;
+          pointer-events: none;
+          filter: blur(18px);
+        }
+
+        .podium-breath-leader {
+          background: radial-gradient(circle at center, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 72%);
           animation: leaderCardBreath 3.2s ease-in-out infinite;
+        }
+
+        .podium-breath-second {
+          background: radial-gradient(circle at center, rgba(246,213,111,0.10) 0%, rgba(246,213,111,0.00) 72%);
+          animation: leaderCardBreath 3.8s ease-in-out infinite;
+        }
+
+        .podium-breath-third {
+          background: radial-gradient(circle at center, rgba(221,230,240,0.09) 0%, rgba(221,230,240,0.00) 72%);
+          animation: leaderCardBreath 3.8s ease-in-out infinite;
         }
 
         .podium-leader-border-trace {
@@ -977,7 +1039,8 @@ export default function LiveRankingPage() {
           inset: -1px;
           border-radius: 32px;
           pointer-events: none;
-          animation: leaderOuterTrace 2.8s ease-in-out infinite;
+          color: rgba(174,242,255,0.78);
+          animation: outerBorderPulse 2.8s ease-in-out infinite;
         }
 
         .rank-badge-3d {
@@ -1002,7 +1065,7 @@ export default function LiveRankingPage() {
           border-radius: inherit;
           background: linear-gradient(
             180deg,
-            rgba(255,255,255,0.34) 0%,
+            rgba(255,255,255,0.36) 0%,
             rgba(255,255,255,0.12) 28%,
             rgba(255,255,255,0.00) 60%
           );
@@ -1013,8 +1076,8 @@ export default function LiveRankingPage() {
           position: absolute;
           inset: -1px;
           border-radius: 999px;
-          border: 2px solid rgba(174,242,255,0.92);
-          box-shadow: 0 0 16px rgba(174,242,255,0.22);
+          border: 2px solid rgba(174,242,255,0.95);
+          box-shadow: 0 0 18px rgba(174,242,255,0.24);
           pointer-events: none;
           animation: rankCircleTrace 2.4s linear infinite;
         }
@@ -1024,18 +1087,28 @@ export default function LiveRankingPage() {
           inset: 0;
           border-radius: inherit;
           box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.46),
+            inset 0 1px 0 rgba(255,255,255,0.48),
             inset 0 -10px 16px rgba(0,0,0,0.16),
-            0 0 30px rgba(174,242,255,0.22);
+            0 0 34px rgba(174,242,255,0.24);
           pointer-events: none;
         }
 
         .leader-photo-depth {
           position: absolute;
           inset: 8px;
-          border-radius: 28px;
-          border: 1px solid rgba(255,255,255,0.12);
+          border-radius: 30px;
+          border: 1px solid rgba(255,255,255,0.14);
           pointer-events: none;
+        }
+
+        .leader-photo-breath {
+          position: absolute;
+          inset: -10px;
+          border-radius: inherit;
+          background: radial-gradient(circle at center, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 74%);
+          filter: blur(18px);
+          pointer-events: none;
+          animation: leaderCardBreath 3s ease-in-out infinite;
         }
 
         .ladder-row:hover {
@@ -1296,4 +1369,4 @@ export default function LiveRankingPage() {
       </div>
     </>
   )
-}
+          }
