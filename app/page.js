@@ -57,7 +57,7 @@ function getRankTheme(rank) {
     }
   }
 
-  if (n >= 4 && n <= 8) {
+  if (n >= 4 && n <= 7) {
     return {
       accent: '#d29667',
       accentSoft: 'rgba(210,150,103,0.12)',
