@@ -1195,4 +1195,4 @@ export default function LiveRankingPage() {
       </div>
     </>
   )
-            }
+          }
