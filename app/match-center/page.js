@@ -501,182 +501,234 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
       className="interactive-card active-card fade-in"
       style={{
         background:
-          'linear-gradient(180deg, rgba(20,48,88,0.96) 0%, rgba(11,28,54,0.96) 100%)',
+          'linear-gradient(180deg, rgba(20,48,88,0.97) 0%, rgba(11,28,54,0.98) 100%)',
         border: '1px solid rgba(91,171,255,0.24)',
-        borderRadius: 24,
-        padding: 18,
+        borderRadius: 28,
+        padding: 20,
         boxShadow: '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.06)',
         cursor: 'pointer',
       }}
     >
       <div
+        className="active-match-layout"
         style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          gap: 14,
-          alignItems: 'flex-start',
-          flexWrap: 'wrap',
-          marginBottom: 16,
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 18,
+          alignItems: 'center',
+          marginBottom: 18,
         }}
       >
-        <div style={{ minWidth: 0, flex: 1 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            minWidth: 0,
+          }}
+        >
+          <PlayerPhoto
+            name={row.challenger}
+            photoUrl={getPlayerPhotoUrl(row.challenger)}
+            size={76}
+            borderColor={challengerTheme.accentBorder}
+          />
+
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.52)',
+                marginBottom: 8,
+              }}
+            >
+              Challenger
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                gap: 8,
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                marginBottom: 6,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#eef6ff',
+                  lineHeight: 1.05,
+                  wordBreak: 'break-word',
+                }}
+              >
+                {row.challenger}
+              </div>
+              <RankChip rank={challengerRank} />
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            justifyItems: 'center',
+            alignItems: 'center',
+            gap: 10,
+            minWidth: 110,
+          }}
+        >
           <div
-            className="active-player-grid"
             style={{
+              width: 78,
+              height: 78,
+              borderRadius: '50%',
               display: 'grid',
-              gridTemplateColumns: '1fr auto 1fr',
-              gap: 12,
-              alignItems: 'center',
-              marginBottom: 12,
+              placeItems: 'center',
+              border: '1px solid rgba(255,255,255,0.10)',
+              background:
+                'radial-gradient(circle at center, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.03) 68%, rgba(255,255,255,0.02) 100%)',
+              boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
             }}
           >
             <div
               style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 10,
-                minWidth: 0,
-              }}
-            >
-              <PlayerPhoto
-                name={row.challenger}
-                photoUrl={getPlayerPhotoUrl(row.challenger)}
-                size={58}
-                borderColor={challengerTheme.accentBorder}
-              />
-              <div style={{ minWidth: 0 }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(220,232,255,0.54)',
-                    marginBottom: 6,
-                  }}
-                >
-                  Challenger
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 850,
-                      color: '#eef6ff',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    {row.challenger}
-                  </div>
-                  <RankChip rank={challengerRank} />
-                </div>
-              </div>
-            </div>
-
-            <div
-              style={{
-                display: 'grid',
-                placeItems: 'center',
-                fontSize: 14,
+                fontSize: 16,
                 fontWeight: 900,
-                letterSpacing: '0.16em',
+                letterSpacing: '0.18em',
                 textTransform: 'uppercase',
-                color: 'rgba(220,232,255,0.56)',
+                color: 'rgba(220,232,255,0.72)',
               }}
             >
               VS
             </div>
+          </div>
+
+          <div
+            style={{
+              width: 90,
+              height: 1,
+              background:
+                'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(174,242,255,0.25) 50%, rgba(255,255,255,0.00) 100%)',
+            }}
+          />
+        </div>
+
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 14,
+            justifyContent: 'flex-end',
+            minWidth: 0,
+          }}
+        >
+          <div style={{ minWidth: 0, textAlign: 'right' }}>
+            <div
+              style={{
+                fontSize: 11,
+                fontWeight: 800,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.52)',
+                marginBottom: 8,
+              }}
+            >
+              Opponent
+            </div>
 
             <div
               style={{
                 display: 'flex',
+                gap: 8,
                 alignItems: 'center',
-                gap: 10,
                 justifyContent: 'flex-end',
-                minWidth: 0,
+                flexWrap: 'wrap',
+                marginBottom: 6,
               }}
             >
-              <div style={{ minWidth: 0, textAlign: 'right' }}>
-                <div
-                  style={{
-                    fontSize: 11,
-                    fontWeight: 800,
-                    letterSpacing: '0.14em',
-                    textTransform: 'uppercase',
-                    color: 'rgba(220,232,255,0.54)',
-                    marginBottom: 6,
-                  }}
-                >
-                  Opponent
-                </div>
-                <div
-                  style={{
-                    display: 'flex',
-                    gap: 8,
-                    alignItems: 'center',
-                    justifyContent: 'flex-end',
-                    flexWrap: 'wrap',
-                  }}
-                >
-                  <RankChip rank={opponentRank} />
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 850,
-                      color: '#eef6ff',
-                      wordBreak: 'break-word',
-                    }}
-                  >
-                    {row.opponent}
-                  </div>
-                </div>
+              <RankChip rank={opponentRank} />
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 900,
+                  color: '#eef6ff',
+                  lineHeight: 1.05,
+                  wordBreak: 'break-word',
+                }}
+              >
+                {row.opponent}
               </div>
-              <PlayerPhoto
-                name={row.opponent}
-                photoUrl={getPlayerPhotoUrl(row.opponent)}
-                size={58}
-                borderColor={opponentTheme.accentBorder}
-              />
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <Pill
-              accent="#bdefff"
-              background="rgba(174,242,255,0.10)"
-              borderColor="rgba(174,242,255,0.18)"
-            >
-              {row.status || 'Active'}
-            </Pill>
-            {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
-            {row.eligible ? <Pill muted>Eligible: {row.eligible}</Pill> : null}
-          </div>
+          <PlayerPhoto
+            name={row.opponent}
+            photoUrl={getPlayerPhotoUrl(row.opponent)}
+            size={76}
+            borderColor={opponentTheme.accentBorder}
+          />
         </div>
-
-        <Pill
-          accent="#aef2ff"
-          background="rgba(174,242,255,0.10)"
-          borderColor="rgba(174,242,255,0.20)"
-        >
-          Click to enter result
-        </Pill>
       </div>
 
       <div
+        className="active-meta-row"
         style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-          gap: 10,
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 14,
+          alignItems: 'flex-end',
+          flexWrap: 'wrap',
         }}
       >
-        <MetaBox label="Match Date" value={formatDate(row.match_date) || '-'} />
+        <div
+          style={{
+            display: 'flex',
+            gap: 8,
+            flexWrap: 'wrap',
+          }}
+        >
+          <Pill
+            accent="#bdefff"
+            background="rgba(174,242,255,0.10)"
+            borderColor="rgba(174,242,255,0.18)"
+          >
+            {row.status || 'Active'}
+          </Pill>
+
+          {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
+
+          <Pill muted>Match Date: {formatDate(row.match_date) || '-'}</Pill>
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation()
+            onClick()
+          }}
+          className="interactive-card"
+          style={{
+            minHeight: 46,
+            padding: '0 18px',
+            borderRadius: 14,
+            border: '1px solid rgba(174,242,255,0.22)',
+            background:
+              'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.06) 100%)',
+            color: '#c9f7ff',
+            fontSize: 14,
+            fontWeight: 900,
+            cursor: 'pointer',
+            boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          Enter Result
+        </button>
       </div>
     </div>
   )
@@ -1555,6 +1607,18 @@ export default function MatchCenterPage() {
           .completed-text-wrap {
             text-align: center !important;
             align-items: center !important;
+          }
+        }
+
+        @media (max-width: 860px) {
+          .active-match-layout {
+            grid-template-columns: 1fr !important;
+            justify-items: center;
+            gap: 16px !important;
+          }
+
+          .active-meta-row {
+            justify-content: center !important;
           }
         }
 
