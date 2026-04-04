@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 
 const sheetId =
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
@@ -76,6 +76,8 @@ function getRankTheme(rank) {
       accent: '#aef2ff',
       accentSoft: 'rgba(174,242,255,0.16)',
       accentBorder: 'rgba(174,242,255,0.34)',
+      badgeBg: 'linear-gradient(135deg, #ffffff 0%, #e2f9ff 45%, #a3ebff 100%)',
+      badgeColor: '#102444',
     }
   }
 
@@ -84,6 +86,8 @@ function getRankTheme(rank) {
       accent: '#f6d56f',
       accentSoft: 'rgba(246,213,111,0.14)',
       accentBorder: 'rgba(246,213,111,0.28)',
+      badgeBg: 'linear-gradient(135deg, #fff7d6 0%, #f4d566 58%, #ddb13d 100%)',
+      badgeColor: '#3d2c00',
     }
   }
 
@@ -92,6 +96,8 @@ function getRankTheme(rank) {
       accent: '#dde6f0',
       accentSoft: 'rgba(221,230,240,0.13)',
       accentBorder: 'rgba(221,230,240,0.26)',
+      badgeBg: 'linear-gradient(135deg, #f5f8fc 0%, #dbe2ec 55%, #b7c4d6 100%)',
+      badgeColor: '#253245',
     }
   }
 
@@ -100,6 +106,8 @@ function getRankTheme(rank) {
       accent: '#d29667',
       accentSoft: 'rgba(210,150,103,0.14)',
       accentBorder: 'rgba(210,150,103,0.28)',
+      badgeBg: 'linear-gradient(135deg, #f3d5bf 0%, #d29667 60%, #b56f42 100%)',
+      badgeColor: '#3f1f0d',
     }
   }
 
@@ -107,7 +115,26 @@ function getRankTheme(rank) {
     accent: '#b8c9e6',
     accentSoft: 'rgba(184,201,230,0.10)',
     accentBorder: 'rgba(184,201,230,0.18)',
+    badgeBg: 'linear-gradient(135deg, #eff5ff 0%, #dbe7f7 100%)',
+    badgeColor: '#182235',
   }
+}
+
+function safeDateValue(value) {
+  if (!value) return null
+  const parsed = new Date(value)
+  if (Number.isNaN(parsed.getTime())) return null
+  return parsed
+}
+
+function formatDate(value) {
+  const d = safeDateValue(value)
+  if (!d) return value || '-'
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 function parseScore(scoreText) {
@@ -128,7 +155,42 @@ function winnerIsChallenger(row) {
   return normalizeText(row.winner) === normalizeText(row.challenger)
 }
 
-function Pill({ children, accent = '#dce8ff', muted = false, background, borderColor }) {
+function getLoserName(row) {
+  if (!row?.winner) return '-'
+  return normalizeText(row.winner) === normalizeText(row.challenger)
+    ? row.opponent
+    : row.challenger
+}
+
+function sortActiveRows(rows) {
+  return [...rows].sort((a, b) => {
+    const da = safeDateValue(a.match_date)
+    const db = safeDateValue(b.match_date)
+    if (da && db) return da - db
+    if (da) return -1
+    if (db) return 1
+    return 0
+  })
+}
+
+function sortCompletedRows(rows) {
+  return [...rows].sort((a, b) => {
+    const da = safeDateValue(a.match_date)
+    const db = safeDateValue(b.match_date)
+    if (da && db) return db - da
+    if (da) return -1
+    if (db) return 1
+    return 0
+  })
+}
+
+function Pill({
+  children,
+  accent = '#dce8ff',
+  muted = false,
+  background,
+  borderColor,
+}) {
   return (
     <div
       style={{
@@ -140,7 +202,8 @@ function Pill({ children, accent = '#dce8ff', muted = false, background, borderC
         fontSize: 12,
         fontWeight: 800,
         letterSpacing: '0.02em',
-        background: background || (muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'),
+        background:
+          background || (muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'),
         border: `1px solid ${borderColor || 'rgba(255,255,255,0.10)'}`,
         color: accent,
         whiteSpace: 'nowrap',
@@ -242,7 +305,12 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
   )
 }
 
-function PlayerPhoto({ name, photoUrl, size = 74, borderColor = 'rgba(255,255,255,0.14)' }) {
+function PlayerPhoto({
+  name,
+  photoUrl,
+  size = 74,
+  borderColor = 'rgba(255,255,255,0.14)',
+}) {
   return (
     <div
       className="photo-hover"
@@ -290,6 +358,137 @@ function PlayerPhoto({ name, photoUrl, size = 74, borderColor = 'rgba(255,255,25
   )
 }
 
+function RankChip({ rank }) {
+  const theme = getRankTheme(rank)
+  return (
+    <div
+      style={{
+        minWidth: 28,
+        height: 28,
+        padding: '0 8px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: theme.badgeBg,
+        color: theme.badgeColor,
+        fontSize: 12,
+        fontWeight: 900,
+        boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
+      }}
+    >
+      #{rank}
+    </div>
+  )
+}
+
+function ScoreDisplayPro({ row }) {
+  const sets = parseScore(row.score)
+  const winnerIsChall = winnerIsChallenger(row)
+
+  if (!sets.length) {
+    return (
+      <div className="completed-score-panel" style={scorePanelOuterStyle}>
+        <div style={scorePanelInnerStyle}>
+          <div style={scoreTitleStyle}>Reported Score</div>
+          <div
+            style={{
+              fontSize: 18,
+              fontWeight: 850,
+              color: '#eef6ff',
+              textAlign: 'center',
+            }}
+          >
+            {row.score || '-'}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="completed-score-panel" style={scorePanelOuterStyle}>
+      <div style={scorePanelInnerStyle}>
+        <div style={scoreTitleStyle}>Reported Score</div>
+
+        <div
+          style={{
+            display: 'grid',
+            gap: 10,
+          }}
+        >
+          {sets.map((set, index) => {
+            const winnerScore = winnerIsChall ? set.a : set.b
+            const loserScore = winnerIsChall ? set.b : set.a
+
+            return (
+              <div
+                key={index}
+                style={{
+                  borderRadius: 16,
+                  padding: '10px 12px',
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                }}
+              >
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto auto',
+                    alignItems: 'center',
+                    gap: 12,
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(220,232,255,0.52)',
+                    }}
+                  >
+                    Set {index + 1}
+                  </div>
+
+                  <div
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: '50%',
+                      display: 'grid',
+                      placeItems: 'center',
+                      fontSize: 21,
+                      fontWeight: 900,
+                      color: '#0f2342',
+                      background: '#dbe7f7',
+                      boxShadow: '0 10px 20px rgba(0,0,0,0.18)',
+                    }}
+                  >
+                    {winnerScore}
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 21,
+                      fontWeight: 900,
+                      color: '#eef6ff',
+                      minWidth: 18,
+                      textAlign: 'center',
+                    }}
+                  >
+                    {loserScore}
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
   const challengerRank = row.challenger_rank || rankByName(row.challenger)
   const opponentRank = row.opponent_rank || rankByName(row.opponent)
@@ -322,48 +521,129 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
       >
         <div style={{ minWidth: 0, flex: 1 }}>
           <div
+            className="active-player-grid"
             style={{
-              display: 'flex',
-              alignItems: 'center',
+              display: 'grid',
+              gridTemplateColumns: '1fr auto 1fr',
               gap: 12,
-              flexWrap: 'wrap',
+              alignItems: 'center',
               marginBottom: 12,
             }}
           >
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                minWidth: 0,
+              }}
+            >
               <PlayerPhoto
                 name={row.challenger}
                 photoUrl={getPlayerPhotoUrl(row.challenger)}
-                size={56}
+                size={58}
                 borderColor={challengerTheme.accentBorder}
               />
-              <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff' }}>
-                {row.challenger}
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(220,232,255,0.54)',
+                    marginBottom: 6,
+                  }}
+                >
+                  Challenger
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 8,
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 850,
+                      color: '#eef6ff',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {row.challenger}
+                  </div>
+                  <RankChip rank={challengerRank} />
+                </div>
               </div>
             </div>
 
             <div
               style={{
-                fontSize: 15,
-                fontWeight: 800,
-                color: 'rgba(220,232,255,0.64)',
-                letterSpacing: '0.12em',
+                display: 'grid',
+                placeItems: 'center',
+                fontSize: 14,
+                fontWeight: 900,
+                letterSpacing: '0.16em',
                 textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.56)',
               }}
             >
-              vs
+              VS
             </div>
 
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 10,
+                justifyContent: 'flex-end',
+                minWidth: 0,
+              }}
+            >
+              <div style={{ minWidth: 0, textAlign: 'right' }}>
+                <div
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 800,
+                    letterSpacing: '0.14em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(220,232,255,0.54)',
+                    marginBottom: 6,
+                  }}
+                >
+                  Opponent
+                </div>
+                <div
+                  style={{
+                    display: 'flex',
+                    gap: 8,
+                    alignItems: 'center',
+                    justifyContent: 'flex-end',
+                    flexWrap: 'wrap',
+                  }}
+                >
+                  <RankChip rank={opponentRank} />
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 850,
+                      color: '#eef6ff',
+                      wordBreak: 'break-word',
+                    }}
+                  >
+                    {row.opponent}
+                  </div>
+                </div>
+              </div>
               <PlayerPhoto
                 name={row.opponent}
                 photoUrl={getPlayerPhotoUrl(row.opponent)}
-                size={56}
+                size={58}
                 borderColor={opponentTheme.accentBorder}
               />
-              <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff' }}>
-                {row.opponent}
-              </div>
             </div>
           </div>
 
@@ -396,87 +676,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
           gap: 10,
         }}
       >
-        <MetaBox label="Match Date" value={row.match_date || '-'} />
-      </div>
-    </div>
-  )
-}
-
-function ScorePanel({ row }) {
-  const sets = parseScore(row.score)
-  const winnerIsChall = winnerIsChallenger(row)
-
-  if (!sets.length) {
-    return (
-      <div className="completed-score-panel" style={scorePanelOuterStyle}>
-        <div style={scorePanelInnerStyle}>
-          <div style={scoreTitleStyle}>Reported Score</div>
-          <div style={{ fontSize: 18, fontWeight: 850, color: '#eef6ff', textAlign: 'center' }}>
-            {row.score || '-'}
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  return (
-    <div className="completed-score-panel" style={scorePanelOuterStyle}>
-      <div style={scorePanelInnerStyle}>
-        <div style={scoreTitleStyle}>Reported Score</div>
-
-        <div style={{ display: 'grid', gap: 10 }}>
-          {sets.map((set, index) => {
-            const winnerScore = winnerIsChall ? set.a : set.b
-            const loserScore = winnerIsChall ? set.b : set.a
-
-            return (
-              <div
-                key={index}
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr auto auto',
-                  alignItems: 'center',
-                  gap: 14,
-                }}
-              >
-                <div
-                  style={{
-                    height: 1,
-                    background: 'rgba(255,255,255,0.18)',
-                    width: '100%',
-                  }}
-                />
-                <div
-                  style={{
-                    width: 46,
-                    height: 46,
-                    borderRadius: '50%',
-                    display: 'grid',
-                    placeItems: 'center',
-                    fontSize: 22,
-                    fontWeight: 900,
-                    color: '#0f2342',
-                    background: '#dbe7f7',
-                    boxShadow: '0 10px 20px rgba(0,0,0,0.18)',
-                  }}
-                >
-                  {winnerScore}
-                </div>
-                <div
-                  style={{
-                    fontSize: 22,
-                    fontWeight: 900,
-                    color: '#eef6ff',
-                    minWidth: 18,
-                    textAlign: 'center',
-                  }}
-                >
-                  {loserScore}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <MetaBox label="Match Date" value={formatDate(row.match_date) || '-'} />
       </div>
     </div>
   )
@@ -484,11 +684,7 @@ function ScorePanel({ row }) {
 
 function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
   const winnerName = row.winner || '-'
-  const loserName =
-    normalizeText(row.winner) === normalizeText(row.challenger)
-      ? row.opponent
-      : row.challenger
-
+  const loserName = getLoserName(row)
   const winnerRank = rankByName(winnerName)
   const winnerTheme = getRankTheme(winnerRank)
 
@@ -542,14 +738,25 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
         >
           <div
             style={{
-              fontSize: 34,
-              fontWeight: 900,
-              color: '#eef6ff',
-              lineHeight: 1.02,
+              display: 'flex',
+              gap: 10,
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
               marginBottom: 8,
             }}
           >
-            {winnerName}
+            <div
+              style={{
+                fontSize: 34,
+                fontWeight: 900,
+                color: '#eef6ff',
+                lineHeight: 1.02,
+              }}
+            >
+              {winnerName}
+            </div>
+            <RankChip rank={winnerRank} />
           </div>
 
           <div
@@ -586,11 +793,11 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
             }}
           >
             <Pill accent="#bdefff">Completed</Pill>
-            <Pill muted>Match Date: {row.match_date || '-'}</Pill>
+            <Pill muted>Match Date: {formatDate(row.match_date) || '-'}</Pill>
           </div>
         </div>
 
-        <ScorePanel row={row} />
+        <ScoreDisplayPro row={row} />
       </div>
     </div>
   )
@@ -603,7 +810,7 @@ function EmptyState({ title, subtitle }) {
       style={{
         borderRadius: 22,
         padding: 26,
-        background: 'rgba(17,40,74,0.64)',
+        background: 'rgba(17,40,74,0.68)',
         border: '1px solid rgba(255,255,255,0.08)',
         textAlign: 'center',
       }}
@@ -722,19 +929,289 @@ function CompletedSkeleton() {
   )
 }
 
+function Toast({ toast }) {
+  if (!toast) return null
+  const isSuccess = toast.type === 'success'
+
+  return (
+    <div
+      className="fade-in"
+      style={{
+        position: 'fixed',
+        top: 18,
+        right: 18,
+        zIndex: 1100,
+        minWidth: 260,
+        maxWidth: 360,
+        borderRadius: 18,
+        padding: '14px 16px',
+        background: isSuccess
+          ? 'linear-gradient(180deg, rgba(16,72,56,0.96) 0%, rgba(9,43,34,0.98) 100%)'
+          : 'linear-gradient(180deg, rgba(89,25,25,0.96) 0%, rgba(53,14,14,0.98) 100%)',
+        border: isSuccess
+          ? '1px solid rgba(110, 255, 190, 0.24)'
+          : '1px solid rgba(255, 132, 132, 0.24)',
+        boxShadow: '0 20px 40px rgba(0,0,0,0.26)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          marginBottom: 6,
+          color: isSuccess ? '#aef2cf' : '#ffb6b6',
+        }}
+      >
+        {isSuccess ? 'Success' : 'Error'}
+      </div>
+      <div
+        style={{
+          fontSize: 15,
+          fontWeight: 700,
+          color: '#eef6ff',
+          lineHeight: 1.4,
+        }}
+      >
+        {toast.message}
+      </div>
+    </div>
+  )
+}
+
+function PlayerPicker({
+  label,
+  value,
+  onChange,
+  players,
+  getPlayerPhotoUrl,
+  excludeName,
+}) {
+  const [open, setOpen] = useState(false)
+  const [query, setQuery] = useState('')
+  const ref = useRef(null)
+
+  useEffect(() => {
+    function handleOutside(event) {
+      if (ref.current && !ref.current.contains(event.target)) {
+        setOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleOutside)
+    return () => document.removeEventListener('mousedown', handleOutside)
+  }, [])
+
+  const selected = players.find((p) => p.name === value)
+
+  const visiblePlayers = players.filter((p) => {
+    if (excludeName && p.name === excludeName) return false
+    if (!query.trim()) return true
+    return p.name.toLowerCase().includes(query.trim().toLowerCase())
+  })
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <label style={labelStyle}>{label}</label>
+
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        className="interactive-card"
+        style={{
+          width: '100%',
+          minHeight: 58,
+          borderRadius: 18,
+          border: '1px solid rgba(255,255,255,0.12)',
+          padding: '10px 14px',
+          background: 'rgba(243,244,246,0.96)',
+          color: '#111827',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+          cursor: 'pointer',
+        }}
+      >
+        {selected ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+            <PlayerPhoto
+              name={selected.name}
+              photoUrl={getPlayerPhotoUrl(selected.name)}
+              size={38}
+              borderColor="rgba(0,0,0,0.08)"
+            />
+            <div style={{ minWidth: 0, textAlign: 'left' }}>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: '#111827',
+                }}
+              >
+                {selected.name}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: '#4b5563',
+                  marginTop: 2,
+                }}
+              >
+                Rank #{selected.rank}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div
+            style={{
+              fontSize: 16,
+              color: '#6b7280',
+            }}
+          >
+            Select {label.toLowerCase()}
+          </div>
+        )}
+
+        <div
+          style={{
+            fontSize: 18,
+            color: '#4b5563',
+            lineHeight: 1,
+          }}
+        >
+          ▾
+        </div>
+      </button>
+
+      {open ? (
+        <div
+          className="fade-in"
+          style={{
+            position: 'absolute',
+            top: 'calc(100% + 8px)',
+            left: 0,
+            right: 0,
+            zIndex: 30,
+            borderRadius: 18,
+            background:
+              'linear-gradient(180deg, rgba(15,34,63,0.98) 0%, rgba(10,23,43,0.99) 100%)',
+            border: '1px solid rgba(91,171,255,0.22)',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.30)',
+            overflow: 'hidden',
+          }}
+        >
+          <div style={{ padding: 12, borderBottom: '1px solid rgba(255,255,255,0.08)' }}>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search player"
+              style={{
+                width: '100%',
+                height: 42,
+                borderRadius: 12,
+                border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(255,255,255,0.06)',
+                color: 'white',
+                padding: '0 12px',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div
+            style={{
+              maxHeight: 280,
+              overflowY: 'auto',
+              padding: 8,
+              display: 'grid',
+              gap: 6,
+            }}
+          >
+            {visiblePlayers.length === 0 ? (
+              <div
+                style={{
+                  padding: 14,
+                  color: 'rgba(220,232,255,0.68)',
+                  fontSize: 14,
+                }}
+              >
+                No players found.
+              </div>
+            ) : (
+              visiblePlayers.map((player) => (
+                <button
+                  key={player.name}
+                  type="button"
+                  onClick={() => {
+                    onChange(player.name)
+                    setOpen(false)
+                    setQuery('')
+                  }}
+                  className="interactive-card"
+                  style={{
+                    width: '100%',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                    background: 'rgba(255,255,255,0.04)',
+                    borderRadius: 14,
+                    padding: '10px 12px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 12,
+                    color: 'white',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <PlayerPhoto
+                    name={player.name}
+                    photoUrl={getPlayerPhotoUrl(player.name)}
+                    size={40}
+                    borderColor="rgba(255,255,255,0.14)"
+                  />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div
+                      style={{
+                        fontSize: 15,
+                        fontWeight: 800,
+                        color: '#eef6ff',
+                      }}
+                    >
+                      {player.name}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: 'rgba(220,232,255,0.62)',
+                        marginTop: 2,
+                      }}
+                    >
+                      Rank #{player.rank}
+                    </div>
+                  </div>
+                </button>
+              ))
+            )}
+          </div>
+        </div>
+      ) : null}
+    </div>
+  )
+}
+
 export default function MatchCenterPage() {
   const [feedRows, setFeedRows] = useState([])
   const [rankingRows, setRankingRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [challengeMessage, setChallengeMessage] = useState('')
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
-
   const [selectedMatch, setSelectedMatch] = useState(null)
   const [resultForm, setResultForm] = useState({
     winner: '',
     score: '',
   })
   const [submittingResult, setSubmittingResult] = useState(false)
+  const [toast, setToast] = useState(null)
 
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
@@ -743,6 +1220,16 @@ export default function MatchCenterPage() {
     opponent_rank: '',
     match_date: '',
   })
+
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 2600)
+    return () => clearTimeout(timer)
+  }, [toast])
+
+  function showToast(message, type = 'success') {
+    setToast({ message, type })
+  }
 
   function getPlayerPhotoUrl(name) {
     const match = rankingRows.find(
@@ -769,6 +1256,7 @@ export default function MatchCenterPage() {
       console.error('Failed to load Match Center data:', err)
       setFeedRows([])
       setRankingRows([])
+      showToast('Failed to load Match Center data', 'error')
     } finally {
       setLoading(false)
     }
@@ -779,12 +1267,18 @@ export default function MatchCenterPage() {
   }, [])
 
   const activeChallenges = useMemo(() => {
-    return feedRows.filter(isActive)
+    return sortActiveRows(feedRows.filter(isActive))
   }, [feedRows])
 
   const completedChallenges = useMemo(() => {
-    return feedRows.filter((row) => isCompleted(row) || isArchived(row))
+    return sortCompletedRows(feedRows.filter((row) => isCompleted(row) || isArchived(row)))
   }, [feedRows])
+
+  const latestCompletedSummary = useMemo(() => {
+    const latest = completedChallenges[0]
+    if (!latest) return 'No recent result yet'
+    return `${latest.winner || 'Winner'} def. ${getLoserName(latest)}`
+  }, [completedChallenges])
 
   function updateChallengeField(name, value) {
     if (name === 'challenger') {
@@ -793,6 +1287,8 @@ export default function MatchCenterPage() {
         ...prev,
         challenger: value,
         challenger_rank: player ? String(player.rank) : '',
+        opponent: prev.opponent === value ? '' : prev.opponent,
+        opponent_rank: prev.opponent === value ? '' : prev.opponent_rank,
       }))
       return
     }
@@ -816,7 +1312,6 @@ export default function MatchCenterPage() {
   async function handleChallengeSubmit(e) {
     e.preventDefault()
     setSubmittingChallenge(true)
-    setChallengeMessage('')
 
     try {
       if (!challengeForm.challenger || !challengeForm.opponent) {
@@ -856,8 +1351,6 @@ export default function MatchCenterPage() {
         throw new Error(data.error || data.raw || 'Challenge submit failed')
       }
 
-      setChallengeMessage('Challenge submitted successfully')
-
       setChallengeForm({
         challenger: '',
         challenger_rank: '',
@@ -866,12 +1359,13 @@ export default function MatchCenterPage() {
         match_date: '',
       })
 
+      showToast('Challenge submitted successfully', 'success')
       setTimeout(() => {
         loadData()
-      }, 1000)
+      }, 250)
     } catch (err) {
       console.error('Challenge submit failed:', err)
-      setChallengeMessage(err.message || 'Challenge submit failed')
+      showToast(err.message || 'Challenge submit failed', 'error')
     } finally {
       setSubmittingChallenge(false)
     }
@@ -882,7 +1376,6 @@ export default function MatchCenterPage() {
     if (!selectedMatch) return
 
     setSubmittingResult(true)
-    setChallengeMessage('')
 
     try {
       if (!selectedMatch.source_row) {
@@ -933,14 +1426,14 @@ export default function MatchCenterPage() {
         score: '',
       })
 
-      setChallengeMessage('Match result saved successfully')
+      showToast('Match result saved successfully', 'success')
 
       setTimeout(() => {
         loadData()
-      }, 1500)
+      }, 300)
     } catch (err) {
       console.error('Result submit failed:', err)
-      setChallengeMessage(err.message || 'Failed to submit result')
+      showToast(err.message || 'Failed to submit result', 'error')
     } finally {
       setSubmittingResult(false)
     }
@@ -1065,12 +1558,20 @@ export default function MatchCenterPage() {
           }
         }
 
+        @media (max-width: 760px) {
+          .active-player-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
         @media (max-width: 700px) {
           .match-center-title {
             font-size: 34px !important;
           }
         }
       `}</style>
+
+      <Toast toast={toast} />
 
       <div
         style={{
@@ -1161,24 +1662,6 @@ export default function MatchCenterPage() {
             }}
           />
 
-          {challengeMessage ? (
-            <div
-              className="fade-in"
-              style={{
-                marginBottom: 24,
-                padding: '18px 20px',
-                borderRadius: 18,
-                background: 'rgba(17,40,74,0.78)',
-                border: '1px solid rgba(91,171,255,0.26)',
-                fontSize: 17,
-                fontWeight: 700,
-                boxShadow: '0 12px 30px rgba(0,0,0,0.18)',
-              }}
-            >
-              {challengeMessage}
-            </div>
-          ) : null}
-
           <div
             className="fade-in"
             style={{
@@ -1201,6 +1684,7 @@ export default function MatchCenterPage() {
             >
               <form onSubmit={handleChallengeSubmit}>
                 <div
+                  className="active-player-grid"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -1208,39 +1692,23 @@ export default function MatchCenterPage() {
                     marginBottom: 16,
                   }}
                 >
-                  <div>
-                    <label style={labelStyle}>Challenger</label>
-                    <select
-                      value={challengeForm.challenger}
-                      onChange={(e) => updateChallengeField('challenger', e.target.value)}
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select challenger</option>
-                      {PLAYERS.map((player) => (
-                        <option key={player.name} value={player.name}>
-                          {player.name} (#{player.rank})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <PlayerPicker
+                    label="Challenger"
+                    value={challengeForm.challenger}
+                    onChange={(value) => updateChallengeField('challenger', value)}
+                    players={PLAYERS}
+                    getPlayerPhotoUrl={getPlayerPhotoUrl}
+                    excludeName={challengeForm.opponent}
+                  />
 
-                  <div>
-                    <label style={labelStyle}>Opponent</label>
-                    <select
-                      value={challengeForm.opponent}
-                      onChange={(e) => updateChallengeField('opponent', e.target.value)}
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select opponent</option>
-                      {PLAYERS.map((player) => (
-                        <option key={player.name} value={player.name}>
-                          {player.name} (#{player.rank})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                  <PlayerPicker
+                    label="Opponent"
+                    value={challengeForm.opponent}
+                    onChange={(value) => updateChallengeField('opponent', value)}
+                    players={PLAYERS}
+                    getPlayerPhotoUrl={getPlayerPhotoUrl}
+                    excludeName={challengeForm.challenger}
+                  />
 
                   <div>
                     <label style={labelStyle}>Match Date</label>
@@ -1270,6 +1738,11 @@ export default function MatchCenterPage() {
 
             <SectionCard
               title="Active Challenges"
+              subtitle={
+                activeChallenges.length
+                  ? `${activeChallenges.length} pending result${activeChallenges.length === 1 ? '' : 's'}`
+                  : 'No pending results'
+              }
               accent="rgba(168,240,255,0.08)"
               right={
                 <Pill
@@ -1314,6 +1787,11 @@ export default function MatchCenterPage() {
 
             <SectionCard
               title="Completed Challenges"
+              subtitle={
+                completedChallenges.length
+                  ? `Latest result: ${latestCompletedSummary}`
+                  : 'No reported results yet'
+              }
               accent="rgba(255,255,255,0.05)"
               right={
                 <Pill muted>
@@ -1379,25 +1857,24 @@ export default function MatchCenterPage() {
 
               <form onSubmit={handleResultSubmit}>
                 <div style={{ display: 'grid', gap: 16 }}>
-                  <div>
-                    <label style={labelStyle}>Winner</label>
-                    <select
-                      value={resultForm.winner}
-                      onChange={(e) =>
-                        setResultForm((prev) => ({ ...prev, winner: e.target.value }))
-                      }
-                      style={inputStyle}
-                      required
-                    >
-                      <option value="">Select winner</option>
-                      <option value={selectedMatch.challenger}>
-                        {selectedMatch.challenger}
-                      </option>
-                      <option value={selectedMatch.opponent}>
-                        {selectedMatch.opponent}
-                      </option>
-                    </select>
-                  </div>
+                  <PlayerPicker
+                    label="Winner"
+                    value={resultForm.winner}
+                    onChange={(value) =>
+                      setResultForm((prev) => ({ ...prev, winner: value }))
+                    }
+                    players={[
+                      {
+                        name: selectedMatch.challenger,
+                        rank: rankByName(selectedMatch.challenger),
+                      },
+                      {
+                        name: selectedMatch.opponent,
+                        rank: rankByName(selectedMatch.opponent),
+                      },
+                    ]}
+                    getPlayerPhotoUrl={getPlayerPhotoUrl}
+                  />
 
                   <div>
                     <label style={labelStyle}>Score</label>
