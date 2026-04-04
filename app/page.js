@@ -7,6 +7,7 @@ const sheetId =
   '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
 
 const rankingUrl = `https://opensheet.elk.sh/${sheetId}/LiveRankingFeed`
+const challengeFeedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
 
 function normalizeText(value) {
   return String(value || '').trim()
@@ -21,6 +22,29 @@ function toNumber(value, fallback = 999) {
   return Number.isFinite(n) ? n : fallback
 }
 
+function isCompleted(row) {
+  const status = normalizeUpper(row?.status)
+  return status === 'COMPLETE' || status === 'COMPLETED'
+}
+
+function isArchived(row) {
+  const archived = normalizeUpper(row?.archived)
+  return archived === 'YES' || archived === 'TRUE'
+}
+
+function isActiveChallenge(row) {
+  if (!row) return false
+  if (isCompleted(row) || isArchived(row)) return false
+
+  const active = normalizeUpper(row.active)
+  const status = normalizeUpper(row.status)
+
+  if (active === 'YES' || active === 'ACTIVE') return true
+  if (status === 'ACTIVE' || status === 'PENDING' || status === 'SCHEDULED') return true
+
+  return false
+}
+
 function sortRankings(rows) {
   return [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
 }
@@ -31,83 +55,113 @@ function getRankTheme(rank) {
   if (n === 1) {
     return {
       accent: '#aef2ff',
-      accentStrong: '#dffbff',
-      soft: 'rgba(174,242,255,0.22)',
-      border: 'rgba(174,242,255,0.52)',
-      glow: 'rgba(174,242,255,0.26)',
-      pillBg:
-        'linear-gradient(180deg, rgba(245,254,255,1) 0%, rgba(205,247,255,1) 58%, rgba(151,233,255,1) 100%)',
-      pillColor: '#0f2341',
+      accentStrong: '#effdff',
+      border: 'rgba(174,242,255,0.56)',
+      glow: 'rgba(174,242,255,0.28)',
+      soft: 'rgba(174,242,255,0.18)',
+      badgeBg:
+        'linear-gradient(180deg, rgba(251,255,255,1) 0%, rgba(216,249,255,1) 56%, rgba(153,235,255,1) 100%)',
+      badgeColor: '#102444',
       cardBg:
-        'linear-gradient(180deg, rgba(16,44,84,0.99) 0%, rgba(7,22,43,0.995) 100%)',
+        'linear-gradient(180deg, rgba(16,46,87,0.99) 0%, rgba(7,21,42,0.995) 100%)',
       platformBg:
-        'linear-gradient(180deg, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.035) 100%)',
+        'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.035) 100%)',
+      chipBg:
+        'linear-gradient(180deg, rgba(16,39,76,0.95) 0%, rgba(10,27,52,0.98) 100%)',
+      chipBorder: 'rgba(174,242,255,0.22)',
+      chipColor: '#d8fbff',
+      rail: 'linear-gradient(180deg, rgba(174,242,255,0.90) 0%, rgba(174,242,255,0.20) 100%)',
+      zoneGlow: 'rgba(174,242,255,0.12)',
     }
   }
 
   if (n === 2) {
     return {
       accent: '#f6d56f',
-      accentStrong: '#fff0b8',
-      soft: 'rgba(246,213,111,0.16)',
+      accentStrong: '#fff4c8',
       border: 'rgba(246,213,111,0.42)',
       glow: 'rgba(246,213,111,0.18)',
-      pillBg:
-        'linear-gradient(180deg, rgba(255,250,228,1) 0%, rgba(249,225,140,1) 56%, rgba(219,170,48,1) 100%)',
-      pillColor: '#3b2a00',
+      soft: 'rgba(246,213,111,0.14)',
+      badgeBg:
+        'linear-gradient(180deg, rgba(255,251,235,1) 0%, rgba(249,226,145,1) 58%, rgba(219,171,53,1) 100%)',
+      badgeColor: '#3b2a00',
       cardBg:
-        'linear-gradient(180deg, rgba(53,40,15,0.98) 0%, rgba(24,18,9,0.99) 100%)',
+        'linear-gradient(180deg, rgba(53,40,15,0.98) 0%, rgba(25,18,8,0.99) 100%)',
       platformBg:
-        'linear-gradient(180deg, rgba(246,213,111,0.11) 0%, rgba(255,255,255,0.03) 100%)',
+        'linear-gradient(180deg, rgba(246,213,111,0.12) 0%, rgba(255,255,255,0.03) 100%)',
+      chipBg:
+        'linear-gradient(180deg, rgba(55,43,17,0.95) 0%, rgba(28,21,9,0.98) 100%)',
+      chipBorder: 'rgba(246,213,111,0.18)',
+      chipColor: '#f8e9ab',
+      rail: 'linear-gradient(180deg, rgba(246,213,111,0.88) 0%, rgba(246,213,111,0.20) 100%)',
+      zoneGlow: 'rgba(246,213,111,0.08)',
     }
   }
 
   if (n === 3) {
     return {
       accent: '#dde6f0',
-      accentStrong: '#f7fbff',
-      soft: 'rgba(221,230,240,0.14)',
+      accentStrong: '#fbfdff',
       border: 'rgba(221,230,240,0.38)',
-      glow: 'rgba(221,230,240,0.14)',
-      pillBg:
-        'linear-gradient(180deg, rgba(250,252,255,1) 0%, rgba(225,233,241,1) 58%, rgba(184,197,214,1) 100%)',
-      pillColor: '#263445',
+      glow: 'rgba(221,230,240,0.15)',
+      soft: 'rgba(221,230,240,0.12)',
+      badgeBg:
+        'linear-gradient(180deg, rgba(251,253,255,1) 0%, rgba(227,234,242,1) 58%, rgba(185,198,214,1) 100%)',
+      badgeColor: '#263445',
       cardBg:
-        'linear-gradient(180deg, rgba(33,40,52,0.98) 0%, rgba(16,20,28,0.99) 100%)',
+        'linear-gradient(180deg, rgba(32,39,52,0.98) 0%, rgba(15,19,28,0.99) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(221,230,240,0.10) 0%, rgba(255,255,255,0.03) 100%)',
+      chipBg:
+        'linear-gradient(180deg, rgba(39,46,58,0.95) 0%, rgba(20,24,31,0.98) 100%)',
+      chipBorder: 'rgba(221,230,240,0.16)',
+      chipColor: '#eef5ff',
+      rail: 'linear-gradient(180deg, rgba(221,230,240,0.88) 0%, rgba(221,230,240,0.20) 100%)',
+      zoneGlow: 'rgba(221,230,240,0.07)',
     }
   }
 
   if (n >= 4 && n <= 7) {
     return {
       accent: '#d29667',
-      accentStrong: '#f3d5bf',
-      soft: 'rgba(210,150,103,0.10)',
+      accentStrong: '#f2d5bf',
       border: 'rgba(210,150,103,0.24)',
       glow: 'rgba(210,150,103,0.08)',
-      pillBg:
+      soft: 'rgba(210,150,103,0.08)',
+      badgeBg:
         'linear-gradient(180deg, rgba(243,213,191,1) 0%, rgba(210,150,103,1) 58%, rgba(181,111,66,1) 100%)',
-      pillColor: '#3f1f0d',
+      badgeColor: '#3f1f0d',
       cardBg:
         'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+      chipBg:
+        'linear-gradient(180deg, rgba(14,31,58,0.90) 0%, rgba(10,21,39,0.94) 100%)',
+      chipBorder: 'rgba(255,255,255,0.10)',
+      chipColor: '#dce8ff',
+      rail: 'linear-gradient(180deg, rgba(210,150,103,0.70) 0%, rgba(210,150,103,0.12) 100%)',
+      zoneGlow: 'rgba(210,150,103,0.05)',
     }
   }
 
   return {
     accent: '#b8c9e6',
     accentStrong: '#eff5ff',
-    soft: 'rgba(184,201,230,0.08)',
     border: 'rgba(184,201,230,0.16)',
     glow: 'rgba(184,201,230,0.06)',
-    pillBg: 'linear-gradient(180deg, #eff5ff 0%, #dbe7f7 100%)',
-    pillColor: '#182235',
+    soft: 'rgba(184,201,230,0.06)',
+    badgeBg: 'linear-gradient(180deg, #eff5ff 0%, #dbe7f7 100%)',
+    badgeColor: '#182235',
     cardBg:
       'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
     platformBg:
       'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+    chipBg:
+      'linear-gradient(180deg, rgba(14,31,58,0.90) 0%, rgba(10,21,39,0.94) 100%)',
+    chipBorder: 'rgba(255,255,255,0.10)',
+    chipColor: '#dce8ff',
+    rail: 'linear-gradient(180deg, rgba(184,201,230,0.55) 0%, rgba(184,201,230,0.10) 100%)',
+    zoneGlow: 'rgba(184,201,230,0.04)',
   }
 }
 
@@ -117,19 +171,23 @@ function getMoveInfo(moveValue) {
 
   if (!raw || upper === '—' || upper === '-') {
     return {
-      label: '—',
-      color: 'rgba(220,232,255,0.72)',
+      label: '0',
+      type: 'neutral',
+      color: 'rgba(220,232,255,0.64)',
       bg: 'rgba(255,255,255,0.05)',
       border: 'rgba(255,255,255,0.08)',
+      icon: '',
     }
   }
 
   if (upper === 'NEW') {
     return {
       label: 'NEW',
-      color: '#bff7d2',
-      bg: 'rgba(110,255,190,0.12)',
-      border: 'rgba(110,255,190,0.18)',
+      type: 'up',
+      color: '#c7ffd7',
+      bg: 'linear-gradient(180deg, rgba(41,84,54,0.92) 0%, rgba(23,49,32,0.98) 100%)',
+      border: 'rgba(132,255,172,0.20)',
+      icon: '↗',
     }
   }
 
@@ -137,28 +195,54 @@ function getMoveInfo(moveValue) {
   if (Number.isFinite(n)) {
     if (n > 0) {
       return {
-        label: `↑ ${n}`,
-        color: '#bff7d2',
-        bg: 'rgba(110,255,190,0.12)',
-        border: 'rgba(110,255,190,0.18)',
+        label: `${n}`,
+        type: 'up',
+        color: '#c7ffd7',
+        bg: 'linear-gradient(180deg, rgba(41,84,54,0.92) 0%, rgba(23,49,32,0.98) 100%)',
+        border: 'rgba(132,255,172,0.22)',
+        icon: '↗',
       }
     }
+
     if (n < 0) {
       return {
-        label: `↓ ${Math.abs(n)}`,
-        color: '#ffd0d0',
-        bg: 'rgba(255,132,132,0.12)',
-        border: 'rgba(255,132,132,0.18)',
+        label: `${Math.abs(n)}`,
+        type: 'down',
+        color: '#ffd7d7',
+        bg: 'linear-gradient(180deg, rgba(92,38,38,0.92) 0%, rgba(48,20,20,0.98) 100%)',
+        border: 'rgba(255,132,132,0.20)',
+        icon: '↘',
       }
     }
   }
 
   return {
     label: raw,
-    color: 'rgba(220,232,255,0.72)',
+    type: 'neutral',
+    color: 'rgba(220,232,255,0.68)',
     bg: 'rgba(255,255,255,0.05)',
     border: 'rgba(255,255,255,0.08)',
+    icon: '',
   }
+}
+
+function getPlayerStatusLabel({
+  row,
+  activeChallengesByPlayer,
+  biggestMoverName,
+}) {
+  const name = normalizeUpper(row.player)
+  const move = getMoveInfo(row.move)
+  const activeThreats = activeChallengesByPlayer[name] || 0
+  const rank = toNumber(row.rank)
+  const isBiggestMover = normalizeUpper(biggestMoverName) === name
+
+  if (rank === 1) return 'Champion'
+  if (activeThreats > 0 && rank <= 7) return 'Under Pressure'
+  if (move.type === 'up' || isBiggestMover) return 'In Form'
+  if (rank <= 3) return 'Defending'
+  if (rank <= 7) return 'Contender'
+  return row.status || 'Active'
 }
 
 function SmallStat({ label, value }) {
@@ -198,33 +282,6 @@ function SmallStat({ label, value }) {
   )
 }
 
-function MoveChip({ move }) {
-  const info = getMoveInfo(move)
-
-  return (
-    <div
-      style={{
-        minWidth: 64,
-        height: 34,
-        padding: '0 12px',
-        borderRadius: 999,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: info.bg,
-        border: `1px solid ${info.border}`,
-        color: info.color,
-        fontSize: 12,
-        fontWeight: 900,
-        letterSpacing: '0.02em',
-        whiteSpace: 'nowrap',
-      }}
-    >
-      {info.label}
-    </div>
-  )
-}
-
 function RankBadge({ rank }) {
   const n = Number(rank)
   const theme = getRankTheme(rank)
@@ -236,20 +293,20 @@ function RankBadge({ rank }) {
     <div
       className={`rank-badge ${isLeader ? 'rank-badge-1' : ''} ${isSecond ? 'rank-badge-2' : ''} ${isThird ? 'rank-badge-3' : ''}`}
       style={{
-        minWidth: isLeader ? 58 : 42,
-        height: isLeader ? 58 : 42,
+        minWidth: isLeader ? 60 : 42,
+        height: isLeader ? 60 : 42,
         padding: isLeader ? '0 16px' : '0 12px',
         borderRadius: 999,
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
         position: 'relative',
-        background: theme.pillBg,
-        color: theme.pillColor,
+        background: theme.badgeBg,
+        color: theme.badgeColor,
         border: `1px solid ${theme.border}`,
         boxShadow: isLeader
-          ? `0 16px 28px rgba(0,0,0,0.24), 0 0 24px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.78), inset 0 -10px 14px rgba(0,0,0,0.16)`
-          : `0 12px 22px rgba(0,0,0,0.18), 0 0 16px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.42), inset 0 -8px 10px rgba(0,0,0,0.14)`,
+          ? `0 16px 28px rgba(0,0,0,0.24), 0 0 24px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.82), inset 0 -10px 14px rgba(0,0,0,0.16)`
+          : `0 12px 22px rgba(0,0,0,0.18), 0 0 14px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.48), inset 0 -8px 10px rgba(0,0,0,0.14)`,
         overflow: 'visible',
       }}
     >
@@ -261,7 +318,7 @@ function RankBadge({ rank }) {
             left: '50%',
             transform: 'translateX(-50%)',
             fontSize: 14,
-            filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.34))',
+            filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.28))',
             zIndex: 4,
             lineHeight: 1,
           }}
@@ -271,7 +328,6 @@ function RankBadge({ rank }) {
       ) : null}
 
       <div className="rank-pill-top-sheen" />
-
       {isLeader ? <div className="rank-pill-trace" /> : null}
 
       <span
@@ -279,7 +335,12 @@ function RankBadge({ rank }) {
           position: 'relative',
           zIndex: 3,
           fontSize: isLeader ? 15 : 13,
-          fontWeight: 900,
+          fontWeight: 950,
+          letterSpacing: '-0.02em',
+          textShadow:
+            isLeader
+              ? '0 1px 0 rgba(255,255,255,0.50), 0 -1px 0 rgba(0,0,0,0.08)'
+              : '0 1px 0 rgba(255,255,255,0.24)',
         }}
       >
         #{rank}
@@ -288,18 +349,45 @@ function RankBadge({ rank }) {
   )
 }
 
-function PlayerPhoto({
-  name,
-  url,
-  rank,
-  size = 100,
-}) {
+function MoveChip({ move }) {
+  const info = getMoveInfo(move)
+
+  return (
+    <div
+      style={{
+        minWidth: 68,
+        height: 38,
+        padding: '0 12px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 6,
+        background: info.bg,
+        border: `1px solid ${info.border}`,
+        color: info.color,
+        fontSize: 13,
+        fontWeight: 900,
+        letterSpacing: '0.01em',
+        whiteSpace: 'nowrap',
+        boxShadow:
+          info.type === 'up'
+            ? '0 10px 20px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.10)'
+            : '0 8px 16px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,0.06)',
+      }}
+    >
+      {info.icon ? <span style={{ fontSize: 12 }}>{info.icon}</span> : null}
+      <span>{info.label}</span>
+    </div>
+  )
+}
+
+function PlayerPhoto({ name, url, rank, size = 100, hot = false }) {
   const theme = getRankTheme(rank)
   const isLeader = Number(rank) === 1
 
   return (
     <div
-      className={isLeader ? 'leader-photo-shell' : ''}
       style={{
         width: size,
         height: size,
@@ -310,26 +398,30 @@ function PlayerPhoto({
       }}
     >
       {isLeader ? <div className="leader-photo-bloom" /> : null}
+      {hot ? <div className="hot-photo-edge" /> : null}
 
       <div
         style={{
           position: 'relative',
-          width: isLeader ? size : size,
-          height: isLeader ? size : size,
+          width: size,
+          height: size,
           borderRadius: Math.round(size * 0.28),
           padding: isLeader ? 8 : 0,
           background: isLeader
             ? `linear-gradient(145deg, ${theme.accentStrong} 0%, ${theme.border} 42%, rgba(255,255,255,0.08) 100%)`
             : 'transparent',
           boxShadow: isLeader
-            ? `0 26px 52px rgba(0,0,0,0.34), 0 0 38px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`
-            : 'none',
+            ? `0 26px 52px rgba(0,0,0,0.34), 0 0 36px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.38)`
+            : hot
+              ? '0 16px 30px rgba(0,0,0,0.22), 0 0 20px rgba(255,98,98,0.16)'
+              : 'none',
           borderRadius: Math.round(size * 0.28),
         }}
       >
         {isLeader ? <div className="leader-photo-outer-ring" /> : null}
         {isLeader ? <div className="leader-photo-inner-bevel" /> : null}
         {isLeader ? <div className="leader-photo-halo" /> : null}
+        {isLeader ? <div className="leader-photo-sheen" /> : null}
 
         <div
           className="photo-hover"
@@ -338,12 +430,14 @@ function PlayerPhoto({
             height: isLeader ? size - 16 : size,
             borderRadius: Math.round(size * 0.22),
             overflow: 'hidden',
-            border: `2px solid ${theme.border}`,
+            border: `2px solid ${hot ? 'rgba(255,98,98,0.38)' : theme.border}`,
             background:
               'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
             boxShadow: isLeader
-              ? `0 18px 36px rgba(0,0,0,0.28), 0 0 26px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.24)`
-              : `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${theme.glow}`,
+              ? `0 18px 36px rgba(0,0,0,0.28), 0 0 24px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.24)`
+              : hot
+                ? '0 14px 28px rgba(0,0,0,0.20), 0 0 18px rgba(255,98,98,0.16)'
+                : `0 14px 30px rgba(0,0,0,0.22), 0 0 18px ${theme.glow}`,
             position: 'relative',
             zIndex: 2,
             transition: 'transform 0.2s ease, box-shadow 0.2s ease',
@@ -382,12 +476,56 @@ function PlayerPhoto({
   )
 }
 
-function PodiumCard({ row, place }) {
+function ActivePressureMarker({ count = 0 }) {
+  if (!count) return null
+
+  return (
+    <div
+      style={{
+        minWidth: 36,
+        height: 24,
+        padding: '0 10px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(180deg, rgba(91,43,43,0.95) 0%, rgba(48,20,20,0.98) 100%)',
+        border: '1px solid rgba(255,132,132,0.20)',
+        color: '#ffd8d8',
+        fontSize: 11,
+        fontWeight: 900,
+        letterSpacing: '0.04em',
+        textTransform: 'uppercase',
+      }}
+    >
+      {count} live
+    </div>
+  )
+}
+
+function PodiumCard({
+  row,
+  place,
+  biggestMoverName,
+  activeChallengesByPlayer,
+  targetMap,
+  highlightedTarget,
+  onHighlightTarget,
+}) {
   const rank = toNumber(row.rank)
   const theme = getRankTheme(rank)
   const isLeader = rank === 1
   const isSecond = rank === 2
   const isThird = rank === 3
+  const isBiggestMover = normalizeUpper(biggestMoverName) === normalizeUpper(row.player)
+  const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
+  const statusLabel = getPlayerStatusLabel({
+    row,
+    activeChallengesByPlayer,
+    biggestMoverName,
+  })
+  const targetName = targetMap[normalizeUpper(row.player)]
+  const isHighlighted = highlightedTarget && normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
 
   const heightMap = {
     1: 452,
@@ -397,24 +535,44 @@ function PodiumCard({ row, place }) {
 
   return (
     <div
-      className={`interactive-card podium-card ${isLeader ? 'podium-card-1' : ''} ${isSecond ? 'podium-card-2' : ''} ${isThird ? 'podium-card-3' : ''} podium-${place}`}
+      onMouseEnter={() => onHighlightTarget(targetName || null)}
+      onMouseLeave={() => onHighlightTarget(null)}
+      className={`interactive-card podium-card ${isLeader ? 'podium-card-1' : ''} ${isSecond ? 'podium-card-2' : ''} ${isThird ? 'podium-card-3' : ''} ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''} podium-${place}`}
       style={{
         position: 'relative',
         minHeight: heightMap[place],
         borderRadius: 34,
         padding: place === 1 ? '30px 22px 22px' : '22px 18px 18px',
         background: theme.cardBg,
-        border: `1px solid ${theme.border}`,
+        border: `1px solid ${isBiggestMover ? 'rgba(255,98,98,0.34)' : theme.border}`,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        transform: isLeader ? 'translateY(-6px)' : 'translateY(0)',
         boxShadow: isLeader
           ? `0 40px 90px rgba(0,0,0,0.42), 0 0 58px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.20)`
-          : `0 24px 56px rgba(0,0,0,0.28), 0 0 28px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`,
+          : isBiggestMover
+            ? `0 24px 56px rgba(0,0,0,0.28), 0 0 24px rgba(255,98,98,0.14), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`
+            : `0 24px 56px rgba(0,0,0,0.28), 0 0 28px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`,
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 24,
+          bottom: 24,
+          width: 5,
+          borderRadius: 999,
+          background: isBiggestMover
+            ? 'linear-gradient(180deg, rgba(255,98,98,0.95) 0%, rgba(255,98,98,0.18) 100%)'
+            : activeCount
+              ? 'linear-gradient(180deg, rgba(255,132,132,0.85) 0%, rgba(255,132,132,0.16) 100%)'
+              : theme.rail,
+          boxShadow: isBiggestMover ? '0 0 16px rgba(255,98,98,0.22)' : 'none',
+        }}
+      />
+
       <div className="podium-frame-outer" />
       <div className="podium-frame-inner" />
       <div className="podium-bottom-lip" />
@@ -425,22 +583,12 @@ function PodiumCard({ row, place }) {
       {isThird ? <div className="podium-breath-silver" /> : null}
       {isLeader ? <div className="podium-hero-outline" /> : null}
 
-      <div
-        style={{
-          position: 'absolute',
-          top: -60,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: isLeader ? 280 : 180,
-          height: isLeader ? 280 : 180,
-          borderRadius: '50%',
-          background: isLeader
-            ? 'radial-gradient(circle, rgba(174,242,255,0.12) 0%, rgba(174,242,255,0.00) 70%)'
-            : 'transparent',
-          filter: 'blur(28px)',
-          pointerEvents: 'none',
-        }}
-      />
+      {isLeader ? (
+        <>
+          <div className="hero-spotlight-behind-photo" />
+          <div className="hero-ambient-rise" />
+        </>
+      ) : null}
 
       <div
         style={{
@@ -449,12 +597,15 @@ function PodiumCard({ row, place }) {
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 10,
-          marginBottom: isLeader ? 20 : 18,
+          marginBottom: isLeader ? 22 : 18,
           zIndex: 3,
         }}
       >
         <RankBadge rank={row.rank} />
-        <MoveChip move={row.move} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <ActivePressureMarker count={activeCount} />
+          <MoveChip move={row.move} />
+        </div>
       </div>
 
       <div style={{ position: 'relative', zIndex: 3 }}>
@@ -462,14 +613,15 @@ function PodiumCard({ row, place }) {
           style={{
             display: 'flex',
             justifyContent: 'center',
-            marginBottom: isLeader ? 20 : 16,
+            marginBottom: isLeader ? 24 : 16,
           }}
         >
           <PlayerPhoto
             name={row.player}
             url={row.photo_url}
             rank={row.rank}
-            size={isLeader ? 170 : 106}
+            size={isLeader ? 176 : 106}
+            hot={isBiggestMover}
           />
         </div>
 
@@ -482,7 +634,7 @@ function PodiumCard({ row, place }) {
               color: '#eef6ff',
               lineHeight: 1.02,
               letterSpacing: '-0.035em',
-              marginBottom: 10,
+              marginBottom: isLeader ? 16 : 12,
             }}
           >
             {row.player || '—'}
@@ -495,28 +647,30 @@ function PodiumCard({ row, place }) {
               justifyContent: 'center',
               alignItems: 'center',
               flexWrap: 'wrap',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
-            {row.status ? (
-              <div
-                style={{
-                  minHeight: 32,
-                  padding: '0 12px',
-                  borderRadius: 999,
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  color: 'rgba(220,232,255,0.82)',
-                  fontSize: 12,
-                  fontWeight: 800,
-                }}
-              >
-                {row.status}
-              </div>
-            ) : null}
+            <div
+              style={{
+                minHeight: 32,
+                padding: '0 12px',
+                borderRadius: 999,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: isBiggestMover
+                  ? 'linear-gradient(180deg, rgba(92,38,38,0.94) 0%, rgba(48,20,20,0.98) 100%)'
+                  : 'rgba(255,255,255,0.05)',
+                border: isBiggestMover
+                  ? '1px solid rgba(255,132,132,0.18)'
+                  : '1px solid rgba(255,255,255,0.08)',
+                color: isBiggestMover ? '#ffd8d8' : 'rgba(220,232,255,0.82)',
+                fontSize: 12,
+                fontWeight: 800,
+              }}
+            >
+              {statusLabel}
+            </div>
 
             {row.flag_url ? (
               <div
@@ -546,7 +700,7 @@ function PodiumCard({ row, place }) {
       </div>
 
       <div
-        className={`podium-platform ${isLeader ? 'podium-platform-1' : isSecond ? 'podium-platform-2' : 'podium-platform-3'}`}
+        className="podium-platform"
         style={{
           position: 'relative',
           zIndex: 3,
@@ -554,7 +708,13 @@ function PodiumCard({ row, place }) {
           height: isLeader ? 88 : 62,
           borderRadius: 24,
           background: theme.platformBg,
-          border: `1px solid ${isLeader ? 'rgba(174,242,255,0.16)' : isSecond ? 'rgba(246,213,111,0.16)' : 'rgba(221,230,240,0.14)'}`,
+          border: `1px solid ${
+            isLeader
+              ? 'rgba(174,242,255,0.16)'
+              : isSecond
+                ? 'rgba(246,213,111,0.16)'
+                : 'rgba(221,230,240,0.14)'
+          }`,
           display: 'grid',
           placeItems: 'center',
           boxShadow:
@@ -565,9 +725,12 @@ function PodiumCard({ row, place }) {
           style={{
             fontSize: isLeader ? 14 : 13,
             fontWeight: 900,
-            letterSpacing: '0.18em',
+            letterSpacing: isLeader ? '0.22em' : '0.18em',
             textTransform: 'uppercase',
-            color: 'rgba(220,232,255,0.68)',
+            color: 'rgba(220,232,255,0.74)',
+            textShadow: isLeader
+              ? '0 1px 0 rgba(255,255,255,0.16), 0 0 8px rgba(255,255,255,0.04)'
+              : '0 1px 0 rgba(255,255,255,0.08)',
           }}
         >
           Rank {row.rank}
@@ -577,12 +740,31 @@ function PodiumCard({ row, place }) {
   )
 }
 
-function LadderRow({ row }) {
+function LadderRow({
+  row,
+  biggestMoverName,
+  activeChallengesByPlayer,
+  targetMap,
+  highlightedTarget,
+  onHighlightTarget,
+}) {
   const theme = getRankTheme(row.rank)
+  const move = getMoveInfo(row.move)
+  const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
+  const targetName = targetMap[normalizeUpper(row.player)]
+  const isBiggestMover = normalizeUpper(biggestMoverName) === normalizeUpper(row.player)
+  const isHighlighted = highlightedTarget && normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
+  const statusLabel = getPlayerStatusLabel({
+    row,
+    activeChallengesByPlayer,
+    biggestMoverName,
+  })
 
   return (
     <div
-      className="interactive-card ladder-row"
+      onMouseEnter={() => onHighlightTarget(targetName || null)}
+      onMouseLeave={() => onHighlightTarget(null)}
+      className={`interactive-card ladder-row ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto',
@@ -591,10 +773,30 @@ function LadderRow({ row }) {
         padding: '14px 16px',
         borderRadius: 22,
         background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
+        border: `1px solid ${isBiggestMover ? 'rgba(255,98,98,0.26)' : 'rgba(255,255,255,0.08)'}`,
+        boxShadow: isBiggestMover
+          ? '0 0 0 1px rgba(255,98,98,0.06), 0 12px 24px rgba(255,98,98,0.08)'
+          : `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
+        position: 'relative',
+        animationDelay: `${Math.min(0.05 * Number(row.rank || 0), 0.7)}s`,
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          left: 0,
+          top: 14,
+          bottom: 14,
+          width: 4,
+          borderRadius: 999,
+          background: isBiggestMover
+            ? 'linear-gradient(180deg, rgba(255,98,98,0.92) 0%, rgba(255,98,98,0.16) 100%)'
+            : activeCount
+              ? 'linear-gradient(180deg, rgba(255,132,132,0.82) 0%, rgba(255,132,132,0.14) 100%)'
+              : theme.rail,
+        }}
+      />
+
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
         <PlayerPhoto
@@ -602,6 +804,7 @@ function LadderRow({ row }) {
           url={row.photo_url}
           rank={row.rank}
           size={58}
+          hot={isBiggestMover}
         />
       </div>
 
@@ -612,7 +815,7 @@ function LadderRow({ row }) {
             alignItems: 'center',
             gap: 10,
             flexWrap: 'wrap',
-            marginBottom: 6,
+            marginBottom: 8,
           }}
         >
           <div
@@ -627,6 +830,32 @@ function LadderRow({ row }) {
           >
             {row.player || '—'}
           </div>
+
+          <div
+            style={{
+              minHeight: 28,
+              padding: '0 10px',
+              borderRadius: 999,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: isBiggestMover
+                ? 'linear-gradient(180deg, rgba(92,38,38,0.94) 0%, rgba(48,20,20,0.98) 100%)'
+                : 'rgba(255,255,255,0.05)',
+              border: isBiggestMover
+                ? '1px solid rgba(255,132,132,0.16)'
+                : '1px solid rgba(255,255,255,0.08)',
+              color: isBiggestMover ? '#ffd8d8' : 'rgba(220,232,255,0.78)',
+              fontSize: 11,
+              fontWeight: 800,
+              letterSpacing: '0.04em',
+              textTransform: 'uppercase',
+            }}
+          >
+            {statusLabel}
+          </div>
+
+          {activeCount ? <ActivePressureMarker count={activeCount} /> : null}
 
           {row.flag_url ? (
             <div
@@ -656,10 +885,12 @@ function LadderRow({ row }) {
           style={{
             fontSize: 13,
             fontWeight: 700,
-            color: 'rgba(220,232,255,0.62)',
+            color: move.type === 'up'
+              ? 'rgba(255,188,188,0.88)'
+              : 'rgba(220,232,255,0.62)',
           }}
         >
-          {row.status || 'Active'}
+          {isBiggestMover ? 'Momentum building' : row.status || 'Active'}
         </div>
       </div>
 
@@ -684,18 +915,28 @@ function LoadingCard() {
 
 export default function LiveRankingPage() {
   const [rows, setRows] = useState([])
+  const [challengeRows, setChallengeRows] = useState([])
   const [loading, setLoading] = useState(true)
+  const [highlightedTarget, setHighlightedTarget] = useState(null)
 
   useEffect(() => {
     async function loadData() {
       try {
         setLoading(true)
-        const res = await fetch(rankingUrl, { cache: 'no-store' })
-        const data = await res.json()
-        setRows(Array.isArray(data) ? sortRankings(data) : [])
+        const [rankingRes, challengeRes] = await Promise.all([
+          fetch(rankingUrl, { cache: 'no-store' }),
+          fetch(challengeFeedUrl, { cache: 'no-store' }),
+        ])
+
+        const rankingData = await rankingRes.json()
+        const challengeData = await challengeRes.json()
+
+        setRows(Array.isArray(rankingData) ? sortRankings(rankingData) : [])
+        setChallengeRows(Array.isArray(challengeData) ? challengeData : [])
       } catch (err) {
         console.error('Failed to load rankings:', err)
         setRows([])
+        setChallengeRows([])
       } finally {
         setLoading(false)
       }
@@ -738,6 +979,60 @@ export default function LiveRankingPage() {
     return bestLabel
   }, [rows])
 
+  const biggestMoverName = useMemo(() => {
+    if (!rows.length) return ''
+
+    let bestName = ''
+    let bestValue = -Infinity
+
+    rows.forEach((row) => {
+      const raw = normalizeText(row.move)
+      const upper = normalizeUpper(row.move)
+
+      if (upper === 'NEW') {
+        if (50 > bestValue) {
+          bestValue = 50
+          bestName = row.player || ''
+        }
+        return
+      }
+
+      const n = Number(raw.replace(/[^\d+-]/g, ''))
+      if (Number.isFinite(n) && n > bestValue) {
+        bestValue = n
+        bestName = row.player || ''
+      }
+    })
+
+    return bestName
+  }, [rows])
+
+  const activeChallengesByPlayer = useMemo(() => {
+    const map = {}
+
+    challengeRows.filter(isActiveChallenge).forEach((row) => {
+      const challenger = normalizeUpper(row.challenger)
+      const opponent = normalizeUpper(row.opponent)
+
+      if (challenger) map[challenger] = (map[challenger] || 0) + 1
+      if (opponent) map[opponent] = (map[opponent] || 0) + 1
+    })
+
+    return map
+  }, [challengeRows])
+
+  const targetMap = useMemo(() => {
+    const sorted = sortRankings(rows)
+    const map = {}
+
+    sorted.forEach((row, index) => {
+      if (!row?.player) return
+      map[normalizeUpper(row.player)] = sorted[index - 1]?.player || ''
+    })
+
+    return map
+  }, [rows])
+
   return (
     <>
       <style>{`
@@ -752,21 +1047,21 @@ export default function LiveRankingPage() {
         }
 
         @keyframes heroBreath {
-          0% { opacity: 0.42; transform: scale(0.995); }
-          50% { opacity: 0.82; transform: scale(1.01); }
-          100% { opacity: 0.42; transform: scale(0.995); }
+          0% { opacity: 0.38; transform: scale(0.995); }
+          50% { opacity: 0.76; transform: scale(1.01); }
+          100% { opacity: 0.38; transform: scale(0.995); }
         }
 
         @keyframes softGoldBreath {
-          0% { opacity: 0.30; transform: scale(0.997); }
-          50% { opacity: 0.55; transform: scale(1.006); }
-          100% { opacity: 0.30; transform: scale(0.997); }
+          0% { opacity: 0.26; transform: scale(0.998); }
+          50% { opacity: 0.46; transform: scale(1.005); }
+          100% { opacity: 0.26; transform: scale(0.998); }
         }
 
         @keyframes softSilverBreath {
-          0% { opacity: 0.28; transform: scale(0.997); }
-          50% { opacity: 0.50; transform: scale(1.006); }
-          100% { opacity: 0.28; transform: scale(0.997); }
+          0% { opacity: 0.24; transform: scale(0.998); }
+          50% { opacity: 0.42; transform: scale(1.005); }
+          100% { opacity: 0.24; transform: scale(0.998); }
         }
 
         @keyframes heroNameGlow {
@@ -777,7 +1072,7 @@ export default function LiveRankingPage() {
 
         @keyframes heroOutlineTrace {
           0% {
-            opacity: 0.35;
+            opacity: 0.32;
             box-shadow:
               0 0 0 1px rgba(174,242,255,0.00),
               0 0 0 rgba(174,242,255,0.00);
@@ -785,11 +1080,11 @@ export default function LiveRankingPage() {
           50% {
             opacity: 1;
             box-shadow:
-              0 0 0 1px rgba(174,242,255,0.80),
+              0 0 0 1px rgba(174,242,255,0.78),
               0 0 28px rgba(174,242,255,0.22);
           }
           100% {
-            opacity: 0.35;
+            opacity: 0.32;
             box-shadow:
               0 0 0 1px rgba(174,242,255,0.00),
               0 0 0 rgba(174,242,255,0.00);
@@ -804,15 +1099,21 @@ export default function LiveRankingPage() {
           100% { clip-path: inset(0 100% 0 0 round 999px); opacity: 0.85; }
         }
 
-        .fade-in { animation: fadeInUp 0.28s ease; }
-
-        .interactive-card {
-          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        @keyframes hotEdgePulse {
+          0% { opacity: 0.28; box-shadow: 0 0 0 rgba(255,98,98,0); }
+          50% { opacity: 0.72; box-shadow: 0 0 20px rgba(255,98,98,0.18); }
+          100% { opacity: 0.28; box-shadow: 0 0 0 rgba(255,98,98,0); }
         }
 
-        .interactive-card:hover { transform: translateY(-3px); }
+        .fade-in { animation: fadeInUp 0.28s ease both; }
 
-        .photo-hover:hover { transform: scale(1.02); }
+        .interactive-card {
+          transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
+        }
+
+        .interactive-card:hover { transform: translateY(-2px); }
+
+        .photo-hover:hover { transform: scale(1.015); }
 
         .leader-name {
           animation: heroNameGlow 2.8s ease-in-out infinite;
@@ -884,12 +1185,12 @@ export default function LiveRankingPage() {
 
         .podium-breath-gold {
           background: radial-gradient(circle at center, rgba(246,213,111,0.12) 0%, rgba(246,213,111,0.00) 72%);
-          animation: softGoldBreath 3.8s ease-in-out infinite;
+          animation: softGoldBreath 4s ease-in-out infinite;
         }
 
         .podium-breath-silver {
           background: radial-gradient(circle at center, rgba(221,230,240,0.10) 0%, rgba(221,230,240,0.00) 72%);
-          animation: softSilverBreath 3.8s ease-in-out infinite;
+          animation: softSilverBreath 4s ease-in-out infinite;
         }
 
         .podium-hero-outline {
@@ -900,16 +1201,40 @@ export default function LiveRankingPage() {
           animation: heroOutlineTrace 2.8s ease-in-out infinite;
         }
 
+        .hero-spotlight-behind-photo {
+          position: absolute;
+          top: 82px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 360px;
+          height: 270px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.00) 72%);
+          filter: blur(26px);
+          pointer-events: none;
+        }
+
+        .hero-ambient-rise {
+          position: absolute;
+          left: 14%;
+          right: 14%;
+          top: 22%;
+          bottom: 28%;
+          background: linear-gradient(180deg, rgba(174,242,255,0.05) 0%, rgba(174,242,255,0.00) 100%);
+          filter: blur(22px);
+          pointer-events: none;
+        }
+
         .rank-badge-1 {
           animation: softGoldBreath 2.8s ease-in-out infinite;
         }
 
         .rank-badge-2 {
-          animation: softGoldBreath 3.4s ease-in-out infinite;
+          animation: softGoldBreath 3.6s ease-in-out infinite;
         }
 
         .rank-badge-3 {
-          animation: softSilverBreath 3.4s ease-in-out infinite;
+          animation: softSilverBreath 3.6s ease-in-out infinite;
         }
 
         .rank-pill-top-sheen {
@@ -918,7 +1243,7 @@ export default function LiveRankingPage() {
           border-radius: inherit;
           background: linear-gradient(
             180deg,
-            rgba(255,255,255,0.38) 0%,
+            rgba(255,255,255,0.40) 0%,
             rgba(255,255,255,0.14) 28%,
             rgba(255,255,255,0.00) 64%
           );
@@ -951,7 +1276,7 @@ export default function LiveRankingPage() {
           inset: 0;
           border-radius: inherit;
           box-shadow:
-            inset 0 1px 0 rgba(255,255,255,0.46),
+            inset 0 1px 0 rgba(255,255,255,0.48),
             inset 0 -12px 16px rgba(0,0,0,0.16),
             0 0 34px rgba(174,242,255,0.24);
           pointer-events: none;
@@ -972,7 +1297,38 @@ export default function LiveRankingPage() {
           background: radial-gradient(circle at center, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 74%);
           filter: blur(18px);
           pointer-events: none;
-          animation: heroBreath 3s ease-in-out infinite;
+          animation: heroBreath 3.1s ease-in-out infinite;
+        }
+
+        .leader-photo-sheen {
+          position: absolute;
+          top: 6px;
+          left: 10px;
+          width: 44%;
+          height: 22%;
+          border-radius: 999px;
+          background: linear-gradient(180deg, rgba(255,255,255,0.18) 0%, rgba(255,255,255,0.00) 100%);
+          filter: blur(6px);
+          pointer-events: none;
+        }
+
+        .hot-photo-edge {
+          position: absolute;
+          inset: -8px;
+          border-radius: inherit;
+          background: radial-gradient(circle, rgba(255,98,98,0.16) 0%, rgba(255,98,98,0.00) 72%);
+          filter: blur(12px);
+          pointer-events: none;
+          animation: hotEdgePulse 2.8s ease-in-out infinite;
+        }
+
+        .hot-card {
+          box-shadow: 0 0 0 1px rgba(255,98,98,0.06), 0 12px 24px rgba(255,98,98,0.08) !important;
+        }
+
+        .target-card-highlighted {
+          box-shadow: 0 0 0 1px rgba(174,242,255,0.10), 0 0 26px rgba(174,242,255,0.10) !important;
+          border-color: rgba(174,242,255,0.18) !important;
         }
 
         .podium-platform::before {
@@ -982,7 +1338,7 @@ export default function LiveRankingPage() {
           right: 14px;
           top: 0;
           height: 1px;
-          background: rgba(255,255,255,0.16);
+          background: rgba(255,255,255,0.18);
           border-radius: 999px;
         }
 
@@ -1021,6 +1377,11 @@ export default function LiveRankingPage() {
           .podium-1 { order: 1 !important; }
           .podium-2 { order: 2 !important; }
           .podium-3 { order: 3 !important; }
+
+          .hero-spotlight-behind-photo {
+            width: 270px;
+            height: 220px;
+          }
         }
 
         @media (max-width: 700px) {
@@ -1059,6 +1420,22 @@ export default function LiveRankingPage() {
           <div
             style={{
               position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(135deg, rgba(255,255,255,0.018) 0%, rgba(255,255,255,0.00) 18%, rgba(255,255,255,0.016) 34%, rgba(255,255,255,0.00) 52%, rgba(255,255,255,0.012) 72%, rgba(255,255,255,0.00) 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(115deg, rgba(174,242,255,0.03) 0%, rgba(174,242,255,0.00) 26%, rgba(174,242,255,0.025) 52%, rgba(174,242,255,0.00) 78%, rgba(174,242,255,0.018) 100%)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
               top: -140,
               left: -90,
               width: 380,
@@ -1078,6 +1455,29 @@ export default function LiveRankingPage() {
               borderRadius: '50%',
               background: 'rgba(168,240,255,0.08)',
               filter: 'blur(84px)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: '8%',
+              right: '8%',
+              top: 120,
+              bottom: 80,
+              borderRadius: 40,
+              border: '1px solid rgba(255,255,255,0.018)',
+              boxShadow: 'inset 0 0 0 1px rgba(255,255,255,0.008)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              left: '16%',
+              right: '16%',
+              top: 220,
+              bottom: 160,
+              borderRadius: 24,
+              border: '1px solid rgba(255,255,255,0.012)',
             }}
           />
         </div>
@@ -1168,14 +1568,14 @@ export default function LiveRankingPage() {
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 220px))',
               gap: 12,
-              marginBottom: 30,
+              marginBottom: 34,
             }}
           >
             <SmallStat label="Leader" value={leader} />
             <SmallStat label="Biggest Move" value={biggestMove} />
           </div>
 
-          <div style={{ display: 'grid', gap: 34 }}>
+          <div style={{ display: 'grid', gap: 38 }}>
             <section className="fade-in">
               {loading ? (
                 <div
@@ -1197,17 +1597,73 @@ export default function LiveRankingPage() {
                     display: 'grid',
                     gridTemplateColumns: '1fr 1.15fr 1fr',
                     gap: 18,
-                    alignItems: 'end',
+                    alignItems: 'stretch',
                   }}
                 >
-                  {topThree[1] ? <PodiumCard row={topThree[1]} place={2} /> : <div />}
-                  {topThree[0] ? <PodiumCard row={topThree[0]} place={1} /> : <div />}
-                  {topThree[2] ? <PodiumCard row={topThree[2]} place={3} /> : <div />}
+                  {topThree[1] ? (
+                    <PodiumCard
+                      row={topThree[1]}
+                      place={2}
+                      biggestMoverName={biggestMoverName}
+                      activeChallengesByPlayer={activeChallengesByPlayer}
+                      targetMap={targetMap}
+                      highlightedTarget={highlightedTarget}
+                      onHighlightTarget={setHighlightedTarget}
+                    />
+                  ) : (
+                    <div />
+                  )}
+
+                  {topThree[0] ? (
+                    <PodiumCard
+                      row={topThree[0]}
+                      place={1}
+                      biggestMoverName={biggestMoverName}
+                      activeChallengesByPlayer={activeChallengesByPlayer}
+                      targetMap={targetMap}
+                      highlightedTarget={highlightedTarget}
+                      onHighlightTarget={setHighlightedTarget}
+                    />
+                  ) : (
+                    <div />
+                  )}
+
+                  {topThree[2] ? (
+                    <PodiumCard
+                      row={topThree[2]}
+                      place={3}
+                      biggestMoverName={biggestMoverName}
+                      activeChallengesByPlayer={activeChallengesByPlayer}
+                      targetMap={targetMap}
+                      highlightedTarget={highlightedTarget}
+                      onHighlightTarget={setHighlightedTarget}
+                    />
+                  ) : (
+                    <div />
+                  )}
                 </div>
               )}
             </section>
 
-            <section className="fade-in">
+            <div
+              className="fade-in"
+              style={{
+                height: 1,
+                background:
+                  'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(174,242,255,0.10) 20%, rgba(255,255,255,0.06) 50%, rgba(246,213,111,0.08) 80%, rgba(255,255,255,0.00) 100%)',
+              }}
+            />
+
+            <section
+              className="fade-in"
+              style={{
+                position: 'relative',
+                borderRadius: 28,
+                padding: '6px 0',
+                background:
+                  'linear-gradient(180deg, rgba(246,213,111,0.025) 0%, rgba(255,255,255,0.00) 100%)',
+              }}
+            >
               {loading ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2, 3, 4, 5].map((i) => (
@@ -1217,13 +1673,30 @@ export default function LiveRankingPage() {
               ) : middleTier.length ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {middleTier.map((row, index) => (
-                    <LadderRow key={`middle-${index}`} row={row} />
+                    <LadderRow
+                      key={`middle-${index}`}
+                      row={row}
+                      biggestMoverName={biggestMoverName}
+                      activeChallengesByPlayer={activeChallengesByPlayer}
+                      targetMap={targetMap}
+                      highlightedTarget={highlightedTarget}
+                      onHighlightTarget={setHighlightedTarget}
+                    />
                   ))}
                 </div>
               ) : null}
             </section>
 
-            <section className="fade-in">
+            <section
+              className="fade-in"
+              style={{
+                position: 'relative',
+                borderRadius: 28,
+                padding: '6px 0',
+                background:
+                  'linear-gradient(180deg, rgba(221,230,240,0.02) 0%, rgba(255,255,255,0.00) 100%)',
+              }}
+            >
               {loading ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2, 3, 4].map((i) => (
@@ -1233,7 +1706,15 @@ export default function LiveRankingPage() {
               ) : fullLadder.length ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {fullLadder.map((row, index) => (
-                    <LadderRow key={`full-${index}`} row={row} />
+                    <LadderRow
+                      key={`full-${index}`}
+                      row={row}
+                      biggestMoverName={biggestMoverName}
+                      activeChallengesByPlayer={activeChallengesByPlayer}
+                      targetMap={targetMap}
+                      highlightedTarget={highlightedTarget}
+                      onHighlightTarget={setHighlightedTarget}
+                    />
                   ))}
                 </div>
               ) : null}
