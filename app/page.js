@@ -21,6 +21,10 @@ function toNumber(value, fallback = 999) {
   return Number.isFinite(n) ? n : fallback
 }
 
+function sortRankings(rows) {
+  return [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
+}
+
 function getRankTheme(rank) {
   const n = Number(rank)
 
@@ -28,11 +32,12 @@ function getRankTheme(rank) {
     return {
       accent: '#aef2ff',
       accentSoft: 'rgba(174,242,255,0.22)',
-      accentBorder: 'rgba(174,242,255,0.44)',
-      badgeBg: 'linear-gradient(135deg, #ffffff 0%, #e7fbff 38%, #b8f3ff 72%, #8ee8ff 100%)',
+      accentBorder: 'rgba(174,242,255,0.42)',
+      badgeBg:
+        'linear-gradient(135deg, #ffffff 0%, #e9fbff 34%, #b8f3ff 72%, #8be7ff 100%)',
       badgeColor: '#102444',
-      glow: 'rgba(174,242,255,0.22)',
-      cardBg: 'linear-gradient(180deg, rgba(20,49,90,0.98) 0%, rgba(10,24,45,0.99) 100%)',
+      glow: 'rgba(174,242,255,0.20)',
+      cardBg: 'linear-gradient(180deg, rgba(18,42,78,0.98) 0%, rgba(9,22,41,0.99) 100%)',
     }
   }
 
@@ -41,9 +46,9 @@ function getRankTheme(rank) {
       accent: '#f6d56f',
       accentSoft: 'rgba(246,213,111,0.18)',
       accentBorder: 'rgba(246,213,111,0.34)',
-      badgeBg: 'linear-gradient(135deg, #fff8dc 0%, #f7de84 55%, #d9ab33 100%)',
+      badgeBg: 'linear-gradient(135deg, #fff8dd 0%, #f7df87 56%, #daa92f 100%)',
       badgeColor: '#3d2c00',
-      glow: 'rgba(246,213,111,0.16)',
+      glow: 'rgba(246,213,111,0.14)',
       cardBg: 'linear-gradient(180deg, rgba(51,39,17,0.96) 0%, rgba(24,19,10,0.98) 100%)',
     }
   }
@@ -55,7 +60,7 @@ function getRankTheme(rank) {
       accentBorder: 'rgba(221,230,240,0.30)',
       badgeBg: 'linear-gradient(135deg, #f7faff 0%, #dfe7f0 58%, #b8c5d6 100%)',
       badgeColor: '#253245',
-      glow: 'rgba(221,230,240,0.12)',
+      glow: 'rgba(221,230,240,0.10)',
       cardBg: 'linear-gradient(180deg, rgba(31,39,52,0.96) 0%, rgba(15,20,28,0.98) 100%)',
     }
   }
@@ -83,10 +88,6 @@ function getRankTheme(rank) {
   }
 }
 
-function sortRankings(rows) {
-  return [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
-}
-
 function getMoveInfo(moveValue) {
   const raw = normalizeText(moveValue)
   const upper = normalizeUpper(moveValue)
@@ -109,7 +110,7 @@ function getMoveInfo(moveValue) {
     }
   }
 
-  const n = Number(raw.replace(/[^\d-+]/g, ''))
+  const n = Number(raw.replace(/[^\d+-]/g, ''))
   if (Number.isFinite(n)) {
     if (n > 0) {
       return {
@@ -225,7 +226,10 @@ function SmallStat({ label, value }) {
 
 function RankBadge({ rank }) {
   const theme = getRankTheme(rank)
-  const isLeader = Number(rank) === 1
+  const n = Number(rank)
+  const isLeader = n === 1
+  const isSecond = n === 2
+  const isThird = n === 3
 
   if (isLeader) {
     return (
@@ -238,6 +242,7 @@ function RankBadge({ rank }) {
           display: 'grid',
           placeItems: 'center',
           filter: 'drop-shadow(0 0 16px rgba(174,242,255,0.30))',
+          flexShrink: 0,
         }}
       >
         <div className="rank-badge-diamond-trace" />
@@ -276,8 +281,8 @@ function RankBadge({ rank }) {
   return (
     <div
       style={{
-        minWidth: 36,
-        height: 36,
+        minWidth: 38,
+        height: 38,
         padding: '0 10px',
         borderRadius: 999,
         display: 'inline-flex',
@@ -287,8 +292,12 @@ function RankBadge({ rank }) {
         color: theme.badgeColor,
         fontSize: 13,
         fontWeight: 900,
-        boxShadow: '0 10px 18px rgba(0,0,0,0.14)',
         border: `1px solid ${theme.accentBorder}`,
+        boxShadow: isSecond
+          ? '0 10px 20px rgba(0,0,0,0.16), 0 0 14px rgba(246,213,111,0.16)'
+          : isThird
+            ? '0 10px 20px rgba(0,0,0,0.16), 0 0 14px rgba(221,230,240,0.14)'
+            : '0 10px 18px rgba(0,0,0,0.14)',
       }}
     >
       #{rank}
@@ -331,42 +340,59 @@ function PodiumCard({ row, place }) {
   const isThird = rank === 3
 
   const heights = {
-    1: 408,
-    2: 348,
-    3: 330,
+    1: 420,
+    2: 352,
+    3: 334,
   }
 
   return (
     <div
-      className={`interactive-card podium-card podium-${place} ${isLeader ? 'podium-leader' : ''} ${isSecond ? 'podium-second' : ''} ${isThird ? 'podium-third' : ''}`}
+      className={`interactive-card podium-card podium-${place} ${
+        isLeader ? 'podium-leader' : ''
+      } ${isSecond ? 'podium-second' : ''} ${isThird ? 'podium-third' : ''}`}
       style={{
         position: 'relative',
         minHeight: heights[place],
-        borderRadius: 30,
+        borderRadius: 32,
         padding: place === 1 ? '26px 22px 22px' : '20px 18px 18px',
         background: theme.cardBg,
         border: `1px solid ${theme.accentBorder}`,
-        boxShadow: `0 22px 54px rgba(0,0,0,0.26), 0 0 34px ${theme.glow}`,
+        boxShadow: isLeader
+          ? `
+            0 30px 70px rgba(0,0,0,0.34),
+            0 0 42px ${theme.glow},
+            inset 0 1px 0 rgba(255,255,255,0.16),
+            inset 0 -10px 24px rgba(0,0,0,0.20)
+          `
+          : `
+            0 22px 54px rgba(0,0,0,0.28),
+            0 0 26px ${theme.glow},
+            inset 0 1px 0 rgba(255,255,255,0.10),
+            inset 0 -8px 20px rgba(0,0,0,0.18)
+          `,
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
+        transform: isLeader ? 'translateY(-4px)' : 'translateY(0)',
       }}
     >
       {isLeader ? <div className="podium-leader-trace" /> : null}
+
+      <div className={`podium-frame ${isLeader ? 'podium-frame-leader' : ''}`} />
+      <div className={`podium-inner-edge ${isLeader ? 'podium-inner-edge-leader' : ''}`} />
 
       <div
         style={{
           position: 'absolute',
           inset: 0,
-          background:
-            isLeader
-              ? 'linear-gradient(180deg, rgba(174,242,255,0.09) 0%, rgba(255,255,255,0.00) 34%)'
-              : isSecond
-                ? 'linear-gradient(180deg, rgba(246,213,111,0.07) 0%, rgba(255,255,255,0.00) 32%)'
-                : isThird
-                  ? 'linear-gradient(180deg, rgba(221,230,240,0.06) 0%, rgba(255,255,255,0.00) 30%)'
-                  : 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.00) 28%)',
+          background: isLeader
+            ? 'linear-gradient(180deg, rgba(174,242,255,0.10) 0%, rgba(255,255,255,0.00) 34%)'
+            : isSecond
+              ? 'linear-gradient(180deg, rgba(246,213,111,0.08) 0%, rgba(255,255,255,0.00) 30%)'
+              : isThird
+                ? 'linear-gradient(180deg, rgba(221,230,240,0.07) 0%, rgba(255,255,255,0.00) 28%)'
+                : 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.00) 28%)',
           pointerEvents: 'none',
         }}
       />
@@ -425,6 +451,7 @@ function PodiumCard({ row, place }) {
               lineHeight: 1.03,
               letterSpacing: '-0.03em',
               marginBottom: 10,
+              textShadow: isLeader ? '0 0 18px rgba(174,242,255,0.12)' : 'none',
             }}
           >
             {row.player || '—'}
@@ -494,15 +521,14 @@ function PodiumCard({ row, place }) {
           marginTop: 18,
           height: place === 1 ? 84 : 60,
           borderRadius: 22,
-          background:
-            isLeader
-              ? 'linear-gradient(180deg, rgba(174,242,255,0.11) 0%, rgba(255,255,255,0.03) 100%)'
-              : isSecond
-                ? 'linear-gradient(180deg, rgba(246,213,111,0.10) 0%, rgba(255,255,255,0.03) 100%)'
-                : isThird
-                  ? 'linear-gradient(180deg, rgba(221,230,240,0.09) 0%, rgba(255,255,255,0.03) 100%)'
-                  : 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+          background: isLeader
+            ? 'linear-gradient(180deg, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.03) 100%)'
+            : isSecond
+              ? 'linear-gradient(180deg, rgba(246,213,111,0.10) 0%, rgba(255,255,255,0.03) 100%)'
+              : 'linear-gradient(180deg, rgba(221,230,240,0.09) 0%, rgba(255,255,255,0.03) 100%)',
           border: '1px solid rgba(255,255,255,0.10)',
+          boxShadow:
+            'inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 14px rgba(0,0,0,0.18)',
           display: 'grid',
           placeItems: 'center',
         }}
@@ -682,7 +708,7 @@ export default function LiveRankingPage() {
         return
       }
 
-      const n = Number(raw.replace(/[^\d-+]/g, ''))
+      const n = Number(raw.replace(/[^\d+-]/g, ''))
       if (Number.isFinite(n) && n > bestValue) {
         bestValue = n
         bestLabel = n > 0 ? `${row.player} (+${n})` : `${row.player} (${n})`
@@ -717,8 +743,8 @@ export default function LiveRankingPage() {
         }
 
         @keyframes leaderDiamondTrace {
-          0% { transform: rotate(0deg); opacity: 0.9; }
-          100% { transform: rotate(360deg); opacity: 0.9; }
+          0% { transform: rotate(45deg); opacity: 0.92; }
+          100% { transform: rotate(405deg); opacity: 0.92; }
         }
 
         .fade-in {
@@ -744,26 +770,56 @@ export default function LiveRankingPage() {
 
         .podium-leader {
           box-shadow:
-            0 28px 66px rgba(0,0,0,0.30),
-            0 0 44px rgba(174,242,255,0.18) !important;
+            0 32px 74px rgba(0,0,0,0.34),
+            0 0 46px rgba(174,242,255,0.18) !important;
         }
 
         .podium-second {
           box-shadow:
-            0 22px 50px rgba(0,0,0,0.25),
-            0 0 30px rgba(246,213,111,0.10) !important;
+            0 24px 56px rgba(0,0,0,0.28),
+            0 0 24px rgba(246,213,111,0.12) !important;
         }
 
         .podium-third {
           box-shadow:
-            0 20px 46px rgba(0,0,0,0.24),
-            0 0 28px rgba(221,230,240,0.08) !important;
+            0 22px 52px rgba(0,0,0,0.27),
+            0 0 22px rgba(221,230,240,0.10) !important;
+        }
+
+        .podium-frame {
+          position: absolute;
+          inset: 0;
+          border-radius: 32px;
+          pointer-events: none;
+          box-shadow:
+            inset 0 0 0 1px rgba(255,255,255,0.05),
+            inset 0 1px 0 rgba(255,255,255,0.14),
+            inset 0 -1px 0 rgba(0,0,0,0.26);
+        }
+
+        .podium-frame-leader {
+          box-shadow:
+            inset 0 0 0 1px rgba(174,242,255,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.18),
+            inset 0 -1px 0 rgba(0,0,0,0.30);
+        }
+
+        .podium-inner-edge {
+          position: absolute;
+          inset: 8px;
+          border-radius: 24px;
+          pointer-events: none;
+          border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .podium-inner-edge-leader {
+          border: 1px solid rgba(174,242,255,0.10);
         }
 
         .podium-leader-trace {
           position: absolute;
           inset: -1px;
-          border-radius: 30px;
+          border-radius: 32px;
           padding: 1.5px;
           background:
             conic-gradient(
@@ -783,10 +839,6 @@ export default function LiveRankingPage() {
           animation: leaderBorderSpin 4.8s linear infinite;
           pointer-events: none;
           opacity: 0.95;
-        }
-
-        .rank-badge-diamond-wrap {
-          flex-shrink: 0;
         }
 
         .rank-badge-diamond-trace {
@@ -1073,4 +1125,4 @@ export default function LiveRankingPage() {
       </div>
     </>
   )
-}
+              }
