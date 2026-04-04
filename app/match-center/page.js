@@ -28,6 +28,8 @@ const PLAYERS = [
   { name: 'Julianna', rank: 16 },
 ]
 
+const EMPTY_SET = { winner: '', loser: '' }
+
 function normalizeText(value) {
   return String(value || '').trim()
 }
@@ -182,6 +184,46 @@ function sortCompletedRows(rows) {
     if (db) return 1
     return 0
   })
+}
+
+function buildScoreFromSets(sets) {
+  return sets
+    .filter((set) => set.winner !== '' && set.loser !== '')
+    .map((set) => `${set.winner}-${set.loser}`)
+    .join(', ')
+}
+
+function sanitizeGameValue(value) {
+  const digits = String(value || '').replace(/\D/g, '')
+  if (!digits) return ''
+  const n = Math.max(0, Math.min(7, Number(digits)))
+  return String(n)
+}
+
+function getDefaultScoreForm() {
+  return {
+    winner: '',
+    sets: [
+      { ...EMPTY_SET },
+      { ...EMPTY_SET },
+      { ...EMPTY_SET },
+    ],
+    useThirdSet: false,
+  }
+}
+
+function applyPresetToScoreForm(preset, currentWinner) {
+  const sets = [
+    preset[0] ? { winner: String(preset[0][0]), loser: String(preset[0][1]) } : { ...EMPTY_SET },
+    preset[1] ? { winner: String(preset[1][0]), loser: String(preset[1][1]) } : { ...EMPTY_SET },
+    preset[2] ? { winner: String(preset[2][0]), loser: String(preset[2][1]) } : { ...EMPTY_SET },
+  ]
+
+  return {
+    winner: currentWinner || '',
+    sets,
+    useThirdSet: Boolean(preset[2]),
+  }
 }
 
 function Pill({
@@ -1252,16 +1294,140 @@ function PlayerPicker({
   )
 }
 
+function ScoreSetInput({ label, setData, onChange, disabled = false }) {
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        padding: 14,
+        background: disabled ? 'rgba(255,255,255,0.02)' : 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        opacity: disabled ? 0.55 : 1,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.58)',
+          marginBottom: 12,
+        }}
+      >
+        {label}
+      </div>
+
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr auto 1fr',
+          gap: 10,
+          alignItems: 'center',
+        }}
+      >
+        <input
+          type="text"
+          inputMode="numeric"
+          value={setData.winner}
+          onChange={(e) => onChange('winner', sanitizeGameValue(e.target.value))}
+          disabled={disabled}
+          placeholder="W"
+          style={scoreInputStyle}
+        />
+
+        <div
+          style={{
+            fontSize: 16,
+            fontWeight: 900,
+            color: 'rgba(220,232,255,0.70)',
+          }}
+        >
+          -
+        </div>
+
+        <input
+          type="text"
+          inputMode="numeric"
+          value={setData.loser}
+          onChange={(e) => onChange('loser', sanitizeGameValue(e.target.value))}
+          disabled={disabled}
+          placeholder="L"
+          style={scoreInputStyle}
+        />
+      </div>
+    </div>
+  )
+}
+
+function ScorePresetButton({ children, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="interactive-card"
+      style={{
+        minHeight: 40,
+        padding: '0 12px',
+        borderRadius: 999,
+        border: '1px solid rgba(255,255,255,0.12)',
+        background: 'rgba(255,255,255,0.05)',
+        color: '#dce8ff',
+        fontSize: 13,
+        fontWeight: 800,
+        cursor: 'pointer',
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+function ScorePreviewCard({ match, winner, score, getPlayerPhotoUrl }) {
+  if (!match || !winner) return null
+
+  const previewRow = {
+    challenger: match.challenger,
+    opponent: match.opponent,
+    winner,
+    score,
+    match_date: match.match_date,
+  }
+
+  return (
+    <div
+      style={{
+        borderRadius: 22,
+        padding: 16,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.56)',
+          marginBottom: 12,
+        }}
+      >
+        Live Preview
+      </div>
+
+      <CompletedMatchCard row={previewRow} getPlayerPhotoUrl={getPlayerPhotoUrl} />
+    </div>
+  )
+}
+
 export default function MatchCenterPage() {
   const [feedRows, setFeedRows] = useState([])
   const [rankingRows, setRankingRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
   const [selectedMatch, setSelectedMatch] = useState(null)
-  const [resultForm, setResultForm] = useState({
-    winner: '',
-    score: '',
-  })
+  const [resultForm, setResultForm] = useState(getDefaultScoreForm())
   const [submittingResult, setSubmittingResult] = useState(false)
   const [toast, setToast] = useState(null)
 
@@ -1332,6 +1498,11 @@ export default function MatchCenterPage() {
     return `${latest.winner || 'Winner'} def. ${getLoserName(latest)}`
   }, [completedChallenges])
 
+  const builtScore = useMemo(() => {
+    const relevantSets = resultForm.useThirdSet ? resultForm.sets : resultForm.sets.slice(0, 2)
+    return buildScoreFromSets(relevantSets)
+  }, [resultForm])
+
   function updateChallengeField(name, value) {
     if (name === 'challenger') {
       const player = PLAYERS.find((p) => p.name === value)
@@ -1359,6 +1530,24 @@ export default function MatchCenterPage() {
       ...prev,
       [name]: value,
     }))
+  }
+
+  function updateSetValue(index, field, value) {
+    setResultForm((prev) => {
+      const nextSets = [...prev.sets]
+      nextSets[index] = {
+        ...nextSets[index],
+        [field]: value,
+      }
+      return {
+        ...prev,
+        sets: nextSets,
+      }
+    })
+  }
+
+  function applyScorePreset(preset) {
+    setResultForm((prev) => applyPresetToScoreForm(preset, prev.winner))
   }
 
   async function handleChallengeSubmit(e) {
@@ -1434,15 +1623,34 @@ export default function MatchCenterPage() {
         throw new Error('Missing source_row from ChallengeFeed')
       }
 
-      if (!resultForm.winner || !resultForm.score) {
-        throw new Error('Please select winner and enter score')
+      if (!resultForm.winner) {
+        throw new Error('Please select winner')
+      }
+
+      if (!resultForm.sets[0].winner || !resultForm.sets[0].loser) {
+        throw new Error('Please enter Set 1')
+      }
+
+      if (!resultForm.sets[1].winner || !resultForm.sets[1].loser) {
+        throw new Error('Please enter Set 2')
+      }
+
+      if (resultForm.useThirdSet) {
+        if (!resultForm.sets[2].winner || !resultForm.sets[2].loser) {
+          throw new Error('Please complete Set 3 or turn it off')
+        }
+      }
+
+      const score = builtScore
+      if (!score) {
+        throw new Error('Please enter a valid score')
       }
 
       const payload = {
         action: 'complete_match',
         source_row: Number(selectedMatch.source_row),
         winner: resultForm.winner,
-        score: resultForm.score,
+        score,
       }
 
       const res = await fetch('/api/submit', {
@@ -1473,10 +1681,7 @@ export default function MatchCenterPage() {
       )
 
       setSelectedMatch(null)
-      setResultForm({
-        winner: '',
-        score: '',
-      })
+      setResultForm(getDefaultScoreForm())
 
       showToast('Match result saved successfully', 'success')
 
@@ -1620,10 +1825,8 @@ export default function MatchCenterPage() {
           .active-meta-row {
             justify-content: center !important;
           }
-        }
 
-        @media (max-width: 760px) {
-          .active-player-grid {
+          .score-entry-layout {
             grid-template-columns: 1fr !important;
           }
         }
@@ -1748,7 +1951,6 @@ export default function MatchCenterPage() {
             >
               <form onSubmit={handleChallengeSubmit}>
                 <div
-                  className="active-player-grid"
                   style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
@@ -1837,10 +2039,7 @@ export default function MatchCenterPage() {
                       row={row}
                       onClick={() => {
                         setSelectedMatch(row)
-                        setResultForm({
-                          winner: '',
-                          score: '',
-                        })
+                        setResultForm(getDefaultScoreForm())
                       }}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
                     />
@@ -1891,7 +2090,13 @@ export default function MatchCenterPage() {
 
         {selectedMatch ? (
           <div className="modal-overlay-anim" style={modalOverlayStyle}>
-            <div className="modal-card-anim" style={modalStyle}>
+            <div
+              className="modal-card-anim"
+              style={{
+                ...modalStyle,
+                maxWidth: 980,
+              }}
+            >
               <div
                 style={{
                   display: 'flex',
@@ -1920,58 +2125,231 @@ export default function MatchCenterPage() {
               </div>
 
               <form onSubmit={handleResultSubmit}>
-                <div style={{ display: 'grid', gap: 16 }}>
-                  <PlayerPicker
-                    label="Winner"
-                    value={resultForm.winner}
-                    onChange={(value) =>
-                      setResultForm((prev) => ({ ...prev, winner: value }))
-                    }
-                    players={[
-                      {
-                        name: selectedMatch.challenger,
-                        rank: rankByName(selectedMatch.challenger),
-                      },
-                      {
-                        name: selectedMatch.opponent,
-                        rank: rankByName(selectedMatch.opponent),
-                      },
-                    ]}
-                    getPlayerPhotoUrl={getPlayerPhotoUrl}
-                  />
-
-                  <div>
-                    <label style={labelStyle}>Score</label>
-                    <input
-                      type="text"
-                      placeholder="Enter score, e.g. 6-3, 6-4"
-                      value={resultForm.score}
-                      onChange={(e) =>
-                        setResultForm((prev) => ({ ...prev, score: e.target.value }))
+                <div
+                  className="score-entry-layout"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'minmax(320px, 1fr) minmax(320px, 1fr)',
+                    gap: 18,
+                  }}
+                >
+                  <div style={{ display: 'grid', gap: 16 }}>
+                    <PlayerPicker
+                      label="Winner"
+                      value={resultForm.winner}
+                      onChange={(value) =>
+                        setResultForm((prev) => ({ ...prev, winner: value }))
                       }
-                      style={inputStyle}
-                      required
+                      players={[
+                        {
+                          name: selectedMatch.challenger,
+                          rank: rankByName(selectedMatch.challenger),
+                        },
+                        {
+                          name: selectedMatch.opponent,
+                          rank: rankByName(selectedMatch.opponent),
+                        },
+                      ]}
+                      getPlayerPhotoUrl={getPlayerPhotoUrl}
                     />
+
+                    <div
+                      style={{
+                        borderRadius: 20,
+                        padding: 16,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(220,232,255,0.58)',
+                          marginBottom: 12,
+                        }}
+                      >
+                        Quick Score Presets
+                      </div>
+
+                      <div
+                        style={{
+                          display: 'flex',
+                          gap: 8,
+                          flexWrap: 'wrap',
+                        }}
+                      >
+                        <ScorePresetButton onClick={() => applyScorePreset([[6, 0], [6, 0]])}>
+                          6-0, 6-0
+                        </ScorePresetButton>
+                        <ScorePresetButton onClick={() => applyScorePreset([[6, 3], [6, 4]])}>
+                          6-3, 6-4
+                        </ScorePresetButton>
+                        <ScorePresetButton onClick={() => applyScorePreset([[7, 5], [6, 4]])}>
+                          7-5, 6-4
+                        </ScorePresetButton>
+                        <ScorePresetButton onClick={() => applyScorePreset([[6, 4], [3, 6], [6, 2]])}>
+                          6-4, 3-6, 6-2
+                        </ScorePresetButton>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 20,
+                        padding: 16,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(220,232,255,0.58)',
+                          marginBottom: 12,
+                        }}
+                      >
+                        Set-by-Set Score
+                      </div>
+
+                      <div style={{ display: 'grid', gap: 12 }}>
+                        <ScoreSetInput
+                          label="Set 1"
+                          setData={resultForm.sets[0]}
+                          onChange={(field, value) => updateSetValue(0, field, value)}
+                        />
+
+                        <ScoreSetInput
+                          label="Set 2"
+                          setData={resultForm.sets[1]}
+                          onChange={(field, value) => updateSetValue(1, field, value)}
+                        />
+
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: 12,
+                            marginTop: 2,
+                          }}
+                        >
+                          <div
+                            style={{
+                              fontSize: 13,
+                              fontWeight: 700,
+                              color: 'rgba(220,232,255,0.76)',
+                            }}
+                          >
+                            Add third set
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setResultForm((prev) => ({
+                                ...prev,
+                                useThirdSet: !prev.useThirdSet,
+                                sets: !prev.useThirdSet
+                                  ? prev.sets
+                                  : [prev.sets[0], prev.sets[1], { ...EMPTY_SET }],
+                              }))
+                            }
+                            className="interactive-card"
+                            style={{
+                              minWidth: 86,
+                              height: 38,
+                              borderRadius: 999,
+                              border: '1px solid rgba(255,255,255,0.12)',
+                              background: resultForm.useThirdSet
+                                ? 'rgba(174,242,255,0.14)'
+                                : 'rgba(255,255,255,0.05)',
+                              color: resultForm.useThirdSet ? '#c9f7ff' : '#dce8ff',
+                              fontWeight: 800,
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {resultForm.useThirdSet ? 'On' : 'Off'}
+                          </button>
+                        </div>
+
+                        <ScoreSetInput
+                          label="Set 3"
+                          setData={resultForm.sets[2]}
+                          onChange={(field, value) => updateSetValue(2, field, value)}
+                          disabled={!resultForm.useThirdSet}
+                        />
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        borderRadius: 20,
+                        padding: 16,
+                        background: 'rgba(255,255,255,0.04)',
+                        border: '1px solid rgba(255,255,255,0.08)',
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: 11,
+                          fontWeight: 800,
+                          letterSpacing: '0.14em',
+                          textTransform: 'uppercase',
+                          color: 'rgba(220,232,255,0.58)',
+                          marginBottom: 10,
+                        }}
+                      >
+                        Final Score String
+                      </div>
+
+                      <div
+                        style={{
+                          fontSize: 18,
+                          fontWeight: 850,
+                          color: '#eef6ff',
+                        }}
+                      >
+                        {builtScore || '—'}
+                      </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gap: 12 }}>
+                      <button
+                        type="submit"
+                        style={buttonStyle}
+                        disabled={submittingResult}
+                        className="interactive-card"
+                      >
+                        {submittingResult ? 'Saving...' : 'Save Result'}
+                      </button>
+
+                      <button
+                        type="button"
+                        style={secondaryButtonStyle}
+                        onClick={() => {
+                          setSelectedMatch(null)
+                          setResultForm(getDefaultScoreForm())
+                        }}
+                        className="interactive-card"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </div>
 
-                  <div style={{ display: 'grid', gap: 12, marginTop: 4 }}>
-                    <button
-                      type="submit"
-                      style={buttonStyle}
-                      disabled={submittingResult}
-                      className="interactive-card"
-                    >
-                      {submittingResult ? 'Saving...' : 'Save Result'}
-                    </button>
-
-                    <button
-                      type="button"
-                      style={secondaryButtonStyle}
-                      onClick={() => setSelectedMatch(null)}
-                      className="interactive-card"
-                    >
-                      Cancel
-                    </button>
+                  <div>
+                    <ScorePreviewCard
+                      match={selectedMatch}
+                      winner={resultForm.winner}
+                      score={builtScore}
+                      getPlayerPhotoUrl={getPlayerPhotoUrl}
+                    />
                   </div>
                 </div>
               </form>
@@ -2032,6 +2410,20 @@ const inputStyle = {
   boxSizing: 'border-box',
 }
 
+const scoreInputStyle = {
+  width: '100%',
+  height: 48,
+  borderRadius: 14,
+  border: '1px solid rgba(255,255,255,0.12)',
+  outline: 'none',
+  textAlign: 'center',
+  fontSize: 20,
+  fontWeight: 900,
+  background: 'rgba(243,244,246,0.96)',
+  color: '#111827',
+  boxSizing: 'border-box',
+}
+
 const buttonStyle = {
   width: '100%',
   height: 58,
@@ -2077,7 +2469,6 @@ const modalOverlayStyle = {
 
 const modalStyle = {
   width: '100%',
-  maxWidth: 560,
   background:
     'linear-gradient(180deg, rgba(15,34,63,0.96) 0%, rgba(10,23,43,0.98) 100%)',
   border: '1px solid rgba(91,171,255,0.24)',
