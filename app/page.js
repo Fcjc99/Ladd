@@ -78,6 +78,10 @@ function getRankTheme(rank) {
   }
 }
 
+function sortRankings(rows) {
+  return [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
+}
+
 function getMoveInfo(moveValue) {
   const raw = normalizeText(moveValue)
   const upper = normalizeUpper(moveValue)
@@ -85,7 +89,6 @@ function getMoveInfo(moveValue) {
   if (!raw || upper === '—' || upper === '-') {
     return {
       label: '—',
-      type: 'neutral',
       color: 'rgba(220,232,255,0.72)',
       bg: 'rgba(255,255,255,0.05)',
       border: 'rgba(255,255,255,0.08)',
@@ -95,7 +98,6 @@ function getMoveInfo(moveValue) {
   if (upper === 'NEW') {
     return {
       label: 'NEW',
-      type: 'up',
       color: '#bff7d2',
       bg: 'rgba(110,255,190,0.12)',
       border: 'rgba(110,255,190,0.18)',
@@ -107,7 +109,6 @@ function getMoveInfo(moveValue) {
     if (n > 0) {
       return {
         label: `↑ ${n}`,
-        type: 'up',
         color: '#bff7d2',
         bg: 'rgba(110,255,190,0.12)',
         border: 'rgba(110,255,190,0.18)',
@@ -117,7 +118,6 @@ function getMoveInfo(moveValue) {
     if (n < 0) {
       return {
         label: `↓ ${Math.abs(n)}`,
-        type: 'down',
         color: '#ffd0d0',
         bg: 'rgba(255,132,132,0.12)',
         border: 'rgba(255,132,132,0.18)',
@@ -127,15 +127,10 @@ function getMoveInfo(moveValue) {
 
   return {
     label: raw,
-    type: 'neutral',
     color: 'rgba(220,232,255,0.72)',
     bg: 'rgba(255,255,255,0.05)',
     border: 'rgba(255,255,255,0.08)',
   }
-}
-
-function sortRankings(rows) {
-  return [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
 }
 
 function Photo({ name, url, size = 76, borderColor = 'rgba(255,255,255,0.14)' }) {
@@ -705,10 +700,16 @@ export default function LiveRankingPage() {
             grid-template-columns: 1fr !important;
           }
 
-          .podium-1,
-          .podium-2,
+          .podium-1 {
+            order: 1 !important;
+          }
+
+          .podium-2 {
+            order: 2 !important;
+          }
+
           .podium-3 {
-            order: initial !important;
+            order: 3 !important;
           }
         }
 
@@ -932,4 +933,4 @@ export default function LiveRankingPage() {
       </div>
     </>
   )
-}
+        }
