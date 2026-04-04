@@ -612,39 +612,26 @@ function TopRankCard({ row, rank, delay = 0, variant = 'standard' }) {
         {isFirst ? (
           <>
             <div
+              className="champion-soft-ring"
               style={{
                 position: 'absolute',
-                inset: 0,
-                borderRadius: 35,
-                pointerEvents: 'none',
-                boxShadow:
-                  'inset 0 0 0 1px rgba(196,247,255,0.18), inset 0 0 34px rgba(168,240,255,0.08)',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 0,
-                borderRadius: 35,
-                pointerEvents: 'none',
-                WebkitMask:
-                  'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
-                WebkitMaskComposite: 'xor',
-                maskComposite: 'exclude',
-                padding: 3,
-                background:
-                  'conic-gradient(from 0deg, rgba(158,239,255,0) 0deg, rgba(158,239,255,0.0) 35deg, rgba(158,239,255,0.92) 85deg, rgba(115,196,255,0.98) 110deg, rgba(158,239,255,0.0) 150deg, rgba(158,239,255,0.0) 220deg, rgba(158,239,255,0.92) 280deg, rgba(115,196,255,0.98) 306deg, rgba(158,239,255,0.0) 340deg, rgba(158,239,255,0) 360deg)',
-                animation: 'championAuraTrace 2.4s linear infinite',
-                filter: 'drop-shadow(0 0 10px rgba(158,239,255,0.85)) drop-shadow(0 0 18px rgba(115,196,255,0.55))',
-              }}
-            />
-            <div
-              style={{
-                position: 'absolute',
-                inset: 8,
+                inset: 14,
                 borderRadius: 28,
-                border: '1px solid rgba(188,244,255,0.18)',
                 pointerEvents: 'none',
+                border: '1px solid rgba(188,244,255,0.18)',
+                boxShadow:
+                  '0 0 0 1px rgba(196,247,255,0.06), inset 0 0 30px rgba(168,240,255,0.06), 0 0 28px rgba(168,240,255,0.08)',
+              }}
+            />
+            <div
+              className="champion-breathe"
+              style={{
+                position: 'absolute',
+                inset: -8,
+                borderRadius: 40,
+                pointerEvents: 'none',
+                background: 'radial-gradient(circle, rgba(168,240,255,0.10) 0%, rgba(168,240,255,0.00) 66%)',
+                filter: 'blur(22px)',
               }}
             />
           </>
@@ -1130,20 +1117,6 @@ export default function HomePage() {
           }
         }
 
-        @keyframes championAuraTrace {
-          0% {
-            transform: rotate(0deg);
-            opacity: 0.88;
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            transform: rotate(360deg);
-            opacity: 0.88;
-          }
-        }
-
         @keyframes fadeInUp {
           from {
             opacity: 0;
@@ -1155,8 +1128,27 @@ export default function HomePage() {
           }
         }
 
+        @keyframes championBreathe {
+          0% {
+            opacity: 0.55;
+            transform: scale(0.985);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.01);
+          }
+          100% {
+            opacity: 0.55;
+            transform: scale(0.985);
+          }
+        }
+
         .fade-in {
           animation: fadeInUp 0.42s cubic-bezier(.22,.61,.36,1);
+        }
+
+        .champion-breathe {
+          animation: championBreathe 3.8s ease-in-out infinite;
         }
 
         .interactive-card {
@@ -1178,7 +1170,7 @@ export default function HomePage() {
 
         .top-card-premium:hover .interactive-card {
           transform: translateY(-5px);
-          box-shadow: 0 22px 52px rgba(0,0,0,0.28), 0 0 36px rgba(168,240,255,0.12);
+          box-shadow: 0 22px 52px rgba(0,0,0,0.28), 0 0 30px rgba(168,240,255,0.10);
         }
 
         .top-card-standard:hover .interactive-card {
@@ -1429,18 +1421,7 @@ export default function HomePage() {
                   marginBottom: 12,
                 }}
               >
-                Center Court Overview
-              </div>
-
-              <div
-                style={{
-                  fontSize: 14,
-                  fontWeight: 700,
-                  color: 'rgba(220,232,255,0.62)',
-                  marginBottom: 6,
-                }}
-              >
-                Current leader
+                Current Leader
               </div>
 
               <div
@@ -1449,22 +1430,10 @@ export default function HomePage() {
                   fontWeight: 900,
                   lineHeight: 1.02,
                   color: '#eef6ff',
-                  marginBottom: 12,
                   letterSpacing: '-0.04em',
                 }}
               >
                 {leader}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 15,
-                  lineHeight: 1.58,
-                  color: 'rgba(220,232,255,0.72)',
-                  maxWidth: 650,
-                }}
-              >
-                The rankings page now emphasizes the top of the ladder with a true podium composition, richer lower-card structure, and more distinct visual grouping across the field.
               </div>
             </div>
 
