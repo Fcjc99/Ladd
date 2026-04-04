@@ -68,6 +68,38 @@ function getMoveDisplay(moveValue) {
   }
 }
 
+function getStatusTone(status) {
+  const s = normalizeUpper(status)
+
+  if (s === 'ACTIVE') {
+    return {
+      edge: 'rgba(94, 234, 212, 0.20)',
+      glow: 'rgba(94, 234, 212, 0.08)',
+      badgeBg: 'rgba(94, 234, 212, 0.10)',
+      badgeBorder: 'rgba(94, 234, 212, 0.20)',
+      badgeColor: '#9ff7ea',
+    }
+  }
+
+  if (s === 'INACTIVE') {
+    return {
+      edge: 'rgba(219,231,247,0.14)',
+      glow: 'rgba(219,231,247,0.05)',
+      badgeBg: 'rgba(219,231,247,0.08)',
+      badgeBorder: 'rgba(219,231,247,0.16)',
+      badgeColor: '#dce8ff',
+    }
+  }
+
+  return {
+    edge: 'rgba(255,255,255,0.12)',
+    glow: 'rgba(255,255,255,0.04)',
+    badgeBg: 'rgba(255,255,255,0.08)',
+    badgeBorder: 'rgba(255,255,255,0.14)',
+    badgeColor: '#dce8ff',
+  }
+}
+
 function getTierStyles(rank) {
   const tier = getTier(rank)
 
@@ -425,23 +457,158 @@ function SegmentedControl({ options, value, onChange }) {
   )
 }
 
-function TopRankCard({ row, rank }) {
+function SectionHeader({ eyebrow, title, subtitle, right }) {
+  return (
+    <div
+      className="fade-in"
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'flex-end',
+        gap: 16,
+        flexWrap: 'wrap',
+        marginBottom: 16,
+      }}
+    >
+      <div>
+        <div
+          style={{
+            fontSize: 11,
+            fontWeight: 800,
+            letterSpacing: '0.18em',
+            textTransform: 'uppercase',
+            color: 'rgba(174,242,255,0.72)',
+            marginBottom: 8,
+          }}
+        >
+          {eyebrow}
+        </div>
+        <div
+          style={{
+            fontSize: 28,
+            fontWeight: 900,
+            letterSpacing: '-0.03em',
+            color: '#eef6ff',
+            lineHeight: 1.02,
+          }}
+        >
+          {title}
+        </div>
+        {subtitle ? (
+          <div
+            style={{
+              marginTop: 8,
+              fontSize: 14,
+              color: 'rgba(220,232,255,0.66)',
+            }}
+          >
+            {subtitle}
+          </div>
+        ) : null}
+      </div>
+
+      {right}
+    </div>
+  )
+}
+
+function EmptyFilterState({ hasRows }) {
+  return (
+    <div
+      className="fade-in"
+      style={{
+        borderRadius: 24,
+        padding: 28,
+        background: 'rgba(17,40,74,0.68)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        textAlign: 'center',
+      }}
+    >
+      <div
+        style={{
+          width: 58,
+          height: 58,
+          margin: '0 auto 14px',
+          borderRadius: 18,
+          display: 'grid',
+          placeItems: 'center',
+          background: 'rgba(255,255,255,0.06)',
+          border: '1px solid rgba(255,255,255,0.10)',
+          fontSize: 22,
+        }}
+      >
+        ⌕
+      </div>
+
+      <div
+        style={{
+          fontSize: 22,
+          fontWeight: 900,
+          color: '#eef6ff',
+          marginBottom: 8,
+        }}
+      >
+        {hasRows ? 'No players match this view' : 'No ranking rows found'}
+      </div>
+
+      <div
+        style={{
+          fontSize: 15,
+          color: 'rgba(220,232,255,0.70)',
+          maxWidth: 520,
+          margin: '0 auto',
+          lineHeight: 1.5,
+        }}
+      >
+        {hasRows
+          ? 'Try a different search term or switch the status filter to see more players.'
+          : 'The live ranking feed is currently empty.'}
+      </div>
+    </div>
+  )
+}
+
+function TopRankCard({ row, rank, delay = 0, variant = 'standard' }) {
   const tierStyles = getTierStyles(rank)
   const moveDisplay = getMoveDisplay(row.move)
   const isFirst = rank === 1
+  const statusTone = getStatusTone(row.status)
+  const isSidePodium = variant === 'side'
+
+  const height = isFirst ? 520 : isSidePodium ? 430 : 395
+  const photoSize = isFirst ? 190 : isSidePodium ? 132 : 138
+  const titleSize = isFirst ? 64 : isSidePodium ? 36 : 44
 
   return (
-    <div style={tierStyles.shell}>
+    <div
+      className={`fade-in ${isFirst ? 'top-card-premium' : 'top-card-standard'}`}
+      style={{
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+        ...tierStyles.shell,
+      }}
+    >
       <div
         className="interactive-card"
         style={{
           ...tierStyles.frame,
           position: 'relative',
           overflow: 'hidden',
-          padding: isFirst ? '24px 26px 22px' : '22px 24px 20px',
-          minHeight: isFirst ? 500 : 395,
+          padding: isFirst ? '26px 28px 24px' : '20px 22px 18px',
+          minHeight: height,
+          boxShadow: `inset 0 0 0 1px ${statusTone.edge}, inset 0 0 26px ${statusTone.glow}`,
         }}
       >
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.00) 28%)',
+            pointerEvents: 'none',
+          }}
+        />
+
         {isFirst ? (
           <>
             <div
@@ -492,7 +659,7 @@ function TopRankCard({ row, rank }) {
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'space-between',
-            minHeight: isFirst ? 448 : 350,
+            minHeight: isFirst ? 462 : isSidePodium ? 390 : 350,
           }}
         >
           <div
@@ -526,16 +693,16 @@ function TopRankCard({ row, rank }) {
               width: '100%',
               display: 'flex',
               justifyContent: 'center',
-              marginTop: isFirst ? 8 : 2,
-              marginBottom: 8,
+              marginTop: isFirst ? 6 : 0,
+              marginBottom: 10,
             }}
           >
             <CenterIdentity
               row={row}
-              titleSize={isFirst ? 64 : 44}
-              photoSize={isFirst ? 190 : 138}
-              flagWidth={isFirst ? 44 : 38}
-              flagHeight={isFirst ? 28 : 24}
+              titleSize={titleSize}
+              photoSize={photoSize}
+              flagWidth={isFirst ? 44 : 36}
+              flagHeight={isFirst ? 28 : 22}
               photoBorderColor={tierStyles.accent}
               champion={isFirst}
             />
@@ -546,13 +713,19 @@ function TopRankCard({ row, rank }) {
               width: '100%',
               display: 'flex',
               justifyContent: 'center',
-              gap: 12,
+              gap: 10,
               flexWrap: 'wrap',
               marginTop: 4,
             }}
           >
             <Pill accent={tierStyles.accent}>{tierStyles.title}</Pill>
-            <Pill muted>Status: {row.status || '-'}</Pill>
+            <Pill
+              accent={statusTone.badgeColor}
+              background={statusTone.badgeBg}
+              borderColor={statusTone.badgeBorder}
+            >
+              Status: {row.status || '-'}
+            </Pill>
           </div>
         </div>
       </div>
@@ -560,12 +733,20 @@ function TopRankCard({ row, rank }) {
   )
 }
 
-function MidRankCard({ row, rank }) {
+function MidRankCard({ row, rank, delay = 0 }) {
   const tierStyles = getTierStyles(rank)
   const moveDisplay = getMoveDisplay(row.move)
+  const statusTone = getStatusTone(row.status)
 
   return (
-    <div style={tierStyles.shell}>
+    <div
+      className="fade-in"
+      style={{
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+        ...tierStyles.shell,
+      }}
+    >
       <div
         className="interactive-card"
         style={{
@@ -574,6 +755,7 @@ function MidRankCard({ row, rank }) {
           overflow: 'hidden',
           padding: '18px 20px 18px',
           minHeight: 285,
+          boxShadow: `inset 0 0 0 1px ${statusTone.edge}, inset 0 0 20px ${statusTone.glow}`,
         }}
       >
         <div
@@ -642,7 +824,14 @@ function MidRankCard({ row, rank }) {
             }}
           >
             <Pill compact accent={tierStyles.accent}>{tierStyles.title}</Pill>
-            <Pill compact muted>Status: {row.status || '-'}</Pill>
+            <Pill
+              compact
+              accent={statusTone.badgeColor}
+              background={statusTone.badgeBg}
+              borderColor={statusTone.badgeBorder}
+            >
+              Status: {row.status || '-'}
+            </Pill>
           </div>
         </div>
       </div>
@@ -650,50 +839,55 @@ function MidRankCard({ row, rank }) {
   )
 }
 
-function CompactCard({ row, rank }) {
+function CompactCard({ row, rank, delay = 0 }) {
   const moveDisplay = getMoveDisplay(row.move)
+  const statusTone = getStatusTone(row.status)
 
   return (
-    <div style={compactCardShellStyle}>
+    <div
+      className="fade-in"
+      style={{
+        animationDelay: `${delay}ms`,
+        animationFillMode: 'both',
+        ...compactCardShellStyle,
+      }}
+    >
       <div
         className="interactive-card compact-card"
         style={{
           ...compactCardStyle,
           position: 'relative',
           overflow: 'hidden',
-          minHeight: 230,
-          padding: '16px 18px 18px',
+          minHeight: 168,
+          padding: '16px',
+          boxShadow: `0 10px 22px rgba(0,0,0,0.16), inset 0 0 0 1px ${statusTone.edge}, inset 0 0 18px ${statusTone.glow}`,
         }}
       >
         <div
           style={{
-            position: 'relative',
-            zIndex: 1,
-            display: 'flex',
-            flexDirection: 'column',
+            display: 'grid',
+            gridTemplateColumns: 'auto minmax(0, 1fr) auto',
+            gap: 16,
             alignItems: 'center',
-            justifyContent: 'space-between',
-            minHeight: 194,
           }}
         >
           <div
             style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'flex-start',
+              display: 'grid',
+              gap: 10,
+              justifyItems: 'center',
             }}
           >
             <div
               style={{
-                minWidth: 46,
-                height: 46,
-                borderRadius: 15,
+                minWidth: 52,
+                height: 52,
+                borderRadius: 16,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 900,
-                fontSize: 22,
+                fontSize: 23,
                 background: '#dbe7f7',
                 color: '#182235',
                 boxShadow: '0 8px 18px rgba(0,0,0,0.16)',
@@ -704,7 +898,7 @@ function CompactCard({ row, rank }) {
 
             <div
               style={{
-                padding: '7px 12px',
+                padding: '7px 11px',
                 borderRadius: 999,
                 fontSize: 12,
                 fontWeight: 800,
@@ -720,34 +914,85 @@ function CompactCard({ row, rank }) {
 
           <div
             style={{
-              width: '100%',
               display: 'flex',
-              justifyContent: 'center',
-              marginTop: -4,
-              marginBottom: 6,
+              alignItems: 'center',
+              gap: 14,
+              minWidth: 0,
             }}
           >
-            <CenterIdentity
-              row={row}
-              titleSize={26}
-              photoSize={112}
-              flagWidth={32}
-              flagHeight={20}
+            <PlayerPhoto
+              player={row.player}
+              photoUrl={row.photo_url}
+              size={88}
+              borderColor="rgba(255,255,255,0.16)"
             />
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 10,
+                  flexWrap: 'wrap',
+                  marginBottom: 8,
+                }}
+              >
+                <div
+                  style={{
+                    fontSize: 28,
+                    fontWeight: 900,
+                    letterSpacing: '-0.03em',
+                    lineHeight: 1,
+                    color: '#eef6ff',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {row.player || 'Unknown'}
+                </div>
+
+                <FlagInline
+                  flagUrl={row.flag_url}
+                  player={row.player}
+                  width={30}
+                  height={20}
+                />
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  gap: 8,
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                }}
+              >
+                <Pill compact accent="#dce8ff">Rank #{rank}</Pill>
+                <Pill
+                  compact
+                  accent={statusTone.badgeColor}
+                  background={statusTone.badgeBg}
+                  borderColor={statusTone.badgeBorder}
+                >
+                  {row.status || '-'}
+                </Pill>
+              </div>
+            </div>
           </div>
 
           <div
             style={{
-              width: '100%',
-              display: 'flex',
-              justifyContent: 'center',
-              gap: 10,
-              flexWrap: 'wrap',
+              width: 8,
+              alignSelf: 'stretch',
+              borderRadius: 999,
+              background:
+                rank <= 10
+                  ? 'linear-gradient(180deg, rgba(168,240,255,0.40) 0%, rgba(168,240,255,0.06) 100%)'
+                  : rank <= 13
+                  ? 'linear-gradient(180deg, rgba(219,231,247,0.32) 0%, rgba(219,231,247,0.06) 100%)'
+                  : 'linear-gradient(180deg, rgba(210,150,103,0.28) 0%, rgba(210,150,103,0.05) 100%)',
+              boxShadow: '0 0 12px rgba(255,255,255,0.06)',
             }}
-          >
-            <Pill compact accent="#dce8ff">#{rank}</Pill>
-            <Pill compact muted>Status: {row.status || '-'}</Pill>
-          </div>
+          />
         </div>
       </div>
     </div>
@@ -827,6 +1072,10 @@ export default function HomePage() {
     return rank && rank >= 8
   })
 
+  const topOne = topThree.find((row) => toNumber(row.rank) === 1) || null
+  const topTwo = topThree.find((row) => toNumber(row.rank) === 2) || null
+  const topThreeThird = topThree.find((row) => toNumber(row.rank) === 3) || null
+
   const totalPlayers = rankingRows.length
   const activePlayers = rankingRows.filter(
     (row) => normalizeUpper(row.status) === 'ACTIVE'
@@ -898,7 +1147,7 @@ export default function HomePage() {
         @keyframes fadeInUp {
           from {
             opacity: 0;
-            transform: translateY(8px);
+            transform: translateY(10px);
           }
           to {
             opacity: 1;
@@ -907,11 +1156,11 @@ export default function HomePage() {
         }
 
         .fade-in {
-          animation: fadeInUp 0.28s ease;
+          animation: fadeInUp 0.42s cubic-bezier(.22,.61,.36,1);
         }
 
         .interactive-card {
-          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease, filter 0.18s ease;
         }
 
         .interactive-card:hover {
@@ -921,6 +1170,38 @@ export default function HomePage() {
         .compact-card:hover {
           border-color: rgba(255,255,255,0.20) !important;
           box-shadow: 0 16px 34px rgba(0,0,0,0.24) !important;
+        }
+
+        .top-card-premium:hover {
+          filter: brightness(1.02);
+        }
+
+        .top-card-premium:hover .interactive-card {
+          transform: translateY(-5px);
+          box-shadow: 0 22px 52px rgba(0,0,0,0.28), 0 0 36px rgba(168,240,255,0.12);
+        }
+
+        .top-card-standard:hover .interactive-card {
+          transform: translateY(-4px);
+          box-shadow: 0 18px 38px rgba(0,0,0,0.24);
+        }
+
+        @media (max-width: 1100px) {
+          .podium-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .podium-center {
+            order: 1;
+          }
+
+          .podium-left {
+            order: 2;
+          }
+
+          .podium-right {
+            order: 3;
+          }
         }
 
         @media (max-width: 980px) {
@@ -936,6 +1217,12 @@ export default function HomePage() {
         @media (max-width: 900px) {
           .top-rank-content {
             min-height: auto !important;
+          }
+        }
+
+        @media (max-width: 780px) {
+          .compact-grid-mobile {
+            grid-template-columns: 1fr !important;
           }
         }
 
@@ -1001,7 +1288,7 @@ export default function HomePage() {
           />
         </div>
 
-        <div style={{ position: 'relative', maxWidth: 1150, margin: '0 auto', zIndex: 1 }}>
+        <div style={{ position: 'relative', maxWidth: 1180, margin: '0 auto', zIndex: 1 }}>
           <div
             className="fade-in"
             style={{
@@ -1049,7 +1336,7 @@ export default function HomePage() {
               <div
                 style={{
                   marginTop: 12,
-                  maxWidth: 700,
+                  maxWidth: 720,
                   fontSize: 16,
                   lineHeight: 1.55,
                   color: 'rgba(220,232,255,0.72)',
@@ -1089,23 +1376,43 @@ export default function HomePage() {
               height: 1,
               background:
                 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(168,240,255,0.18) 22%, rgba(255,255,255,0.08) 50%, rgba(168,240,255,0.18) 78%, rgba(255,255,255,0) 100%)',
-              marginBottom: 26,
+              marginBottom: 22,
             }}
           />
+
+          <div
+            className="fade-in"
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 14px',
+              borderRadius: 999,
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(220,232,255,0.78)',
+              fontSize: 13,
+              fontWeight: 700,
+              marginBottom: 22,
+            }}
+          >
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#9eefff', boxShadow: '0 0 14px rgba(158,239,255,0.8)' }} />
+            Live from ranking feed
+          </div>
 
           <div
             className="hero-grid fade-in"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.35fr 1fr',
+              gridTemplateColumns: '1.5fr 1fr',
               gap: 16,
-              marginBottom: 26,
+              marginBottom: 28,
             }}
           >
             <div
               style={{
-                borderRadius: 28,
-                padding: 22,
+                borderRadius: 30,
+                padding: 24,
                 background:
                   'linear-gradient(180deg, rgba(18,42,78,0.86) 0%, rgba(10,22,41,0.92) 100%)',
                 border: '1px solid rgba(168,240,255,0.12)',
@@ -1119,7 +1426,7 @@ export default function HomePage() {
                   letterSpacing: '0.18em',
                   textTransform: 'uppercase',
                   color: 'rgba(174,242,255,0.74)',
-                  marginBottom: 10,
+                  marginBottom: 12,
                 }}
               >
                 Center Court Overview
@@ -1127,25 +1434,37 @@ export default function HomePage() {
 
               <div
                 style={{
-                  fontSize: 28,
-                  fontWeight: 900,
-                  lineHeight: 1.05,
-                  color: '#eef6ff',
-                  marginBottom: 10,
-                  letterSpacing: '-0.03em',
+                  fontSize: 14,
+                  fontWeight: 700,
+                  color: 'rgba(220,232,255,0.62)',
+                  marginBottom: 6,
                 }}
               >
-                Current leader: {leader}
+                Current leader
+              </div>
+
+              <div
+                style={{
+                  fontSize: 38,
+                  fontWeight: 900,
+                  lineHeight: 1.02,
+                  color: '#eef6ff',
+                  marginBottom: 12,
+                  letterSpacing: '-0.04em',
+                }}
+              >
+                {leader}
               </div>
 
               <div
                 style={{
                   fontSize: 15,
-                  lineHeight: 1.55,
+                  lineHeight: 1.58,
                   color: 'rgba(220,232,255,0.72)',
+                  maxWidth: 650,
                 }}
               >
-                The rankings page is optimized for premium visual hierarchy, with featured elite tiers on top and a cleaner, more polished ladder below.
+                The rankings page now emphasizes the top of the ladder with a true podium composition, richer lower-card structure, and more distinct visual grouping across the field.
               </div>
             </div>
 
@@ -1157,9 +1476,9 @@ export default function HomePage() {
               }}
             >
               <MetaBox label="Players" value={String(totalPlayers)} />
-              <MetaBox label="Active" value={String(activePlayers)} />
+              <MetaBox label="Active" value={String(activePlayers)} accent="rgba(94,234,212,0.08)" />
               <MetaBox label="Leader" value={leader} />
-              <MetaBox label="Biggest Move" value={biggestMover} />
+              <MetaBox label="Biggest Move" value={biggestMover} accent="rgba(168,240,255,0.10)" />
             </div>
           </div>
 
@@ -1171,7 +1490,7 @@ export default function HomePage() {
               gap: 12,
               justifyContent: 'space-between',
               flexWrap: 'wrap',
-              marginBottom: 24,
+              marginBottom: 28,
             }}
           >
             <SearchInput
@@ -1210,41 +1529,123 @@ export default function HomePage() {
           {loading ? (
             <div style={loadingCardStyle}>Loading rankings...</div>
           ) : filteredRankingRows.length === 0 ? (
-            <div style={loadingCardStyle}>No ranking rows found.</div>
+            <EmptyFilterState hasRows={rankingRows.length > 0} />
           ) : (
             <>
-              {topThree.length ? (
-                <div style={{ display: 'grid', gap: 18, marginBottom: 28 }}>
-                  {topThree.map((row) => {
-                    const rank = toNumber(row.rank) ?? 0
-                    return <TopRankCard key={`top-${rank}`} row={row} rank={rank} />
-                  })}
+              {(topOne || topTwo || topThreeThird) ? (
+                <div style={{ marginBottom: 34 }}>
+                  <SectionHeader
+                    eyebrow="Featured"
+                    title="Elite Tier"
+                    subtitle="The three benchmark positions in the current ladder."
+                    right={<Pill muted>Top 3</Pill>}
+                  />
+
+                  <div
+                    className="podium-grid"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1.18fr 1fr',
+                      gap: 18,
+                      alignItems: 'end',
+                    }}
+                  >
+                    <div className="podium-left">
+                      {topTwo ? (
+                        <TopRankCard
+                          row={topTwo}
+                          rank={2}
+                          delay={60}
+                          variant="side"
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className="podium-center">
+                      {topOne ? (
+                        <TopRankCard
+                          row={topOne}
+                          rank={1}
+                          delay={0}
+                          variant="center"
+                        />
+                      ) : null}
+                    </div>
+
+                    <div className="podium-right">
+                      {topThreeThird ? (
+                        <TopRankCard
+                          row={topThreeThird}
+                          rank={3}
+                          delay={120}
+                          variant="side"
+                        />
+                      ) : null}
+                    </div>
+                  </div>
                 </div>
               ) : null}
 
               {bronzeRows.length ? (
-                <div
-                  className="bronze-grid"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-                    gap: 16,
-                    marginBottom: 28,
-                  }}
-                >
-                  {bronzeRows.map((row) => {
-                    const rank = toNumber(row.rank) ?? 0
-                    return <MidRankCard key={`bronze-${rank}`} row={row} rank={rank} />
-                  })}
+                <div style={{ marginBottom: 34 }}>
+                  <SectionHeader
+                    eyebrow="Middle Tier"
+                    title="Contenders"
+                    subtitle="Strong positions with realistic upward pressure on the elite ranks."
+                    right={<Pill muted>Ranks 4–7</Pill>}
+                  />
+
+                  <div
+                    className="bronze-grid"
+                    style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+                      gap: 16,
+                    }}
+                  >
+                    {bronzeRows.map((row, index) => {
+                      const rank = toNumber(row.rank) ?? 0
+                      return (
+                        <MidRankCard
+                          key={`bronze-${rank}`}
+                          row={row}
+                          rank={rank}
+                          delay={index * 70}
+                        />
+                      )
+                    })}
+                  </div>
                 </div>
               ) : null}
 
               {restRows.length ? (
-                <div style={{ display: 'grid', gap: 16 }}>
-                  {restRows.map((row) => {
-                    const rank = toNumber(row.rank) ?? 0
-                    return <CompactCard key={`rest-${rank}`} row={row} rank={rank} />
-                  })}
+                <div>
+                  <SectionHeader
+                    eyebrow="Full Ladder"
+                    title="Ranked Field"
+                    subtitle="The wider competitive field with cleaner density and faster scanability."
+                    right={<Pill muted>Ranks 8+</Pill>}
+                  />
+
+                  <div
+                    className="compact-grid-mobile"
+                    style={{
+                      display: 'grid',
+                      gap: 14,
+                    }}
+                  >
+                    {restRows.map((row, index) => {
+                      const rank = toNumber(row.rank) ?? 0
+                      return (
+                        <CompactCard
+                          key={`rest-${rank}`}
+                          row={row}
+                          rank={rank}
+                          delay={index * 45}
+                        />
+                      )
+                    })}
+                  </div>
                 </div>
               ) : null}
             </>
