@@ -124,9 +124,18 @@ function getRankTheme(rank) {
 
 function safeDateValue(value) {
   if (!value) return null
+
   const parsed = new Date(value)
-  if (Number.isNaN(parsed.getTime())) return null
-  return parsed
+  if (!Number.isNaN(parsed.getTime())) return parsed
+
+  const num = Number(value)
+  if (!Number.isNaN(num) && num > 30000) {
+    const excelEpoch = new Date(Date.UTC(1899, 11, 30))
+    excelEpoch.setUTCDate(excelEpoch.getUTCDate() + num)
+    return excelEpoch
+  }
+
+  return null
 }
 
 function formatDate(value) {
@@ -222,6 +231,25 @@ function applyPresetToScoreForm(preset, currentWinner) {
   }
 }
 
+function matchesSearch(row, query) {
+  const q = normalizeUpper(query)
+  if (!q) return true
+
+  const haystack = [
+    row.challenger,
+    row.opponent,
+    row.winner,
+    row.status,
+    row.approval,
+    row.score,
+    formatDate(row.match_date),
+  ]
+    .map((v) => normalizeUpper(v))
+    .join(' ')
+
+  return haystack.includes(q)
+}
+
 function Pill({
   children,
   accent = '#dce8ff',
@@ -253,14 +281,15 @@ function Pill({
   )
 }
 
-function MetaBox({ label, value }) {
+function MetaBox({ label, value, accent = 'rgba(168,240,255,0.08)' }) {
   return (
     <div
       style={{
-        borderRadius: 18,
-        padding: '12px 14px',
-        background: 'rgba(255,255,255,0.04)',
+        borderRadius: 22,
+        padding: '14px 16px',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.035))',
         border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: `0 0 24px ${accent}, inset 0 1px 0 rgba(255,255,255,0.04)`,
       }}
     >
       <div
@@ -294,17 +323,36 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
     <section
       className="glass-section fade-in"
       style={{
-        background: 'rgba(255,255,255,0.05)',
+        position: 'relative',
+        background:
+          'linear-gradient(180deg, rgba(255,255,255,0.055) 0%, rgba(255,255,255,0.035) 100%)',
         border: '1px solid rgba(255,255,255,0.09)',
-        borderRadius: 28,
+        borderRadius: 30,
         padding: 24,
-        boxShadow: `0 0 40px ${accent}`,
+        boxShadow: `0 0 46px ${accent}, 0 16px 44px rgba(0,0,0,0.18)`,
         backdropFilter: 'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
+        overflow: 'hidden',
       }}
     >
       <div
         style={{
+          position: 'absolute',
+          top: -80,
+          right: -40,
+          width: 220,
+          height: 220,
+          borderRadius: '50%',
+          background: accent,
+          filter: 'blur(60px)',
+          opacity: 0.55,
+          pointerEvents: 'none',
+        }}
+      />
+
+      <div
+        style={{
+          position: 'relative',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'flex-start',
@@ -316,10 +364,11 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
         <div>
           <h2
             style={{
-              fontSize: 28,
-              fontWeight: 850,
+              fontSize: 30,
+              fontWeight: 900,
               margin: 0,
-              lineHeight: 1.05,
+              lineHeight: 1.02,
+              letterSpacing: '-0.025em',
             }}
           >
             {title}
@@ -330,6 +379,7 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
                 marginTop: 8,
                 fontSize: 14,
                 color: 'rgba(220,232,255,0.66)',
+                maxWidth: 700,
               }}
             >
               {subtitle}
@@ -338,7 +388,8 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
         </div>
         {right}
       </div>
-      {children}
+
+      <div style={{ position: 'relative' }}>{children}</div>
     </section>
   )
 }
@@ -419,6 +470,95 @@ function RankChip({ rank }) {
       }}
     >
       #{rank}
+    </div>
+  )
+}
+
+function SearchInput({ value, onChange, placeholder = 'Search' }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        minWidth: 220,
+        flex: 1,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: 14,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: 'rgba(220,232,255,0.46)',
+          fontSize: 14,
+          pointerEvents: 'none',
+        }}
+      >
+        ⌕
+      </div>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          height: 46,
+          borderRadius: 16,
+          border: '1px solid rgba(255,255,255,0.10)',
+          background: 'rgba(255,255,255,0.04)',
+          color: '#eef6ff',
+          padding: '0 14px 0 38px',
+          outline: 'none',
+          fontSize: 14,
+          boxSizing: 'border-box',
+        }}
+      />
+    </div>
+  )
+}
+
+function SegmentedControl({ options, value, onChange }) {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: 6,
+        borderRadius: 16,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        flexWrap: 'wrap',
+      }}
+    >
+      {options.map((option) => {
+        const active = option.value === value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className="interactive-card"
+            style={{
+              height: 34,
+              padding: '0 12px',
+              borderRadius: 12,
+              border: active
+                ? '1px solid rgba(174,242,255,0.22)'
+                : '1px solid rgba(255,255,255,0.02)',
+              background: active
+                ? 'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.07) 100%)'
+                : 'transparent',
+              color: active ? '#c9f7ff' : 'rgba(220,232,255,0.72)',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+            }}
+          >
+            {option.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
@@ -1398,6 +1538,7 @@ function ScorePreviewCard({ match, winner, score, getPlayerPhotoUrl }) {
         padding: 16,
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.03)',
       }}
     >
       <div
@@ -1725,6 +1866,11 @@ export default function MatchCenterPage() {
   const [submittingResult, setSubmittingResult] = useState(false)
   const [toast, setToast] = useState(null)
 
+  const [activeQuery, setActiveQuery] = useState('')
+  const [completedQuery, setCompletedQuery] = useState('')
+  const [activeView, setActiveView] = useState('all')
+  const [completedView, setCompletedView] = useState('all')
+
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
     challenger_rank: '',
@@ -1738,6 +1884,23 @@ export default function MatchCenterPage() {
     const timer = setTimeout(() => setToast(null), 2600)
     return () => clearTimeout(timer)
   }, [toast])
+
+  useEffect(() => {
+    function handleEscape(e) {
+      if (e.key !== 'Escape') return
+      if (selectedMatch) {
+        setSelectedMatch(null)
+        setResultForm(getDefaultScoreForm())
+        return
+      }
+      if (selectedPlayer) {
+        setSelectedPlayer(null)
+      }
+    }
+
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [selectedMatch, selectedPlayer])
 
   function showToast(message, type = 'success') {
     setToast({ message, type })
@@ -1841,6 +2004,28 @@ export default function MatchCenterPage() {
       })
       .slice(0, 6)
   }, [selectedPlayer, feedRows])
+
+  const filteredActiveChallenges = useMemo(() => {
+    return activeChallenges.filter((row) => {
+      if (!matchesSearch(row, activeQuery)) return false
+      if (activeView === 'scheduled') return normalizeUpper(row.status) === 'SCHEDULED'
+      if (activeView === 'pending') return normalizeUpper(row.status) === 'PENDING'
+      return true
+    })
+  }, [activeChallenges, activeQuery, activeView])
+
+  const filteredCompletedChallenges = useMemo(() => {
+    let rows = completedChallenges.filter((row) => matchesSearch(row, completedQuery))
+    if (completedView === 'recent') rows = rows.slice(0, 5)
+    if (completedView === 'all') return rows
+    return rows
+  }, [completedChallenges, completedQuery, completedView])
+
+  const topSummary = useMemo(() => {
+    const leader = rankingRows[0]
+    if (!leader?.player) return 'Elite ladder competition in progress'
+    return `Current leader: ${leader.player}`
+  }, [rankingRows])
 
   function updateChallengeField(name, value) {
     if (name === 'challenger') {
@@ -2086,7 +2271,7 @@ export default function MatchCenterPage() {
         }
 
         .interactive-card {
-          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
         }
 
         .interactive-card:hover {
@@ -2193,6 +2378,15 @@ export default function MatchCenterPage() {
           .profile-drawer-panel {
             max-width: 100% !important;
           }
+
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          .toolbar-stack {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
         }
       `}</style>
 
@@ -2207,7 +2401,42 @@ export default function MatchCenterPage() {
           padding: '32px 16px 60px',
         }}
       >
-        <div style={{ maxWidth: 980, margin: '0 auto' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden',
+            zIndex: 0,
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              top: -120,
+              left: -80,
+              width: 360,
+              height: 360,
+              borderRadius: '50%',
+              background: 'rgba(56,189,248,0.12)',
+              filter: 'blur(80px)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 180,
+              right: -90,
+              width: 300,
+              height: 300,
+              borderRadius: '50%',
+              background: 'rgba(168,240,255,0.08)',
+              filter: 'blur(80px)',
+            }}
+          />
+        </div>
+
+        <div style={{ position: 'relative', maxWidth: 1060, margin: '0 auto', zIndex: 1 }}>
           <div
             className="fade-in"
             style={{
@@ -2242,15 +2471,27 @@ export default function MatchCenterPage() {
               <h1
                 className="match-center-title"
                 style={{
-                  fontSize: 48,
+                  fontSize: 50,
                   fontWeight: 900,
-                  letterSpacing: '-0.03em',
+                  letterSpacing: '-0.04em',
                   margin: 0,
                   lineHeight: 0.95,
                 }}
               >
                 Match Center
               </h1>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  maxWidth: 700,
+                  fontSize: 16,
+                  lineHeight: 1.55,
+                  color: 'rgba(220,232,255,0.72)',
+                }}
+              >
+                Premium challenge management with live results, structured score entry, and elite ladder presentation.
+              </div>
             </div>
 
             <a
@@ -2288,17 +2529,73 @@ export default function MatchCenterPage() {
           />
 
           <div
-            className="fade-in"
+            className="hero-grid fade-in"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
-              gap: 12,
+              gridTemplateColumns: '1.35fr 1fr',
+              gap: 16,
               marginBottom: 28,
             }}
           >
-            <MetaBox label="Feed Rows" value={String(feedRows.length)} />
-            <MetaBox label="Active" value={String(activeChallenges.length)} />
-            <MetaBox label="Completed" value={String(completedChallenges.length)} />
+            <div
+              style={{
+                borderRadius: 28,
+                padding: 22,
+                background:
+                  'linear-gradient(180deg, rgba(18,42,78,0.86) 0%, rgba(10,22,41,0.92) 100%)',
+                border: '1px solid rgba(168,240,255,0.12)',
+                boxShadow: '0 18px 44px rgba(0,0,0,0.18), 0 0 36px rgba(56,189,248,0.08)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(174,242,255,0.74)',
+                  marginBottom: 10,
+                }}
+              >
+                Center Court Status
+              </div>
+
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  color: '#eef6ff',
+                  marginBottom: 10,
+                  letterSpacing: '-0.03em',
+                }}
+              >
+                {topSummary}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.55,
+                  color: 'rgba(220,232,255,0.72)',
+                }}
+              >
+                Active matchups and completed results update from the sheet feed, while result entry keeps the premium match card experience intact.
+              </div>
+            </div>
+
+            <div
+              className="fade-in"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+                gap: 12,
+              }}
+            >
+              <MetaBox label="Feed Rows" value={String(feedRows.length)} />
+              <MetaBox label="Active" value={String(activeChallenges.length)} />
+              <MetaBox label="Completed" value={String(completedChallenges.length)} />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gap: 24 }}>
@@ -2378,20 +2675,52 @@ export default function MatchCenterPage() {
                 </Pill>
               }
             >
+              <div
+                className="toolbar-stack"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  marginBottom: 16,
+                }}
+              >
+                <SearchInput
+                  value={activeQuery}
+                  onChange={setActiveQuery}
+                  placeholder="Search by player, status, or date"
+                />
+
+                <SegmentedControl
+                  value={activeView}
+                  onChange={setActiveView}
+                  options={[
+                    { value: 'all', label: 'All' },
+                    { value: 'scheduled', label: 'Scheduled' },
+                    { value: 'pending', label: 'Pending' },
+                  ]}
+                />
+              </div>
+
               {loading ? (
                 <div style={listStyle}>
                   {[1, 2].map((i) => (
                     <ChallengeSkeleton key={i} />
                   ))}
                 </div>
-              ) : activeChallenges.length === 0 ? (
+              ) : filteredActiveChallenges.length === 0 ? (
                 <EmptyState
-                  title="No active challenges"
-                  subtitle="New matchups will appear here once a challenge is submitted."
+                  title={activeChallenges.length ? 'No matching active challenges' : 'No active challenges'}
+                  subtitle={
+                    activeChallenges.length
+                      ? 'Try another search or filter.'
+                      : 'New matchups will appear here once a challenge is submitted.'
+                  }
                 />
               ) : (
                 <div style={listStyle}>
-                  {activeChallenges.map((row, index) => (
+                  {filteredActiveChallenges.map((row, index) => (
                     <ActiveMatchCard
                       key={`active-${index}`}
                       row={row}
@@ -2421,20 +2750,51 @@ export default function MatchCenterPage() {
                 </Pill>
               }
             >
+              <div
+                className="toolbar-stack"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  justifyContent: 'space-between',
+                  flexWrap: 'wrap',
+                  marginBottom: 16,
+                }}
+              >
+                <SearchInput
+                  value={completedQuery}
+                  onChange={setCompletedQuery}
+                  placeholder="Search winner, opponent, score, or date"
+                />
+
+                <SegmentedControl
+                  value={completedView}
+                  onChange={setCompletedView}
+                  options={[
+                    { value: 'all', label: 'All Results' },
+                    { value: 'recent', label: 'Recent 5' },
+                  ]}
+                />
+              </div>
+
               {loading ? (
                 <div style={listStyle}>
                   {[1, 2].map((i) => (
                     <CompletedSkeleton key={i} />
                   ))}
                 </div>
-              ) : completedChallenges.length === 0 ? (
+              ) : filteredCompletedChallenges.length === 0 ? (
                 <EmptyState
-                  title="No completed challenges"
-                  subtitle="Finished match results will appear here after they are reported."
+                  title={completedChallenges.length ? 'No matching completed challenges' : 'No completed challenges'}
+                  subtitle={
+                    completedChallenges.length
+                      ? 'Try another search or filter.'
+                      : 'Finished match results will appear here after they are reported.'
+                  }
                 />
               ) : (
                 <div style={listStyle}>
-                  {completedChallenges.map((row, index) => (
+                  {filteredCompletedChallenges.map((row, index) => (
                     <CompletedMatchCard
                       key={`completed-${index}`}
                       row={row}
@@ -2467,10 +2827,45 @@ export default function MatchCenterPage() {
                   flexWrap: 'wrap',
                 }}
               >
-                <h3 style={{ fontSize: 26, fontWeight: 850, margin: 0 }}>
-                  Enter Match Result
-                </h3>
-                <Pill muted>Row: {selectedMatch.source_row || 'missing'}</Pill>
+                <div>
+                  <h3 style={{ fontSize: 28, fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>
+                    Enter Match Result
+                  </h3>
+                  <div
+                    style={{
+                      marginTop: 6,
+                      fontSize: 14,
+                      color: 'rgba(220,232,255,0.68)',
+                    }}
+                  >
+                    Structured result entry with live card preview
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <Pill muted>Row: {selectedMatch.source_row || 'missing'}</Pill>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedMatch(null)
+                      setResultForm(getDefaultScoreForm())
+                    }}
+                    className="interactive-card"
+                    style={{
+                      width: 42,
+                      height: 42,
+                      borderRadius: 14,
+                      border: '1px solid rgba(255,255,255,0.12)',
+                      background: 'rgba(255,255,255,0.05)',
+                      color: '#eef6ff',
+                      fontSize: 18,
+                      fontWeight: 900,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    ×
+                  </button>
+                </div>
               </div>
 
               <div
