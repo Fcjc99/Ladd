@@ -251,14 +251,6 @@ function matchesSearch(row, query) {
   return haystack.includes(q)
 }
 
-function getFormIndicator(challenger, opponent) {
-  if (!challenger && !opponent) return 'Select players to create a challenge'
-  if (challenger && !opponent) return `${challenger} selected`
-  if (!challenger && opponent) return `${opponent} selected`
-  if (challenger === opponent) return 'Players must be different'
-  return `${challenger} vs ${opponent}`
-}
-
 function getLatestWinnerText(completedChallenges) {
   const latest = completedChallenges[0]
   if (!latest?.winner) return 'No result yet'
@@ -288,7 +280,7 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
         boxShadow: `0 0 46px ${accent}, 0 16px 44px rgba(0,0,0,0.18)`,
         backdropFilter: 'blur(14px)',
         WebkitBackdropFilter: 'blur(14px)',
-        overflow: 'hidden',
+        overflow: 'visible',
       }}
     >
       <div
@@ -345,7 +337,7 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
         {right}
       </div>
 
-      <div style={{ position: 'relative' }}>{children}</div>
+      <div style={{ position: 'relative', zIndex: 2 }}>{children}</div>
     </section>
   )
 }
@@ -568,6 +560,7 @@ function ScoreDisplayPro({ row }) {
 function ActiveLiveDot() {
   return (
     <span
+      className="pulse-dot"
       style={{
         width: 8,
         height: 8,
@@ -1177,7 +1170,7 @@ function PlayerPicker({
   })
 
   return (
-    <div ref={ref} style={{ position: 'relative' }}>
+    <div ref={ref} style={{ position: 'relative', zIndex: open ? 50 : 1 }}>
       <label style={labelStyle}>{label}</label>
 
       <button
@@ -1258,7 +1251,7 @@ function PlayerPicker({
             top: 'calc(100% + 8px)',
             left: 0,
             right: 0,
-            zIndex: 30,
+            zIndex: 2000,
             borderRadius: 18,
             background:
               'linear-gradient(180deg, rgba(15,34,63,0.98) 0%, rgba(10,23,43,0.99) 100%)',
@@ -1973,53 +1966,6 @@ export default function MatchCenterPage() {
     return rows
   }, [completedChallenges, completedQuery, completedView])
 
-  function updateChallengeField(name, value) {
-    if (name === 'challenger') {
-      const player = PLAYERS.find((p) => p.name === value)
-      setChallengeForm((prev) => ({
-        ...prev,
-        challenger: value,
-        challenger_rank: player ? String(player.rank) : '',
-        opponent: prev.opponent === value ? '' : prev.opponent,
-        opponent_rank: prev.opponent === value ? '' : prev.opponent_rank,
-      }))
-      return
-    }
-
-    if (name === 'opponent') {
-      const player = PLAYERS.find((p) => p.name === value)
-      setChallengeForm((prev) => ({
-        ...prev,
-        opponent: value,
-        opponent_rank: player ? String(player.rank) : '',
-      }))
-      return
-    }
-
-    setChallengeForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }))
-  }
-
-  function updateSetValue(index, field, value) {
-    setResultForm((prev) => {
-      const nextSets = [...prev.sets]
-      nextSets[index] = {
-        ...nextSets[index],
-        [field]: value,
-      }
-      return {
-        ...prev,
-        sets: nextSets,
-      }
-    })
-  }
-
-  function applyScorePreset(preset) {
-    setResultForm((prev) => applyPresetToScoreForm(preset, prev.winner))
-  }
-
   async function handleChallengeSubmit(e) {
     e.preventDefault()
     setSubmittingChallenge(true)
@@ -2167,10 +2113,6 @@ export default function MatchCenterPage() {
   }
 
   const latestWinnerText = getLatestWinnerText(completedChallenges)
-  const challengeIndicator = getFormIndicator(
-    challengeForm.challenger,
-    challengeForm.opponent
-  )
 
   return (
     <>
@@ -2328,10 +2270,6 @@ export default function MatchCenterPage() {
           }
 
           .score-entry-layout {
-            grid-template-columns: 1fr !important;
-          }
-
-          .challenge-preview-grid {
             grid-template-columns: 1fr !important;
           }
         }
@@ -2504,93 +2442,9 @@ export default function MatchCenterPage() {
           <div style={{ display: 'grid', gap: 24 }}>
             <SectionCard
               title="Submit Challenge"
-              subtitle="Choose an eligible matchup and set the scheduled date."
+              subtitle="Choose challenger, opponent, and scheduled date."
               accent="rgba(168,240,255,0.10)"
-              right={
-                <Pill muted>
-                  {challengeIndicator}
-                </Pill>
-              }
             >
-              <div
-                className="challenge-preview-grid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1.2fr 0.8fr',
-                  gap: 16,
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    borderRadius: 20,
-                    padding: 16,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 800,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      color: 'rgba(220,232,255,0.58)',
-                      marginBottom: 12,
-                    }}
-                  >
-                    Eligible Matchup
-                  </div>
-
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: 12,
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    <Pill muted>Challenge writes to CHALLENGE MATCHES</Pill>
-                    <Pill muted>Live feed mirrors ChallengeFeed</Pill>
-                    <Pill muted>Results update via popup</Pill>
-                  </div>
-                </div>
-
-                <div
-                  style={{
-                    borderRadius: 20,
-                    padding: 16,
-                    background: 'rgba(255,255,255,0.04)',
-                    border: '1px solid rgba(255,255,255,0.08)',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: 11,
-                      fontWeight: 800,
-                      letterSpacing: '0.14em',
-                      textTransform: 'uppercase',
-                      color: 'rgba(220,232,255,0.58)',
-                      marginBottom: 12,
-                    }}
-                  >
-                    Selection Preview
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 18,
-                      fontWeight: 850,
-                      color: '#eef6ff',
-                      lineHeight: 1.3,
-                      letterSpacing: '-0.02em',
-                    }}
-                  >
-                    {challengeIndicator}
-                  </div>
-                </div>
-              </div>
-
               <form onSubmit={handleChallengeSubmit}>
                 <div
                   style={{
@@ -2603,7 +2457,16 @@ export default function MatchCenterPage() {
                   <PlayerPicker
                     label="Challenger"
                     value={challengeForm.challenger}
-                    onChange={(value) => updateChallengeField('challenger', value)}
+                    onChange={(value) => {
+                      const player = PLAYERS.find((p) => p.name === value)
+                      setChallengeForm((prev) => ({
+                        ...prev,
+                        challenger: value,
+                        challenger_rank: player ? String(player.rank) : '',
+                        opponent: prev.opponent === value ? '' : prev.opponent,
+                        opponent_rank: prev.opponent === value ? '' : prev.opponent_rank,
+                      }))
+                    }}
                     players={PLAYERS}
                     getPlayerPhotoUrl={getPlayerPhotoUrl}
                     excludeName={challengeForm.opponent}
@@ -2612,7 +2475,14 @@ export default function MatchCenterPage() {
                   <PlayerPicker
                     label="Opponent"
                     value={challengeForm.opponent}
-                    onChange={(value) => updateChallengeField('opponent', value)}
+                    onChange={(value) => {
+                      const player = PLAYERS.find((p) => p.name === value)
+                      setChallengeForm((prev) => ({
+                        ...prev,
+                        opponent: value,
+                        opponent_rank: player ? String(player.rank) : '',
+                      }))
+                    }}
                     players={PLAYERS}
                     getPlayerPhotoUrl={getPlayerPhotoUrl}
                     excludeName={challengeForm.challenger}
@@ -2623,7 +2493,12 @@ export default function MatchCenterPage() {
                     <input
                       type="date"
                       value={challengeForm.match_date}
-                      onChange={(e) => updateChallengeField('match_date', e.target.value)}
+                      onChange={(e) =>
+                        setChallengeForm((prev) => ({
+                          ...prev,
+                          match_date: e.target.value,
+                        }))
+                      }
                       style={inputStyle}
                     />
                   </div>
