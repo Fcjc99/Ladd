@@ -251,33 +251,6 @@ function matchesSearch(row, query) {
   return haystack.includes(q)
 }
 
-) {
-  return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '8px 12px',
-        borderRadius: 999,
-        fontSize: 12,
-        fontWeight: 800,
-        letterSpacing: '0.02em',
-        background:
-          background || (muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'),
-        border: `1px solid ${borderColor || 'rgba(255,255,255,0.10)'}`,
-        color: accent,
-        whiteSpace: 'nowrap',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-
-
-
 function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,255,0.12)' }) {
   return (
     <section
@@ -351,32 +324,6 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
 
       <div style={{ position: 'relative' }}>{children}</div>
     </section>
-  )
-}
-
-
-
-function RankChip({ rank }) {
-  const theme = getRankTheme(rank)
-  return (
-    <div
-      style={{
-        minWidth: 28,
-        height: 28,
-        padding: '0 8px',
-        borderRadius: 999,
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        background: theme.badgeBg,
-        color: theme.badgeColor,
-        fontSize: 12,
-        fontWeight: 900,
-        boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
-      }}
-    >
-      #{rank}
-    </div>
   )
 }
 
@@ -465,6 +412,30 @@ function SegmentedControl({ options, value, onChange }) {
           </button>
         )
       })}
+    </div>
+  )
+}
+
+function RankChip({ rank }) {
+  const theme = getRankTheme(rank)
+  return (
+    <div
+      style={{
+        minWidth: 28,
+        height: 28,
+        padding: '0 8px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: theme.badgeBg,
+        color: theme.badgeColor,
+        fontSize: 12,
+        fontWeight: 900,
+        boxShadow: '0 8px 16px rgba(0,0,0,0.12)',
+      }}
+    >
+      #{rank}
     </div>
   )
 }
