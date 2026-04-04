@@ -251,6 +251,29 @@ function matchesSearch(row, query) {
   return haystack.includes(q)
 }
 
+function getFormIndicator(challenger, opponent) {
+  if (!challenger && !opponent) return 'Select players to create a challenge'
+  if (challenger && !opponent) return `${challenger} selected`
+  if (!challenger && opponent) return `${opponent} selected`
+  if (challenger === opponent) return 'Players must be different'
+  return `${challenger} vs ${opponent}`
+}
+
+function getLatestWinnerText(completedChallenges) {
+  const latest = completedChallenges[0]
+  if (!latest?.winner) return 'No result yet'
+  return latest.winner
+}
+
+function getPlayerFormString(playerName, recentMatches) {
+  const relevant = recentMatches
+    .filter((row) => row.winner)
+    .slice(0, 5)
+    .map((row) => (normalizeUpper(row.winner) === normalizeUpper(playerName) ? 'W' : 'L'))
+
+  return relevant.length ? relevant.join(' ') : '—'
+}
+
 function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,255,0.12)' }) {
   return (
     <section
@@ -291,13 +314,13 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
           alignItems: 'flex-start',
           gap: 12,
           flexWrap: 'wrap',
-          marginBottom: 20,
+          marginBottom: 18,
         }}
       >
         <div>
           <h2
             style={{
-              fontSize: 30,
+              fontSize: 31,
               fontWeight: 900,
               margin: 0,
               lineHeight: 1.02,
@@ -310,9 +333,9 @@ function SectionCard({ title, subtitle, children, right, accent = 'rgba(91,171,2
             <div
               style={{
                 marginTop: 8,
-                fontSize: 14,
-                color: 'rgba(220,232,255,0.66)',
-                maxWidth: 700,
+                fontSize: 13,
+                color: 'rgba(220,232,255,0.58)',
+                maxWidth: 720,
               }}
             >
               {subtitle}
@@ -448,7 +471,7 @@ function ScoreDisplayPro({ row }) {
     return (
       <div className="completed-score-panel" style={scorePanelOuterStyle}>
         <div style={scorePanelInnerStyle}>
-          <div style={scoreTitleStyle}>Reported Score</div>
+          <div style={scoreTitleStyle}>Final Score</div>
           <div
             style={{
               fontSize: 18,
@@ -467,7 +490,7 @@ function ScoreDisplayPro({ row }) {
   return (
     <div className="completed-score-panel" style={scorePanelOuterStyle}>
       <div style={scorePanelInnerStyle}>
-        <div style={scoreTitleStyle}>Reported Score</div>
+        <div style={scoreTitleStyle}>Final Score</div>
 
         <div style={{ display: 'grid', gap: 10 }}>
           {sets.map((set, index) => {
@@ -542,6 +565,21 @@ function ScoreDisplayPro({ row }) {
   )
 }
 
+function ActiveLiveDot() {
+  return (
+    <span
+      style={{
+        width: 8,
+        height: 8,
+        borderRadius: '50%',
+        background: '#9eefff',
+        boxShadow: '0 0 14px rgba(158,239,255,0.85)',
+        display: 'inline-block',
+      }}
+    />
+  )
+}
+
 function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
   const challengerRank = row.challenger_rank || rankByName(row.challenger)
   const opponentRank = row.opponent_rank || rankByName(row.opponent)
@@ -560,8 +598,20 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
         padding: 20,
         boxShadow: '0 12px 32px rgba(0,0,0,0.20), 0 0 22px rgba(56,189,248,0.06)',
         cursor: 'pointer',
+        position: 'relative',
+        overflow: 'hidden',
       }}
     >
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background:
+            'linear-gradient(180deg, rgba(174,242,255,0.03) 0%, rgba(255,255,255,0.00) 30%)',
+          pointerEvents: 'none',
+        }}
+      />
+
       <div
         className="active-match-layout"
         style={{
@@ -570,6 +620,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
           gap: 18,
           alignItems: 'center',
           marginBottom: 18,
+          position: 'relative',
         }}
       >
         <div
@@ -744,6 +795,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
           gap: 14,
           alignItems: 'flex-end',
           flexWrap: 'wrap',
+          position: 'relative',
         }}
       >
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -752,12 +804,15 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
             background="rgba(174,242,255,0.10)"
             borderColor="rgba(174,242,255,0.18)"
           >
-            {row.status || 'Active'}
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+              <ActiveLiveDot />
+              {row.status || 'Active'}
+            </span>
           </Pill>
 
           {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
 
-          <Pill muted>Match Date: {formatDate(row.match_date) || '-'}</Pill>
+          <Pill muted>📅 {formatDate(row.match_date) || '-'}</Pill>
         </div>
 
         <button
@@ -768,17 +823,17 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
           }}
           className="interactive-card"
           style={{
-            minHeight: 46,
+            minHeight: 48,
             padding: '0 18px',
             borderRadius: 14,
-            border: '1px solid rgba(174,242,255,0.22)',
+            border: '1px solid rgba(174,242,255,0.24)',
             background:
-              'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.06) 100%)',
+              'linear-gradient(180deg, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.07) 100%)',
             color: '#c9f7ff',
             fontSize: 14,
             fontWeight: 900,
             cursor: 'pointer',
-            boxShadow: '0 10px 24px rgba(0,0,0,0.18)',
+            boxShadow: '0 12px 28px rgba(0,0,0,0.18), 0 0 18px rgba(174,242,255,0.08)',
             whiteSpace: 'nowrap',
           }}
         >
@@ -811,8 +866,8 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
         className="completed-card-layout"
         style={{
           display: 'grid',
-          gridTemplateColumns: '190px minmax(260px, 1fr) 320px',
-          gap: 24,
+          gridTemplateColumns: '178px minmax(250px, 1fr) 300px',
+          gap: 22,
           alignItems: 'center',
         }}
       >
@@ -827,7 +882,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
           <PlayerPhoto
             name={winnerName}
             photoUrl={getPlayerPhotoUrl(winnerName)}
-            size={150}
+            size={142}
             borderColor={winnerTheme.accentBorder}
             onClick={() => onPlayerClick(winnerName)}
           />
@@ -841,7 +896,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
             justifyContent: 'center',
             alignItems: 'center',
             textAlign: 'center',
-            minHeight: 150,
+            minHeight: 142,
           }}
         >
           <div
@@ -851,15 +906,16 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
               alignItems: 'center',
               flexWrap: 'wrap',
               justifyContent: 'center',
-              marginBottom: 8,
+              marginBottom: 6,
             }}
           >
             <div
               style={{
-                fontSize: 34,
+                fontSize: 33,
                 fontWeight: 900,
                 color: '#eef6ff',
                 lineHeight: 1.02,
+                letterSpacing: '-0.02em',
               }}
             >
               {winnerName}
@@ -882,11 +938,12 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
 
           <div
             style={{
-              fontSize: 30,
-              fontWeight: 850,
+              fontSize: 28,
+              fontWeight: 840,
               color: '#dce8ff',
               lineHeight: 1.04,
               marginBottom: 14,
+              letterSpacing: '-0.02em',
             }}
           >
             {loserName || '-'}
@@ -901,7 +958,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
             }}
           >
             <Pill accent="#bdefff">Completed</Pill>
-            <Pill muted>Match Date: {formatDate(row.match_date) || '-'}</Pill>
+            <Pill muted>📅 {formatDate(row.match_date) || '-'}</Pill>
           </div>
         </div>
 
@@ -1451,6 +1508,7 @@ function PlayerProfileDrawer({
 
   const rank = rankByName(playerName)
   const theme = getRankTheme(rank)
+  const formString = getPlayerFormString(playerName, recentMatches)
 
   return (
     <div
@@ -1472,7 +1530,7 @@ function PlayerProfileDrawer({
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: 420,
+          maxWidth: 430,
           height: '100%',
           overflowY: 'auto',
           background:
@@ -1530,14 +1588,30 @@ function PlayerProfileDrawer({
             background: 'rgba(255,255,255,0.04)',
             border: '1px solid rgba(255,255,255,0.08)',
             marginBottom: 16,
+            overflow: 'hidden',
+            position: 'relative',
           }}
         >
+          <div
+            style={{
+              position: 'absolute',
+              top: -40,
+              right: -20,
+              width: 160,
+              height: 160,
+              borderRadius: '50%',
+              background: theme.accentSoft,
+              filter: 'blur(46px)',
+            }}
+          />
+
           <div
             style={{
               display: 'flex',
               gap: 14,
               alignItems: 'center',
               marginBottom: 16,
+              position: 'relative',
             }}
           >
             <PlayerPhoto
@@ -1563,6 +1637,7 @@ function PlayerProfileDrawer({
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <RankChip rank={rank} />
                 {profile?.status ? <Pill accent={theme.accent}>{profile.status}</Pill> : null}
+                <Pill muted>Form: {formString}</Pill>
               </div>
             </div>
           </div>
@@ -1572,6 +1647,7 @@ function PlayerProfileDrawer({
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
               gap: 10,
+              position: 'relative',
             }}
           >
             <MetaBox label="Current Rank" value={`#${rank}`} />
@@ -1894,7 +1970,6 @@ export default function MatchCenterPage() {
   const filteredCompletedChallenges = useMemo(() => {
     let rows = completedChallenges.filter((row) => matchesSearch(row, completedQuery))
     if (completedView === 'recent') rows = rows.slice(0, 5)
-    if (completedView === 'all') return rows
     return rows
   }, [completedChallenges, completedQuery, completedView])
 
@@ -2091,6 +2166,12 @@ export default function MatchCenterPage() {
     }
   }
 
+  const latestWinnerText = getLatestWinnerText(completedChallenges)
+  const challengeIndicator = getFormIndicator(
+    challengeForm.challenger,
+    challengeForm.opponent
+  )
+
   return (
     <>
       <style>{`
@@ -2135,6 +2216,12 @@ export default function MatchCenterPage() {
             opacity: 1;
             transform: translateX(0);
           }
+        }
+
+        @keyframes pulseDot {
+          0% { transform: scale(0.92); opacity: 0.7; }
+          50% { transform: scale(1.08); opacity: 1; }
+          100% { transform: scale(0.92); opacity: 0.7; }
         }
 
         .fade-in {
@@ -2207,6 +2294,10 @@ export default function MatchCenterPage() {
           animation: drawerSlide 0.22s ease;
         }
 
+        .pulse-dot {
+          animation: pulseDot 1.8s ease-in-out infinite;
+        }
+
         @media (max-width: 980px) {
           .completed-card-layout {
             grid-template-columns: 1fr !important;
@@ -2239,6 +2330,10 @@ export default function MatchCenterPage() {
           .score-entry-layout {
             grid-template-columns: 1fr !important;
           }
+
+          .challenge-preview-grid {
+            grid-template-columns: 1fr !important;
+          }
         }
 
         @media (max-width: 700px) {
@@ -2253,6 +2348,10 @@ export default function MatchCenterPage() {
           .toolbar-stack {
             flex-direction: column !important;
             align-items: stretch !important;
+          }
+
+          .hero-stats-grid {
+            grid-template-columns: 1fr !important;
           }
         }
       `}</style>
@@ -2303,7 +2402,7 @@ export default function MatchCenterPage() {
           />
         </div>
 
-        <div style={{ position: 'relative', maxWidth: 1060, margin: '0 auto', zIndex: 1 }}>
+        <div style={{ position: 'relative', maxWidth: 1080, margin: '0 auto', zIndex: 1 }}>
           <div
             className="fade-in"
             style={{
@@ -2384,25 +2483,114 @@ export default function MatchCenterPage() {
           />
 
           <div
-            className="fade-in"
+            className="hero-stats-grid fade-in"
             style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gridTemplateColumns: '1.2fr repeat(3, minmax(0, 1fr))',
               gap: 12,
               marginBottom: 28,
             }}
           >
+            <MetaBox
+              label="Latest Winner"
+              value={latestWinnerText}
+              accent="rgba(168,240,255,0.10)"
+            />
             <MetaBox label="Feed Rows" value={String(feedRows.length)} />
-            <MetaBox label="Active" value={String(activeChallenges.length)} />
-            <MetaBox label="Completed" value={String(completedChallenges.length)} />
+            <MetaBox label="Active Challenges" value={String(activeChallenges.length)} />
+            <MetaBox label="Completed Matches" value={String(completedChallenges.length)} />
           </div>
 
           <div style={{ display: 'grid', gap: 24 }}>
             <SectionCard
               title="Submit Challenge"
-              subtitle="Select challenger, opponent, and scheduled date."
+              subtitle="Choose an eligible matchup and set the scheduled date."
               accent="rgba(168,240,255,0.10)"
+              right={
+                <Pill muted>
+                  {challengeIndicator}
+                </Pill>
+              }
             >
+              <div
+                className="challenge-preview-grid"
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1.2fr 0.8fr',
+                  gap: 16,
+                  marginBottom: 16,
+                }}
+              >
+                <div
+                  style={{
+                    borderRadius: 20,
+                    padding: 16,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(220,232,255,0.58)',
+                      marginBottom: 12,
+                    }}
+                  >
+                    Eligible Matchup
+                  </div>
+
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: 12,
+                      alignItems: 'center',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    <Pill muted>Challenge writes to CHALLENGE MATCHES</Pill>
+                    <Pill muted>Live feed mirrors ChallengeFeed</Pill>
+                    <Pill muted>Results update via popup</Pill>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    borderRadius: 20,
+                    padding: 16,
+                    background: 'rgba(255,255,255,0.04)',
+                    border: '1px solid rgba(255,255,255,0.08)',
+                  }}
+                >
+                  <div
+                    style={{
+                      fontSize: 11,
+                      fontWeight: 800,
+                      letterSpacing: '0.14em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(220,232,255,0.58)',
+                      marginBottom: 12,
+                    }}
+                  >
+                    Selection Preview
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 18,
+                      fontWeight: 850,
+                      color: '#eef6ff',
+                      lineHeight: 1.3,
+                      letterSpacing: '-0.02em',
+                    }}
+                  >
+                    {challengeIndicator}
+                  </div>
+                </div>
+              </div>
+
               <form onSubmit={handleChallengeSubmit}>
                 <div
                   style={{
@@ -2441,18 +2629,22 @@ export default function MatchCenterPage() {
                   </div>
                 </div>
 
-                <button
-                  type="submit"
-                  disabled={submittingChallenge}
-                  className="interactive-card"
-                  style={{
-                    ...buttonStyle,
-                    opacity: submittingChallenge ? 0.7 : 1,
-                    cursor: submittingChallenge ? 'not-allowed' : 'pointer',
-                  }}
-                >
-                  {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
-                </button>
+                <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+                  <button
+                    type="submit"
+                    disabled={submittingChallenge}
+                    className="interactive-card"
+                    style={{
+                      ...buttonStyle,
+                      width: 'auto',
+                      minWidth: 220,
+                      opacity: submittingChallenge ? 0.7 : 1,
+                      cursor: submittingChallenge ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {submittingChallenge ? 'Submitting...' : 'Submit Challenge'}
+                  </button>
+                </div>
               </form>
             </SectionCard>
 
@@ -2613,7 +2805,7 @@ export default function MatchCenterPage() {
               className="modal-card-anim"
               style={{
                 ...modalStyle,
-                maxWidth: 980,
+                maxWidth: 1020,
               }}
             >
               <div
@@ -2637,7 +2829,7 @@ export default function MatchCenterPage() {
                       color: 'rgba(220,232,255,0.68)',
                     }}
                   >
-                    Structured result entry with live card preview
+                    Structured result entry with live preview
                   </div>
                 </div>
 
@@ -2669,13 +2861,67 @@ export default function MatchCenterPage() {
 
               <div
                 style={{
-                  fontSize: 18,
-                  fontWeight: 750,
-                  lineHeight: 1.45,
+                  borderRadius: 20,
+                  padding: 16,
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.08)',
                   marginBottom: 18,
                 }}
               >
-                {selectedMatch.challenger} vs {selectedMatch.opponent}
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: '1fr auto 1fr',
+                    gap: 16,
+                    alignItems: 'center',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
+                    <PlayerPhoto
+                      name={selectedMatch.challenger}
+                      photoUrl={getPlayerPhotoUrl(selectedMatch.challenger)}
+                      size={54}
+                      borderColor="rgba(255,255,255,0.16)"
+                    />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 17, fontWeight: 850, color: '#eef6ff' }}>
+                        {selectedMatch.challenger}
+                      </div>
+                      <div style={{ marginTop: 4 }}>
+                        <RankChip rank={rankByName(selectedMatch.challenger)} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      fontSize: 15,
+                      fontWeight: 900,
+                      letterSpacing: '0.18em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(220,232,255,0.72)',
+                    }}
+                  >
+                    VS
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', minWidth: 0 }}>
+                    <div style={{ minWidth: 0, textAlign: 'right' }}>
+                      <div style={{ fontSize: 17, fontWeight: 850, color: '#eef6ff' }}>
+                        {selectedMatch.opponent}
+                      </div>
+                      <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}>
+                        <RankChip rank={rankByName(selectedMatch.opponent)} />
+                      </div>
+                    </div>
+                    <PlayerPhoto
+                      name={selectedMatch.opponent}
+                      photoUrl={getPlayerPhotoUrl(selectedMatch.opponent)}
+                      size={54}
+                      borderColor="rgba(255,255,255,0.16)"
+                    />
+                  </div>
+                </div>
               </div>
 
               <form onSubmit={handleResultSubmit}>
@@ -2918,7 +3164,7 @@ export default function MatchCenterPage() {
 }
 
 const scorePanelOuterStyle = {
-  minWidth: 260,
+  minWidth: 250,
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -2926,9 +3172,9 @@ const scorePanelOuterStyle = {
 
 const scorePanelInnerStyle = {
   width: '100%',
-  maxWidth: 300,
+  maxWidth: 290,
   borderRadius: 20,
-  padding: '16px 18px',
+  padding: '14px 16px',
   background: 'rgba(255,255,255,0.05)',
   border: '1px solid rgba(255,255,255,0.10)',
 }
