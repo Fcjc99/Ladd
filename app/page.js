@@ -31,15 +31,15 @@ function getRankTheme(rank) {
   if (n === 1) {
     return {
       accent: '#aef2ff',
-      accentStrong: '#dffbff',
-      soft: 'rgba(174,242,255,0.22)',
-      border: 'rgba(174,242,255,0.52)',
+      accentStrong: '#e3fcff',
+      soft: 'rgba(174,242,255,0.24)',
+      border: 'rgba(174,242,255,0.56)',
       glow: 'rgba(174,242,255,0.26)',
       pillBg:
-        'linear-gradient(180deg, rgba(245,254,255,1) 0%, rgba(205,247,255,1) 58%, rgba(151,233,255,1) 100%)',
+        'linear-gradient(180deg, rgba(249,255,255,1) 0%, rgba(211,248,255,1) 58%, rgba(152,234,255,1) 100%)',
       pillColor: '#0f2341',
       cardBg:
-        'linear-gradient(180deg, rgba(16,44,84,0.99) 0%, rgba(7,22,43,0.995) 100%)',
+        'linear-gradient(180deg, rgba(17,46,87,0.99) 0%, rgba(7,22,43,0.995) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(174,242,255,0.12) 0%, rgba(255,255,255,0.035) 100%)',
     }
@@ -48,15 +48,15 @@ function getRankTheme(rank) {
   if (n === 2) {
     return {
       accent: '#f6d56f',
-      accentStrong: '#fff0b8',
-      soft: 'rgba(246,213,111,0.16)',
+      accentStrong: '#fff2bd',
+      soft: 'rgba(246,213,111,0.18)',
       border: 'rgba(246,213,111,0.42)',
       glow: 'rgba(246,213,111,0.18)',
       pillBg:
-        'linear-gradient(180deg, rgba(255,250,228,1) 0%, rgba(249,225,140,1) 56%, rgba(219,170,48,1) 100%)',
+        'linear-gradient(180deg, rgba(255,251,232,1) 0%, rgba(249,226,143,1) 58%, rgba(218,171,52,1) 100%)',
       pillColor: '#3b2a00',
       cardBg:
-        'linear-gradient(180deg, rgba(53,40,15,0.98) 0%, rgba(24,18,9,0.99) 100%)',
+        'linear-gradient(180deg, rgba(50,39,17,0.98) 0%, rgba(24,18,9,0.99) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(246,213,111,0.11) 0%, rgba(255,255,255,0.03) 100%)',
     }
@@ -65,12 +65,12 @@ function getRankTheme(rank) {
   if (n === 3) {
     return {
       accent: '#dde6f0',
-      accentStrong: '#f7fbff',
+      accentStrong: '#f8fbff',
       soft: 'rgba(221,230,240,0.14)',
       border: 'rgba(221,230,240,0.38)',
       glow: 'rgba(221,230,240,0.14)',
       pillBg:
-        'linear-gradient(180deg, rgba(250,252,255,1) 0%, rgba(225,233,241,1) 58%, rgba(184,197,214,1) 100%)',
+        'linear-gradient(180deg, rgba(250,252,255,1) 0%, rgba(226,234,242,1) 58%, rgba(184,197,214,1) 100%)',
       pillColor: '#263445',
       cardBg:
         'linear-gradient(180deg, rgba(33,40,52,0.98) 0%, rgba(16,20,28,0.99) 100%)',
@@ -143,6 +143,7 @@ function getMoveInfo(moveValue) {
         border: 'rgba(110,255,190,0.18)',
       }
     }
+
     if (n < 0) {
       return {
         label: `↓ ${Math.abs(n)}`,
@@ -271,7 +272,6 @@ function RankBadge({ rank }) {
       ) : null}
 
       <div className="rank-pill-top-sheen" />
-
       {isLeader ? <div className="rank-pill-trace" /> : null}
 
       <span
@@ -288,18 +288,12 @@ function RankBadge({ rank }) {
   )
 }
 
-function PlayerPhoto({
-  name,
-  url,
-  rank,
-  size = 100,
-}) {
+function PlayerPhoto({ name, url, rank, size = 100 }) {
   const theme = getRankTheme(rank)
   const isLeader = Number(rank) === 1
 
   return (
     <div
-      className={isLeader ? 'leader-photo-shell' : ''}
       style={{
         width: size,
         height: size,
@@ -314,8 +308,8 @@ function PlayerPhoto({
       <div
         style={{
           position: 'relative',
-          width: isLeader ? size : size,
-          height: isLeader ? size : size,
+          width: size,
+          height: size,
           borderRadius: Math.round(size * 0.28),
           padding: isLeader ? 8 : 0,
           background: isLeader
@@ -324,7 +318,6 @@ function PlayerPhoto({
           boxShadow: isLeader
             ? `0 26px 52px rgba(0,0,0,0.34), 0 0 38px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.36)`
             : 'none',
-          borderRadius: Math.round(size * 0.28),
         }}
       >
         {isLeader ? <div className="leader-photo-outer-ring" /> : null}
@@ -409,7 +402,6 @@ function PodiumCard({ row, place }) {
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
-        transform: isLeader ? 'translateY(-6px)' : 'translateY(0)',
         boxShadow: isLeader
           ? `0 40px 90px rgba(0,0,0,0.42), 0 0 58px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.20)`
           : `0 24px 56px rgba(0,0,0,0.28), 0 0 28px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`,
@@ -546,7 +538,7 @@ function PodiumCard({ row, place }) {
       </div>
 
       <div
-        className={`podium-platform ${isLeader ? 'podium-platform-1' : isSecond ? 'podium-platform-2' : 'podium-platform-3'}`}
+        className="podium-platform"
         style={{
           position: 'relative',
           zIndex: 3,
@@ -1197,7 +1189,7 @@ export default function LiveRankingPage() {
                     display: 'grid',
                     gridTemplateColumns: '1fr 1.15fr 1fr',
                     gap: 18,
-                    alignItems: 'end',
+                    alignItems: 'stretch',
                   }}
                 >
                   {topThree[1] ? <PodiumCard row={topThree[1]} place={2} /> : <div />}
