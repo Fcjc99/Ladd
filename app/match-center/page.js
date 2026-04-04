@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { MetaBox, Pill, PlayerPhoto } from '../components/ui-kit'
 
 const sheetId =
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
