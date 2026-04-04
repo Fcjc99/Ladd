@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useMemo, useState } from 'react'
+import { FlagInline, MetaBox, Pill, PlayerPhoto } from './components/ui-kit'
 
 const sheetId =
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
@@ -11,6 +12,14 @@ const rankingUrl = `https://opensheet.elk.sh/${sheetId}/LiveRankingFeed`
 function toNumber(value) {
   const n = Number(String(value ?? '').trim())
   return Number.isFinite(n) ? n : null
+}
+
+function normalizeText(value) {
+  return String(value || '').trim()
+}
+
+function normalizeUpper(value) {
+  return normalizeText(value).toUpperCase()
 }
 
 function getTier(rank) {
@@ -88,7 +97,6 @@ function getTierStyles(rank) {
       },
       title: 'Diamond Elite',
       glow: 'rgba(168,240,255,0.55)',
-      aura: '#9eefff',
     }
   }
 
@@ -225,104 +233,6 @@ function CrownIcon() {
   )
 }
 
-function PlayerPhoto({
-  photoUrl,
-  player,
-  size = 86,
-  radius = 26,
-  borderColor = 'rgba(255,255,255,0.14)',
-  champion = false,
-}) {
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        borderRadius: radius,
-        overflow: 'hidden',
-        border: `2px solid ${borderColor}`,
-        background:
-          'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
-        boxShadow: champion
-          ? `0 0 0 3px rgba(255,255,255,0.06), 0 18px 40px rgba(0,0,0,0.30), 0 0 30px ${borderColor}`
-          : '0 16px 34px rgba(0,0,0,0.24)',
-        flexShrink: 0,
-      }}
-    >
-      {photoUrl ? (
-        <img
-          src={photoUrl}
-          alt={player || 'Player'}
-          style={{
-            width: '100%',
-            height: '100%',
-            objectFit: 'cover',
-            display: 'block',
-          }}
-        />
-      ) : (
-        <div
-          style={{
-            width: '100%',
-            height: '100%',
-            display: 'grid',
-            placeItems: 'center',
-            color: 'rgba(255,255,255,0.72)',
-            fontWeight: 800,
-            fontSize: Math.max(18, size * 0.22),
-            letterSpacing: '-0.03em',
-          }}
-        >
-          {(player || '?').slice(0, 1).toUpperCase()}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function FlagInline({ flagUrl, player, width = 30, height = 20, radius = 6 }) {
-  if (!flagUrl) return null
-
-  return (
-    <img
-      src={flagUrl}
-      alt={`${player || 'Player'} flag`}
-      style={{
-        width,
-        height,
-        objectFit: 'cover',
-        borderRadius: radius,
-        border: '1px solid rgba(255,255,255,0.16)',
-        boxShadow: '0 8px 18px rgba(0,0,0,0.18)',
-        flexShrink: 0,
-      }}
-    />
-  )
-}
-
-function Pill({ children, accent, muted = false, compact = false }) {
-  return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: compact ? '7px 12px' : '10px 16px',
-        borderRadius: 999,
-        fontSize: compact ? 12 : 14,
-        fontWeight: 800,
-        background: muted ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)',
-        border: '1px solid rgba(255,255,255,0.10)',
-        color: accent || '#dce8ff',
-        whiteSpace: 'nowrap',
-        boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
-      }}
-    >
-      {children}
-    </div>
-  )
-}
-
 function RankBadge({ rank, styles, small = false, champion = false }) {
   return (
     <div
@@ -385,8 +295,8 @@ function CenterIdentity({
       }}
     >
       <PlayerPhoto
-        photoUrl={row.photo_url}
         player={row.player}
+        photoUrl={row.photo_url}
         size={photoSize}
         borderColor={photoBorderColor}
         champion={champion}
@@ -426,6 +336,95 @@ function CenterIdentity({
   )
 }
 
+function SearchInput({ value, onChange, placeholder = 'Search player or status' }) {
+  return (
+    <div
+      style={{
+        position: 'relative',
+        minWidth: 240,
+        flex: 1,
+      }}
+    >
+      <div
+        style={{
+          position: 'absolute',
+          left: 14,
+          top: '50%',
+          transform: 'translateY(-50%)',
+          color: 'rgba(220,232,255,0.46)',
+          fontSize: 14,
+          pointerEvents: 'none',
+        }}
+      >
+        ⌕
+      </div>
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          height: 46,
+          borderRadius: 16,
+          border: '1px solid rgba(255,255,255,0.10)',
+          background: 'rgba(255,255,255,0.04)',
+          color: '#eef6ff',
+          padding: '0 14px 0 38px',
+          outline: 'none',
+          fontSize: 14,
+          boxSizing: 'border-box',
+        }}
+      />
+    </div>
+  )
+}
+
+function SegmentedControl({ options, value, onChange }) {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 6,
+        padding: 6,
+        borderRadius: 16,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        flexWrap: 'wrap',
+      }}
+    >
+      {options.map((option) => {
+        const active = option.value === value
+        return (
+          <button
+            key={option.value}
+            type="button"
+            onClick={() => onChange(option.value)}
+            className="interactive-card"
+            style={{
+              height: 34,
+              padding: '0 12px',
+              borderRadius: 12,
+              border: active
+                ? '1px solid rgba(174,242,255,0.22)'
+                : '1px solid rgba(255,255,255,0.02)',
+              background: active
+                ? 'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.07) 100%)'
+                : 'transparent',
+              color: active ? '#c9f7ff' : 'rgba(220,232,255,0.72)',
+              fontSize: 13,
+              fontWeight: 800,
+              cursor: 'pointer',
+            }}
+          >
+            {option.label}
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 function TopRankCard({ row, rank }) {
   const tierStyles = getTierStyles(rank)
   const moveDisplay = getMoveDisplay(row.move)
@@ -434,6 +433,7 @@ function TopRankCard({ row, rank }) {
   return (
     <div style={tierStyles.shell}>
       <div
+        className="interactive-card"
         style={{
           ...tierStyles.frame,
           position: 'relative',
@@ -567,6 +567,7 @@ function MidRankCard({ row, rank }) {
   return (
     <div style={tierStyles.shell}>
       <div
+        className="interactive-card"
         style={{
           ...tierStyles.frame,
           position: 'relative',
@@ -640,7 +641,7 @@ function MidRankCard({ row, rank }) {
               flexWrap: 'wrap',
             }}
           >
-            <Pill compact accent={tierStyles.accent}>Bronze Rank</Pill>
+            <Pill compact accent={tierStyles.accent}>{tierStyles.title}</Pill>
             <Pill compact muted>Status: {row.status || '-'}</Pill>
           </div>
         </div>
@@ -655,6 +656,7 @@ function CompactCard({ row, rank }) {
   return (
     <div style={compactCardShellStyle}>
       <div
+        className="interactive-card compact-card"
         style={{
           ...compactCardStyle,
           position: 'relative',
@@ -756,6 +758,8 @@ export default function HomePage() {
   const [rows, setRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [searchQuery, setSearchQuery] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all')
 
   async function loadRankings() {
     try {
@@ -791,20 +795,52 @@ export default function HomePage() {
     })
   }, [rows])
 
-  const topThree = rankingRows.filter((row) => {
+  const filteredRankingRows = useMemo(() => {
+    return rankingRows.filter((row) => {
+      const query = normalizeUpper(searchQuery)
+      const matchesQuery =
+        !query ||
+        normalizeUpper(row.player).includes(query) ||
+        normalizeUpper(row.status).includes(query) ||
+        String(row.rank || '').includes(query)
+
+      const matchesStatus =
+        statusFilter === 'all' ||
+        normalizeUpper(row.status) === normalizeUpper(statusFilter)
+
+      return matchesQuery && matchesStatus
+    })
+  }, [rankingRows, searchQuery, statusFilter])
+
+  const topThree = filteredRankingRows.filter((row) => {
     const rank = toNumber(row.rank)
     return rank && rank <= 3
   })
 
-  const bronzeRows = rankingRows.filter((row) => {
+  const bronzeRows = filteredRankingRows.filter((row) => {
     const rank = toNumber(row.rank)
     return rank && rank >= 4 && rank <= 7
   })
 
-  const restRows = rankingRows.filter((row) => {
+  const restRows = filteredRankingRows.filter((row) => {
     const rank = toNumber(row.rank)
     return rank && rank >= 8
   })
+
+  const totalPlayers = rankingRows.length
+  const activePlayers = rankingRows.filter(
+    (row) => normalizeUpper(row.status) === 'ACTIVE'
+  ).length
+  const leader = rankingRows[0]?.player || '—'
+  const biggestMover = useMemo(() => {
+    const sorted = [...rankingRows]
+      .map((row) => ({ ...row, moveNum: toNumber(row.move) ?? 0 }))
+      .sort((a, b) => b.moveNum - a.moveNum)
+
+    const best = sorted[0]
+    if (!best || best.moveNum <= 0) return 'No upward movement yet'
+    return `${best.player} ▲ ${best.moveNum}`
+  }, [rankingRows])
 
   return (
     <>
@@ -859,9 +895,47 @@ export default function HomePage() {
           }
         }
 
-        @media (max-width: 900px) {
+        @keyframes fadeInUp {
+          from {
+            opacity: 0;
+            transform: translateY(8px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .fade-in {
+          animation: fadeInUp 0.28s ease;
+        }
+
+        .interactive-card {
+          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+        }
+
+        .interactive-card:hover {
+          transform: translateY(-3px);
+        }
+
+        .compact-card:hover {
+          border-color: rgba(255,255,255,0.20) !important;
+          box-shadow: 0 16px 34px rgba(0,0,0,0.24) !important;
+        }
+
+        @media (max-width: 980px) {
           .ranking-page-title {
             font-size: 44px !important;
+          }
+
+          .hero-grid {
+            grid-template-columns: 1fr !important;
+          }
+        }
+
+        @media (max-width: 900px) {
+          .top-rank-content {
+            min-height: auto !important;
           }
         }
 
@@ -869,11 +943,16 @@ export default function HomePage() {
           .bronze-grid {
             grid-template-columns: 1fr !important;
           }
+
+          .toolbar-stack {
+            flex-direction: column !important;
+            align-items: stretch !important;
+          }
         }
 
         @media (max-width: 640px) {
-          .top-rank-content {
-            min-height: auto !important;
+          .ranking-page-title {
+            font-size: 36px !important;
           }
         }
       `}</style>
@@ -887,8 +966,44 @@ export default function HomePage() {
           padding: '32px 16px 60px',
         }}
       >
-        <div style={{ maxWidth: 1150, margin: '0 auto' }}>
+        <div
+          style={{
+            position: 'fixed',
+            inset: 0,
+            pointerEvents: 'none',
+            overflow: 'hidden',
+            zIndex: 0,
+          }}
+        >
           <div
+            style={{
+              position: 'absolute',
+              top: -120,
+              left: -80,
+              width: 360,
+              height: 360,
+              borderRadius: '50%',
+              background: 'rgba(56,189,248,0.12)',
+              filter: 'blur(80px)',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              top: 160,
+              right: -90,
+              width: 300,
+              height: 300,
+              borderRadius: '50%',
+              background: 'rgba(168,240,255,0.08)',
+              filter: 'blur(80px)',
+            }}
+          />
+        </div>
+
+        <div style={{ position: 'relative', maxWidth: 1150, margin: '0 auto', zIndex: 1 }}>
+          <div
+            className="fade-in"
             style={{
               display: 'flex',
               justifyContent: 'space-between',
@@ -923,17 +1038,30 @@ export default function HomePage() {
                 style={{
                   fontSize: 56,
                   fontWeight: 900,
-                  letterSpacing: '-0.03em',
+                  letterSpacing: '-0.04em',
                   margin: 0,
                   lineHeight: 0.95,
                 }}
               >
                 Live Ranking
               </h1>
+
+              <div
+                style={{
+                  marginTop: 12,
+                  maxWidth: 700,
+                  fontSize: 16,
+                  lineHeight: 1.55,
+                  color: 'rgba(220,232,255,0.72)',
+                }}
+              >
+                Elite ladder standings with premium player presentation, movement tracking, and Match Center access.
+              </div>
             </div>
 
             <a
               href="/match-center"
+              className="interactive-card"
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -945,9 +1073,11 @@ export default function HomePage() {
                 fontWeight: 900,
                 fontSize: 16,
                 color: '#eef6ff',
-                background: 'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+                background:
+                  'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
                 border: '2px solid rgba(219,231,247,0.38)',
-                boxShadow: '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
+                boxShadow:
+                  '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
             >
               Go to Match Center
@@ -962,6 +1092,104 @@ export default function HomePage() {
               marginBottom: 26,
             }}
           />
+
+          <div
+            className="hero-grid fade-in"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1.35fr 1fr',
+              gap: 16,
+              marginBottom: 26,
+            }}
+          >
+            <div
+              style={{
+                borderRadius: 28,
+                padding: 22,
+                background:
+                  'linear-gradient(180deg, rgba(18,42,78,0.86) 0%, rgba(10,22,41,0.92) 100%)',
+                border: '1px solid rgba(168,240,255,0.12)',
+                boxShadow: '0 18px 44px rgba(0,0,0,0.18), 0 0 36px rgba(56,189,248,0.08)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(174,242,255,0.74)',
+                  marginBottom: 10,
+                }}
+              >
+                Center Court Overview
+              </div>
+
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  color: '#eef6ff',
+                  marginBottom: 10,
+                  letterSpacing: '-0.03em',
+                }}
+              >
+                Current leader: {leader}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.55,
+                  color: 'rgba(220,232,255,0.72)',
+                }}
+              >
+                The rankings page is optimized for premium visual hierarchy, with featured elite tiers on top and a cleaner, more polished ladder below.
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: 12,
+              }}
+            >
+              <MetaBox label="Players" value={String(totalPlayers)} />
+              <MetaBox label="Active" value={String(activePlayers)} />
+              <MetaBox label="Leader" value={leader} />
+              <MetaBox label="Biggest Move" value={biggestMover} />
+            </div>
+          </div>
+
+          <div
+            className="toolbar-stack fade-in"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 12,
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              marginBottom: 24,
+            }}
+          >
+            <SearchInput
+              value={searchQuery}
+              onChange={setSearchQuery}
+              placeholder="Search player, status, or rank"
+            />
+
+            <SegmentedControl
+              value={statusFilter}
+              onChange={setStatusFilter}
+              options={[
+                { value: 'all', label: 'All Statuses' },
+                { value: 'active', label: 'Active' },
+                { value: 'inactive', label: 'Inactive' },
+              ]}
+            />
+          </div>
 
           {error ? (
             <div
@@ -981,38 +1209,44 @@ export default function HomePage() {
 
           {loading ? (
             <div style={loadingCardStyle}>Loading rankings...</div>
-          ) : rankingRows.length === 0 ? (
+          ) : filteredRankingRows.length === 0 ? (
             <div style={loadingCardStyle}>No ranking rows found.</div>
           ) : (
             <>
-              <div style={{ display: 'grid', gap: 18, marginBottom: 28 }}>
-                {topThree.map((row) => {
-                  const rank = toNumber(row.rank) ?? 0
-                  return <TopRankCard key={`top-${rank}`} row={row} rank={rank} />
-                })}
-              </div>
+              {topThree.length ? (
+                <div style={{ display: 'grid', gap: 18, marginBottom: 28 }}>
+                  {topThree.map((row) => {
+                    const rank = toNumber(row.rank) ?? 0
+                    return <TopRankCard key={`top-${rank}`} row={row} rank={rank} />
+                  })}
+                </div>
+              ) : null}
 
-              <div
-                className="bronze-grid"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
-                  gap: 16,
-                  marginBottom: 28,
-                }}
-              >
-                {bronzeRows.map((row) => {
-                  const rank = toNumber(row.rank) ?? 0
-                  return <MidRankCard key={`bronze-${rank}`} row={row} rank={rank} />
-                })}
-              </div>
+              {bronzeRows.length ? (
+                <div
+                  className="bronze-grid"
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(420px, 1fr))',
+                    gap: 16,
+                    marginBottom: 28,
+                  }}
+                >
+                  {bronzeRows.map((row) => {
+                    const rank = toNumber(row.rank) ?? 0
+                    return <MidRankCard key={`bronze-${rank}`} row={row} rank={rank} />
+                  })}
+                </div>
+              ) : null}
 
-              <div style={{ display: 'grid', gap: 16 }}>
-                {restRows.map((row) => {
-                  const rank = toNumber(row.rank) ?? 0
-                  return <CompactCard key={`rest-${rank}`} row={row} rank={rank} />
-                })}
-              </div>
+              {restRows.length ? (
+                <div style={{ display: 'grid', gap: 16 }}>
+                  {restRows.map((row) => {
+                    const rank = toNumber(row.rank) ?? 0
+                    return <CompactCard key={`rest-${rank}`} row={row} rank={rank} />
+                  })}
+                </div>
+              ) : null}
             </>
           )}
         </div>
@@ -1039,4 +1273,5 @@ const compactCardStyle = {
   borderRadius: 24,
   background: 'rgba(10,18,32,0.72)',
   border: '1px solid rgba(255,255,255,0.14)',
+  boxShadow: '0 10px 22px rgba(0,0,0,0.16)',
 }
