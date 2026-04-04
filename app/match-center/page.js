@@ -203,11 +203,7 @@ function sanitizeGameValue(value) {
 function getDefaultScoreForm() {
   return {
     winner: '',
-    sets: [
-      { ...EMPTY_SET },
-      { ...EMPTY_SET },
-      { ...EMPTY_SET },
-    ],
+    sets: [{ ...EMPTY_SET }, { ...EMPTY_SET }, { ...EMPTY_SET }],
     useThirdSet: false,
   }
 }
@@ -352,10 +348,12 @@ function PlayerPhoto({
   photoUrl,
   size = 74,
   borderColor = 'rgba(255,255,255,0.14)',
+  onClick,
 }) {
   return (
     <div
       className="photo-hover"
+      onClick={onClick}
       style={{
         width: size,
         height: size,
@@ -367,6 +365,7 @@ function PlayerPhoto({
         boxShadow: `0 14px 30px rgba(0,0,0,0.22), 0 0 20px ${borderColor}`,
         flexShrink: 0,
         transition: 'transform 0.2s ease, box-shadow 0.2s ease',
+        cursor: onClick ? 'pointer' : 'default',
       }}
     >
       {photoUrl ? (
@@ -453,12 +452,7 @@ function ScoreDisplayPro({ row }) {
       <div style={scorePanelInnerStyle}>
         <div style={scoreTitleStyle}>Reported Score</div>
 
-        <div
-          style={{
-            display: 'grid',
-            gap: 10,
-          }}
-        >
+        <div style={{ display: 'grid', gap: 10 }}>
           {sets.map((set, index) => {
             const winnerScore = winnerIsChall ? set.a : set.b
             const loserScore = winnerIsChall ? set.b : set.a
@@ -531,7 +525,7 @@ function ScoreDisplayPro({ row }) {
   )
 }
 
-function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
+function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
   const challengerRank = row.challenger_rank || rankByName(row.challenger)
   const opponentRank = row.opponent_rank || rankByName(row.opponent)
   const challengerTheme = getRankTheme(challengerRank)
@@ -574,6 +568,10 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
             photoUrl={getPlayerPhotoUrl(row.challenger)}
             size={76}
             borderColor={challengerTheme.accentBorder}
+            onClick={(e) => {
+              e.stopPropagation()
+              onPlayerClick(row.challenger)
+            }}
           />
 
           <div style={{ minWidth: 0 }}>
@@ -713,6 +711,10 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
             photoUrl={getPlayerPhotoUrl(row.opponent)}
             size={76}
             borderColor={opponentTheme.accentBorder}
+            onClick={(e) => {
+              e.stopPropagation()
+              onPlayerClick(row.opponent)
+            }}
           />
         </div>
       </div>
@@ -727,13 +729,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
           flexWrap: 'wrap',
         }}
       >
-        <div
-          style={{
-            display: 'flex',
-            gap: 8,
-            flexWrap: 'wrap',
-          }}
-        >
+        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Pill
             accent="#bdefff"
             background="rgba(174,242,255,0.10)"
@@ -776,7 +772,7 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl }) {
   )
 }
 
-function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
+function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
   const winnerName = row.winner || '-'
   const loserName = getLoserName(row)
   const winnerRank = rankByName(winnerName)
@@ -816,6 +812,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl }) {
             photoUrl={getPlayerPhotoUrl(winnerName)}
             size={150}
             borderColor={winnerTheme.accentBorder}
+            onClick={() => onPlayerClick(winnerName)}
           />
         </div>
 
@@ -1416,7 +1413,303 @@ function ScorePreviewCard({ match, winner, score, getPlayerPhotoUrl }) {
         Live Preview
       </div>
 
-      <CompletedMatchCard row={previewRow} getPlayerPhotoUrl={getPlayerPhotoUrl} />
+      <CompletedMatchCard
+        row={previewRow}
+        getPlayerPhotoUrl={getPlayerPhotoUrl}
+        onPlayerClick={() => {}}
+      />
+    </div>
+  )
+}
+
+function PlayerProfileDrawer({
+  playerName,
+  profile,
+  stats,
+  recentMatches,
+  onClose,
+}) {
+  if (!playerName) return null
+
+  const rank = rankByName(playerName)
+  const theme = getRankTheme(rank)
+
+  return (
+    <div
+      className="profile-drawer-overlay"
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.54)',
+        zIndex: 1200,
+        display: 'flex',
+        justifyContent: 'flex-end',
+        backdropFilter: 'blur(5px)',
+        WebkitBackdropFilter: 'blur(5px)',
+      }}
+    >
+      <div
+        className="profile-drawer-panel fade-in"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 420,
+          height: '100%',
+          overflowY: 'auto',
+          background:
+            'linear-gradient(180deg, rgba(10,23,43,0.98) 0%, rgba(7,17,32,0.99) 100%)',
+          borderLeft: '1px solid rgba(174,242,255,0.16)',
+          boxShadow: '-20px 0 60px rgba(0,0,0,0.35)',
+          padding: 20,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            gap: 12,
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(174,242,255,0.70)',
+            }}
+          >
+            Player Profile
+          </div>
+
+          <button
+            type="button"
+            onClick={onClose}
+            className="interactive-card"
+            style={{
+              width: 38,
+              height: 38,
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#eef6ff',
+              cursor: 'pointer',
+              fontSize: 18,
+              fontWeight: 900,
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            borderRadius: 24,
+            padding: 18,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginBottom: 16,
+          }}
+        >
+          <div
+            style={{
+              display: 'flex',
+              gap: 14,
+              alignItems: 'center',
+              marginBottom: 16,
+            }}
+          >
+            <PlayerPhoto
+              name={playerName}
+              photoUrl={profile?.photo_url || ''}
+              size={96}
+              borderColor={theme.accentBorder}
+            />
+
+            <div style={{ minWidth: 0 }}>
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 900,
+                  color: '#eef6ff',
+                  lineHeight: 1.02,
+                  marginBottom: 8,
+                }}
+              >
+                {playerName}
+              </div>
+
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <RankChip rank={rank} />
+                {profile?.status ? <Pill accent={theme.accent}>{profile.status}</Pill> : null}
+              </div>
+            </div>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+              gap: 10,
+            }}
+          >
+            <MetaBox label="Current Rank" value={`#${rank}`} />
+            <MetaBox
+              label="Country"
+              value={
+                profile?.flag_url ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <img
+                      src={profile.flag_url}
+                      alt=""
+                      style={{
+                        width: 24,
+                        height: 16,
+                        objectFit: 'cover',
+                        borderRadius: 4,
+                        border: '1px solid rgba(255,255,255,0.16)',
+                      }}
+                    />
+                    <span>On file</span>
+                  </div>
+                ) : (
+                  '—'
+                )
+              }
+            />
+          </div>
+        </div>
+
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+            gap: 10,
+            marginBottom: 16,
+          }}
+        >
+          <MetaBox label="Wins" value={String(stats.wins)} />
+          <MetaBox label="Active" value={String(stats.active)} />
+          <MetaBox label="Completed" value={String(stats.completed)} />
+        </div>
+
+        <div
+          style={{
+            borderRadius: 22,
+            padding: 16,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.60)',
+              marginBottom: 14,
+            }}
+          >
+            Recent Match History
+          </div>
+
+          {recentMatches.length === 0 ? (
+            <div
+              style={{
+                fontSize: 14,
+                color: 'rgba(220,232,255,0.70)',
+              }}
+            >
+              No recent matches found.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {recentMatches.map((row, index) => {
+                const isWinner = normalizeText(row.winner) === normalizeText(playerName)
+                const opponent =
+                  normalizeText(row.challenger) === normalizeText(playerName)
+                    ? row.opponent
+                    : row.challenger
+
+                return (
+                  <div
+                    key={`${playerName}-${index}`}
+                    style={{
+                      borderRadius: 16,
+                      padding: 14,
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        gap: 10,
+                        alignItems: 'center',
+                        marginBottom: 8,
+                        flexWrap: 'wrap',
+                      }}
+                    >
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {row.winner ? (
+                          <Pill
+                            accent={isWinner ? '#bff7d2' : '#ffd0d0'}
+                            background={
+                              isWinner
+                                ? 'rgba(110,255,190,0.10)'
+                                : 'rgba(255,132,132,0.10)'
+                            }
+                            borderColor={
+                              isWinner
+                                ? 'rgba(110,255,190,0.18)'
+                                : 'rgba(255,132,132,0.18)'
+                            }
+                          >
+                            {isWinner ? 'Win' : 'Loss'}
+                          </Pill>
+                        ) : (
+                          <Pill accent="#bdefff">Pending</Pill>
+                        )}
+
+                        <Pill muted>{formatDate(row.match_date) || '-'}</Pill>
+                      </div>
+
+                      {row.score ? <Pill muted>{row.score}</Pill> : null}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 16,
+                        fontWeight: 800,
+                        color: '#eef6ff',
+                        marginBottom: 6,
+                      }}
+                    >
+                      vs {opponent || '-'}
+                    </div>
+
+                    <div
+                      style={{
+                        fontSize: 13,
+                        color: 'rgba(220,232,255,0.66)',
+                      }}
+                    >
+                      {row.winner
+                        ? `${row.winner} defeated ${getLoserName(row)}`
+                        : `${row.challenger} vs ${row.opponent}`}
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
@@ -1427,6 +1720,7 @@ export default function MatchCenterPage() {
   const [loading, setLoading] = useState(true)
   const [submittingChallenge, setSubmittingChallenge] = useState(false)
   const [selectedMatch, setSelectedMatch] = useState(null)
+  const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [resultForm, setResultForm] = useState(getDefaultScoreForm())
   const [submittingResult, setSubmittingResult] = useState(false)
   const [toast, setToast] = useState(null)
@@ -1449,11 +1743,12 @@ export default function MatchCenterPage() {
     setToast({ message, type })
   }
 
+  function getPlayerProfile(name) {
+    return rankingRows.find((row) => normalizeUpper(row.player) === normalizeUpper(name))
+  }
+
   function getPlayerPhotoUrl(name) {
-    const match = rankingRows.find(
-      (row) => normalizeUpper(row.player) === normalizeUpper(name)
-    )
-    return match?.photo_url || ''
+    return getPlayerProfile(name)?.photo_url || ''
   }
 
   async function loadData() {
@@ -1502,6 +1797,50 @@ export default function MatchCenterPage() {
     const relevantSets = resultForm.useThirdSet ? resultForm.sets : resultForm.sets.slice(0, 2)
     return buildScoreFromSets(relevantSets)
   }, [resultForm])
+
+  const selectedPlayerProfile = useMemo(() => {
+    if (!selectedPlayer) return null
+    return getPlayerProfile(selectedPlayer) || null
+  }, [selectedPlayer, rankingRows])
+
+  const selectedPlayerStats = useMemo(() => {
+    if (!selectedPlayer) return { wins: 0, active: 0, completed: 0 }
+
+    const related = feedRows.filter(
+      (row) =>
+        normalizeUpper(row.challenger) === normalizeUpper(selectedPlayer) ||
+        normalizeUpper(row.opponent) === normalizeUpper(selectedPlayer)
+    )
+
+    const wins = related.filter(
+      (row) => normalizeUpper(row.winner) === normalizeUpper(selectedPlayer)
+    ).length
+
+    const active = related.filter(isActive).length
+    const completed = related.filter((row) => isCompleted(row) || isArchived(row)).length
+
+    return { wins, active, completed }
+  }, [selectedPlayer, feedRows])
+
+  const selectedPlayerRecentMatches = useMemo(() => {
+    if (!selectedPlayer) return []
+
+    return [...feedRows]
+      .filter(
+        (row) =>
+          normalizeUpper(row.challenger) === normalizeUpper(selectedPlayer) ||
+          normalizeUpper(row.opponent) === normalizeUpper(selectedPlayer)
+      )
+      .sort((a, b) => {
+        const da = safeDateValue(a.match_date)
+        const db = safeDateValue(b.match_date)
+        if (da && db) return db - da
+        if (da) return -1
+        if (db) return 1
+        return 0
+      })
+      .slice(0, 6)
+  }, [selectedPlayer, feedRows])
 
   function updateChallengeField(name, value) {
     if (name === 'challenger') {
@@ -1731,6 +2070,17 @@ export default function MatchCenterPage() {
           }
         }
 
+        @keyframes drawerSlide {
+          from {
+            opacity: 0;
+            transform: translateX(22px);
+          }
+          to {
+            opacity: 1;
+            transform: translateX(0);
+          }
+        }
+
         .fade-in {
           animation: fadeInUp 0.28s ease;
         }
@@ -1797,6 +2147,10 @@ export default function MatchCenterPage() {
           animation: modalScale 0.2s ease;
         }
 
+        .profile-drawer-panel {
+          animation: drawerSlide 0.22s ease;
+        }
+
         @media (max-width: 980px) {
           .completed-card-layout {
             grid-template-columns: 1fr !important;
@@ -1834,6 +2188,10 @@ export default function MatchCenterPage() {
         @media (max-width: 700px) {
           .match-center-title {
             font-size: 34px !important;
+          }
+
+          .profile-drawer-panel {
+            max-width: 100% !important;
           }
         }
       `}</style>
@@ -2042,6 +2400,7 @@ export default function MatchCenterPage() {
                         setResultForm(getDefaultScoreForm())
                       }}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
+                      onPlayerClick={setSelectedPlayer}
                     />
                   ))}
                 </div>
@@ -2080,6 +2439,7 @@ export default function MatchCenterPage() {
                       key={`completed-${index}`}
                       row={row}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
+                      onPlayerClick={setSelectedPlayer}
                     />
                   ))}
                 </div>
@@ -2174,13 +2534,7 @@ export default function MatchCenterPage() {
                         Quick Score Presets
                       </div>
 
-                      <div
-                        style={{
-                          display: 'flex',
-                          gap: 8,
-                          flexWrap: 'wrap',
-                        }}
-                      >
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                         <ScorePresetButton onClick={() => applyScorePreset([[6, 0], [6, 0]])}>
                           6-0, 6-0
                         </ScorePresetButton>
@@ -2356,6 +2710,14 @@ export default function MatchCenterPage() {
             </div>
           </div>
         ) : null}
+
+        <PlayerProfileDrawer
+          playerName={selectedPlayer}
+          profile={selectedPlayerProfile}
+          stats={selectedPlayerStats}
+          recentMatches={selectedPlayerRecentMatches}
+          onClose={() => setSelectedPlayer(null)}
+        />
       </div>
     </>
   )
