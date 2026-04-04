@@ -55,30 +55,31 @@ function getRankTheme(rank) {
   if (n === 1) {
     return {
       accent: '#aef2ff',
-      accentStrong: '#effdff',
-      border: 'rgba(174,242,255,0.56)',
+      accentStrong: '#f0fdff',
+      border: 'rgba(174,242,255,0.58)',
       glow: 'rgba(174,242,255,0.28)',
       soft: 'rgba(174,242,255,0.18)',
       badgeBg:
-        'linear-gradient(180deg, rgba(251,255,255,1) 0%, rgba(216,249,255,1) 56%, rgba(153,235,255,1) 100%)',
+        'linear-gradient(180deg, rgba(252,255,255,1) 0%, rgba(217,249,255,1) 56%, rgba(154,235,255,1) 100%)',
       badgeColor: '#102444',
       cardBg:
-        'linear-gradient(180deg, rgba(16,46,87,0.99) 0%, rgba(7,21,42,0.995) 100%)',
+        'linear-gradient(180deg, rgba(17,47,89,0.99) 0%, rgba(7,21,42,0.995) 100%)',
       platformBg:
-        'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.035) 100%)',
-      chipBg:
-        'linear-gradient(180deg, rgba(16,39,76,0.95) 0%, rgba(10,27,52,0.98) 100%)',
-      chipBorder: 'rgba(174,242,255,0.22)',
-      chipColor: '#d8fbff',
-      rail: 'linear-gradient(180deg, rgba(174,242,255,0.90) 0%, rgba(174,242,255,0.20) 100%)',
+        'linear-gradient(180deg, rgba(174,242,255,0.16) 0%, rgba(255,255,255,0.04) 100%)',
+      rail:
+        'linear-gradient(180deg, rgba(174,242,255,0.95) 0%, rgba(174,242,255,0.18) 100%)',
       zoneGlow: 'rgba(174,242,255,0.12)',
+      statusBg:
+        'linear-gradient(180deg, rgba(16,40,78,0.95) 0%, rgba(9,24,46,0.99) 100%)',
+      statusBorder: 'rgba(174,242,255,0.18)',
+      statusColor: '#d7fbff',
     }
   }
 
   if (n === 2) {
     return {
       accent: '#f6d56f',
-      accentStrong: '#fff4c8',
+      accentStrong: '#fff3c5',
       border: 'rgba(246,213,111,0.42)',
       glow: 'rgba(246,213,111,0.18)',
       soft: 'rgba(246,213,111,0.14)',
@@ -89,12 +90,13 @@ function getRankTheme(rank) {
         'linear-gradient(180deg, rgba(53,40,15,0.98) 0%, rgba(25,18,8,0.99) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(246,213,111,0.12) 0%, rgba(255,255,255,0.03) 100%)',
-      chipBg:
-        'linear-gradient(180deg, rgba(55,43,17,0.95) 0%, rgba(28,21,9,0.98) 100%)',
-      chipBorder: 'rgba(246,213,111,0.18)',
-      chipColor: '#f8e9ab',
-      rail: 'linear-gradient(180deg, rgba(246,213,111,0.88) 0%, rgba(246,213,111,0.20) 100%)',
-      zoneGlow: 'rgba(246,213,111,0.08)',
+      rail:
+        'linear-gradient(180deg, rgba(246,213,111,0.90) 0%, rgba(246,213,111,0.18) 100%)',
+      zoneGlow: 'rgba(246,213,111,0.07)',
+      statusBg:
+        'linear-gradient(180deg, rgba(57,43,17,0.95) 0%, rgba(30,22,9,0.99) 100%)',
+      statusBorder: 'rgba(246,213,111,0.16)',
+      statusColor: '#f8eaad',
     }
   }
 
@@ -112,12 +114,13 @@ function getRankTheme(rank) {
         'linear-gradient(180deg, rgba(32,39,52,0.98) 0%, rgba(15,19,28,0.99) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(221,230,240,0.10) 0%, rgba(255,255,255,0.03) 100%)',
-      chipBg:
-        'linear-gradient(180deg, rgba(39,46,58,0.95) 0%, rgba(20,24,31,0.98) 100%)',
-      chipBorder: 'rgba(221,230,240,0.16)',
-      chipColor: '#eef5ff',
-      rail: 'linear-gradient(180deg, rgba(221,230,240,0.88) 0%, rgba(221,230,240,0.20) 100%)',
-      zoneGlow: 'rgba(221,230,240,0.07)',
+      rail:
+        'linear-gradient(180deg, rgba(221,230,240,0.88) 0%, rgba(221,230,240,0.18) 100%)',
+      zoneGlow: 'rgba(221,230,240,0.06)',
+      statusBg:
+        'linear-gradient(180deg, rgba(39,46,58,0.95) 0%, rgba(20,24,31,0.99) 100%)',
+      statusBorder: 'rgba(221,230,240,0.14)',
+      statusColor: '#eef5ff',
     }
   }
 
@@ -135,12 +138,13 @@ function getRankTheme(rank) {
         'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
       platformBg:
         'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
-      chipBg:
-        'linear-gradient(180deg, rgba(14,31,58,0.90) 0%, rgba(10,21,39,0.94) 100%)',
-      chipBorder: 'rgba(255,255,255,0.10)',
-      chipColor: '#dce8ff',
-      rail: 'linear-gradient(180deg, rgba(210,150,103,0.70) 0%, rgba(210,150,103,0.12) 100%)',
-      zoneGlow: 'rgba(210,150,103,0.05)',
+      rail:
+        'linear-gradient(180deg, rgba(210,150,103,0.70) 0%, rgba(210,150,103,0.12) 100%)',
+      zoneGlow: 'rgba(210,150,103,0.04)',
+      statusBg:
+        'linear-gradient(180deg, rgba(16,31,58,0.90) 0%, rgba(10,21,39,0.95) 100%)',
+      statusBorder: 'rgba(255,255,255,0.10)',
+      statusColor: '#dce8ff',
     }
   }
 
@@ -156,12 +160,13 @@ function getRankTheme(rank) {
       'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
     platformBg:
       'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
-    chipBg:
-      'linear-gradient(180deg, rgba(14,31,58,0.90) 0%, rgba(10,21,39,0.94) 100%)',
-    chipBorder: 'rgba(255,255,255,0.10)',
-    chipColor: '#dce8ff',
-    rail: 'linear-gradient(180deg, rgba(184,201,230,0.55) 0%, rgba(184,201,230,0.10) 100%)',
+    rail:
+      'linear-gradient(180deg, rgba(184,201,230,0.55) 0%, rgba(184,201,230,0.10) 100%)',
     zoneGlow: 'rgba(184,201,230,0.04)',
+    statusBg:
+      'linear-gradient(180deg, rgba(16,31,58,0.90) 0%, rgba(10,21,39,0.95) 100%)',
+    statusBorder: 'rgba(255,255,255,0.10)',
+    statusColor: '#dce8ff',
   }
 }
 
@@ -203,7 +208,6 @@ function getMoveInfo(moveValue) {
         icon: '↗',
       }
     }
-
     if (n < 0) {
       return {
         label: `${Math.abs(n)}`,
@@ -525,24 +529,27 @@ function PodiumCard({
     biggestMoverName,
   })
   const targetName = targetMap[normalizeUpper(row.player)]
-  const isHighlighted = highlightedTarget && normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
+  const isHighlighted =
+    highlightedTarget &&
+    normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
 
   const heightMap = {
-    1: 452,
-    2: 364,
-    3: 346,
+    1: 470,
+    2: 374,
+    3: 356,
   }
 
   return (
     <div
       onMouseEnter={() => onHighlightTarget(targetName || null)}
       onMouseLeave={() => onHighlightTarget(null)}
-      className={`interactive-card podium-card ${isLeader ? 'podium-card-1' : ''} ${isSecond ? 'podium-card-2' : ''} ${isThird ? 'podium-card-3' : ''} ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''} podium-${place}`}
+      className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} ${isSecond ? 'podium-card-2' : ''} ${isThird ? 'podium-card-3' : ''} ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''} podium-${place}`}
       style={{
+        animationDelay: `${place === 1 ? 0.08 : place === 2 ? 0.18 : 0.28}s`,
         position: 'relative',
         minHeight: heightMap[place],
         borderRadius: 34,
-        padding: place === 1 ? '30px 22px 22px' : '22px 18px 18px',
+        padding: place === 1 ? '32px 22px 22px' : '22px 18px 18px',
         background: theme.cardBg,
         border: `1px solid ${isBiggestMover ? 'rgba(255,98,98,0.34)' : theme.border}`,
         overflow: 'hidden',
@@ -550,7 +557,7 @@ function PodiumCard({
         flexDirection: 'column',
         justifyContent: 'space-between',
         boxShadow: isLeader
-          ? `0 40px 90px rgba(0,0,0,0.42), 0 0 58px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.20)`
+          ? `0 44px 96px rgba(0,0,0,0.44), 0 0 62px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.18), inset 0 -10px 24px rgba(0,0,0,0.20)`
           : isBiggestMover
             ? `0 24px 56px rgba(0,0,0,0.28), 0 0 24px rgba(255,98,98,0.14), inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`
             : `0 24px 56px rgba(0,0,0,0.28), 0 0 28px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.10), inset 0 -8px 20px rgba(0,0,0,0.18)`,
@@ -587,6 +594,7 @@ function PodiumCard({
         <>
           <div className="hero-spotlight-behind-photo" />
           <div className="hero-ambient-rise" />
+          <div className="hero-crown-light" />
         </>
       ) : null}
 
@@ -597,7 +605,7 @@ function PodiumCard({
           justifyContent: 'space-between',
           alignItems: 'center',
           gap: 10,
-          marginBottom: isLeader ? 22 : 18,
+          marginBottom: isLeader ? 24 : 18,
           zIndex: 3,
         }}
       >
@@ -613,14 +621,14 @@ function PodiumCard({
           style={{
             display: 'flex',
             justifyContent: 'center',
-            marginBottom: isLeader ? 24 : 16,
+            marginBottom: isLeader ? 28 : 18,
           }}
         >
           <PlayerPhoto
             name={row.player}
             url={row.photo_url}
             rank={row.rank}
-            size={isLeader ? 176 : 106}
+            size={isLeader ? 186 : 110}
             hot={isBiggestMover}
           />
         </div>
@@ -629,12 +637,12 @@ function PodiumCard({
           <div
             className={isLeader ? 'leader-name' : isSecond ? 'metal-name-gold' : isThird ? 'metal-name-silver' : ''}
             style={{
-              fontSize: isLeader ? 38 : 27,
+              fontSize: isLeader ? 40 : 27,
               fontWeight: isLeader ? 950 : 900,
               color: '#eef6ff',
               lineHeight: 1.02,
-              letterSpacing: '-0.035em',
-              marginBottom: isLeader ? 16 : 12,
+              letterSpacing: '-0.04em',
+              marginBottom: isLeader ? 18 : 12,
             }}
           >
             {row.player || '—'}
@@ -660,11 +668,11 @@ function PodiumCard({
                 justifyContent: 'center',
                 background: isBiggestMover
                   ? 'linear-gradient(180deg, rgba(92,38,38,0.94) 0%, rgba(48,20,20,0.98) 100%)'
-                  : 'rgba(255,255,255,0.05)',
+                  : theme.statusBg,
                 border: isBiggestMover
-                  ? '1px solid rgba(255,132,132,0.18)'
-                  : '1px solid rgba(255,255,255,0.08)',
-                color: isBiggestMover ? '#ffd8d8' : 'rgba(220,232,255,0.82)',
+                  ? '1px solid rgba(255,132,132,0.16)'
+                  : `1px solid ${theme.statusBorder}`,
+                color: isBiggestMover ? '#ffd8d8' : theme.statusColor,
                 fontSize: 12,
                 fontWeight: 800,
               }}
@@ -705,7 +713,7 @@ function PodiumCard({
           position: 'relative',
           zIndex: 3,
           marginTop: 18,
-          height: isLeader ? 88 : 62,
+          height: isLeader ? 92 : 64,
           borderRadius: 24,
           background: theme.platformBg,
           border: `1px solid ${
@@ -725,9 +733,9 @@ function PodiumCard({
           style={{
             fontSize: isLeader ? 14 : 13,
             fontWeight: 900,
-            letterSpacing: isLeader ? '0.22em' : '0.18em',
+            letterSpacing: isLeader ? '0.24em' : '0.18em',
             textTransform: 'uppercase',
-            color: 'rgba(220,232,255,0.74)',
+            color: 'rgba(220,232,255,0.76)',
             textShadow: isLeader
               ? '0 1px 0 rgba(255,255,255,0.16), 0 0 8px rgba(255,255,255,0.04)'
               : '0 1px 0 rgba(255,255,255,0.08)',
@@ -753,7 +761,9 @@ function LadderRow({
   const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
   const targetName = targetMap[normalizeUpper(row.player)]
   const isBiggestMover = normalizeUpper(biggestMoverName) === normalizeUpper(row.player)
-  const isHighlighted = highlightedTarget && normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
+  const isHighlighted =
+    highlightedTarget &&
+    normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
   const statusLabel = getPlayerStatusLabel({
     row,
     activeChallengesByPlayer,
@@ -764,8 +774,9 @@ function LadderRow({
     <div
       onMouseEnter={() => onHighlightTarget(targetName || null)}
       onMouseLeave={() => onHighlightTarget(null)}
-      className={`interactive-card ladder-row ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
+      className={`interactive-card fade-in ladder-row ${isBiggestMover ? 'hot-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
+        animationDelay: `${Math.min(Number(row.rank) * 0.045, 0.75)}s`,
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto',
         gap: 16,
@@ -778,7 +789,6 @@ function LadderRow({
           ? '0 0 0 1px rgba(255,98,98,0.06), 0 12px 24px rgba(255,98,98,0.08)'
           : `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
         position: 'relative',
-        animationDelay: `${Math.min(0.05 * Number(row.rank || 0), 0.7)}s`,
       }}
     >
       <div
@@ -841,11 +851,11 @@ function LadderRow({
               justifyContent: 'center',
               background: isBiggestMover
                 ? 'linear-gradient(180deg, rgba(92,38,38,0.94) 0%, rgba(48,20,20,0.98) 100%)'
-                : 'rgba(255,255,255,0.05)',
+                : theme.statusBg,
               border: isBiggestMover
                 ? '1px solid rgba(255,132,132,0.16)'
-                : '1px solid rgba(255,255,255,0.08)',
-              color: isBiggestMover ? '#ffd8d8' : 'rgba(220,232,255,0.78)',
+                : `1px solid ${theme.statusBorder}`,
+              color: isBiggestMover ? '#ffd8d8' : theme.statusColor,
               fontSize: 11,
               fontWeight: 800,
               letterSpacing: '0.04em',
@@ -885,9 +895,10 @@ function LadderRow({
           style={{
             fontSize: 13,
             fontWeight: 700,
-            color: move.type === 'up'
-              ? 'rgba(255,188,188,0.88)'
-              : 'rgba(220,232,255,0.62)',
+            color:
+              move.type === 'up'
+                ? 'rgba(255,188,188,0.88)'
+                : 'rgba(220,232,255,0.62)',
           }}
         >
           {isBiggestMover ? 'Momentum building' : row.status || 'Active'}
@@ -1042,13 +1053,13 @@ export default function LiveRankingPage() {
         }
 
         @keyframes fadeInUp {
-          from { opacity: 0; transform: translateY(8px); }
-          to { opacity: 1; transform: translateY(0); }
+          from { opacity: 0; transform: translateY(12px) scale(0.992); }
+          to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @keyframes heroBreath {
           0% { opacity: 0.38; transform: scale(0.995); }
-          50% { opacity: 0.76; transform: scale(1.01); }
+          50% { opacity: 0.78; transform: scale(1.01); }
           100% { opacity: 0.38; transform: scale(0.995); }
         }
 
@@ -1105,7 +1116,9 @@ export default function LiveRankingPage() {
           100% { opacity: 0.28; box-shadow: 0 0 0 rgba(255,98,98,0); }
         }
 
-        .fade-in { animation: fadeInUp 0.28s ease both; }
+        .fade-in {
+          animation: fadeInUp 0.7s cubic-bezier(.22,.8,.22,1) both;
+        }
 
         .interactive-card {
           transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
@@ -1203,25 +1216,38 @@ export default function LiveRankingPage() {
 
         .hero-spotlight-behind-photo {
           position: absolute;
-          top: 82px;
+          top: 72px;
           left: 50%;
           transform: translateX(-50%);
-          width: 360px;
-          height: 270px;
+          width: 390px;
+          height: 300px;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.00) 72%);
-          filter: blur(26px);
+          background: radial-gradient(circle, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.00) 72%);
+          filter: blur(28px);
           pointer-events: none;
         }
 
         .hero-ambient-rise {
           position: absolute;
-          left: 14%;
-          right: 14%;
-          top: 22%;
-          bottom: 28%;
-          background: linear-gradient(180deg, rgba(174,242,255,0.05) 0%, rgba(174,242,255,0.00) 100%);
-          filter: blur(22px);
+          left: 12%;
+          right: 12%;
+          top: 18%;
+          bottom: 26%;
+          background: linear-gradient(180deg, rgba(174,242,255,0.06) 0%, rgba(174,242,255,0.00) 100%);
+          filter: blur(24px);
+          pointer-events: none;
+        }
+
+        .hero-crown-light {
+          position: absolute;
+          top: 10px;
+          left: 50%;
+          transform: translateX(-50%);
+          width: 120px;
+          height: 56px;
+          border-radius: 50%;
+          background: radial-gradient(circle, rgba(246,213,111,0.16) 0%, rgba(246,213,111,0.00) 72%);
+          filter: blur(14px);
           pointer-events: none;
         }
 
@@ -1379,8 +1405,12 @@ export default function LiveRankingPage() {
           .podium-3 { order: 3 !important; }
 
           .hero-spotlight-behind-photo {
-            width: 270px;
-            height: 220px;
+            width: 290px;
+            height: 230px;
+          }
+
+          .hero-crown-light {
+            width: 90px;
           }
         }
 
@@ -1480,12 +1510,24 @@ export default function LiveRankingPage() {
               border: '1px solid rgba(255,255,255,0.012)',
             }}
           />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              opacity: 0.035,
+              backgroundImage:
+                'radial-gradient(circle at 1px 1px, white 1px, transparent 0)',
+              backgroundSize: '18px 18px',
+              mixBlendMode: 'soft-light',
+            }}
+          />
         </div>
 
         <div style={{ position: 'relative', maxWidth: 1120, margin: '0 auto', zIndex: 1 }}>
           <div
             className="topbar fade-in"
             style={{
+              animationDelay: '0.02s',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'flex-start',
@@ -1554,7 +1596,9 @@ export default function LiveRankingPage() {
           </div>
 
           <div
+            className="fade-in"
             style={{
+              animationDelay: '0.06s',
               height: 1,
               background:
                 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(168,240,255,0.18) 22%, rgba(255,255,255,0.08) 50%, rgba(168,240,255,0.18) 78%, rgba(255,255,255,0) 100%)',
@@ -1565,18 +1609,19 @@ export default function LiveRankingPage() {
           <div
             className="stats-row fade-in"
             style={{
+              animationDelay: '0.10s',
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 220px))',
               gap: 12,
-              marginBottom: 34,
+              marginBottom: 36,
             }}
           >
             <SmallStat label="Leader" value={leader} />
             <SmallStat label="Biggest Move" value={biggestMove} />
           </div>
 
-          <div style={{ display: 'grid', gap: 38 }}>
-            <section className="fade-in">
+          <div style={{ display: 'grid', gap: 40 }}>
+            <section>
               {loading ? (
                 <div
                   className="podium-grid"
@@ -1648,6 +1693,7 @@ export default function LiveRankingPage() {
             <div
               className="fade-in"
               style={{
+                animationDelay: '0.34s',
                 height: 1,
                 background:
                   'linear-gradient(90deg, rgba(255,255,255,0.00) 0%, rgba(174,242,255,0.10) 20%, rgba(255,255,255,0.06) 50%, rgba(246,213,111,0.08) 80%, rgba(255,255,255,0.00) 100%)',
@@ -1657,6 +1703,7 @@ export default function LiveRankingPage() {
             <section
               className="fade-in"
               style={{
+                animationDelay: '0.38s',
                 position: 'relative',
                 borderRadius: 28,
                 padding: '6px 0',
@@ -1690,6 +1737,7 @@ export default function LiveRankingPage() {
             <section
               className="fade-in"
               style={{
+                animationDelay: '0.46s',
                 position: 'relative',
                 borderRadius: 28,
                 padding: '6px 0',
