@@ -1898,12 +1898,6 @@ export default function MatchCenterPage() {
     return rows
   }, [completedChallenges, completedQuery, completedView])
 
-  const topSummary = useMemo(() => {
-    const leader = rankingRows[0]
-    if (!leader?.player) return 'Elite ladder competition in progress'
-    return `Current leader: ${leader.player}`
-  }, [rankingRows])
-
   function updateChallengeField(name, value) {
     if (name === 'challenger') {
       const player = PLAYERS.find((p) => p.name === value)
@@ -2256,10 +2250,6 @@ export default function MatchCenterPage() {
             max-width: 100% !important;
           }
 
-          .hero-grid {
-            grid-template-columns: 1fr !important;
-          }
-
           .toolbar-stack {
             flex-direction: column !important;
             align-items: stretch !important;
@@ -2357,18 +2347,6 @@ export default function MatchCenterPage() {
               >
                 Match Center
               </h1>
-
-              <div
-                style={{
-                  marginTop: 12,
-                  maxWidth: 700,
-                  fontSize: 16,
-                  lineHeight: 1.55,
-                  color: 'rgba(220,232,255,0.72)',
-                }}
-              >
-                Premium challenge management with live results, structured score entry, and elite ladder presentation.
-              </div>
             </div>
 
             <a
@@ -2406,73 +2384,17 @@ export default function MatchCenterPage() {
           />
 
           <div
-            className="hero-grid fade-in"
+            className="fade-in"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.35fr 1fr',
-              gap: 16,
+              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+              gap: 12,
               marginBottom: 28,
             }}
           >
-            <div
-              style={{
-                borderRadius: 28,
-                padding: 22,
-                background:
-                  'linear-gradient(180deg, rgba(18,42,78,0.86) 0%, rgba(10,22,41,0.92) 100%)',
-                border: '1px solid rgba(168,240,255,0.12)',
-                boxShadow: '0 18px 44px rgba(0,0,0,0.18), 0 0 36px rgba(56,189,248,0.08)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: '0.18em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(174,242,255,0.74)',
-                  marginBottom: 10,
-                }}
-              >
-                Center Court Status
-              </div>
-
-              <div
-                style={{
-                  fontSize: 28,
-                  fontWeight: 900,
-                  lineHeight: 1.05,
-                  color: '#eef6ff',
-                  marginBottom: 10,
-                  letterSpacing: '-0.03em',
-                }}
-              >
-                {topSummary}
-              </div>
-
-              <div
-                style={{
-                  fontSize: 15,
-                  lineHeight: 1.55,
-                  color: 'rgba(220,232,255,0.72)',
-                }}
-              >
-                Active matchups and completed results update from the sheet feed, while result entry keeps the premium match card experience intact.
-              </div>
-            </div>
-
-            <div
-              className="fade-in"
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-                gap: 12,
-              }}
-            >
-              <MetaBox label="Feed Rows" value={String(feedRows.length)} />
-              <MetaBox label="Active" value={String(activeChallenges.length)} />
-              <MetaBox label="Completed" value={String(completedChallenges.length)} />
-            </div>
+            <MetaBox label="Feed Rows" value={String(feedRows.length)} />
+            <MetaBox label="Active" value={String(activeChallenges.length)} />
+            <MetaBox label="Completed" value={String(completedChallenges.length)} />
           </div>
 
           <div style={{ display: 'grid', gap: 24 }}>
