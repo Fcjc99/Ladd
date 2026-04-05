@@ -2,6 +2,9 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react'
 
+const externalMatchLogUrl = `https://opensheet.elk.sh/${sheetId}/ExternalMatchLog`
+const [externalMatches, setExternalMatches] = useState([])
+
 const sheetId =
   process.env.NEXT_PUBLIC_GOOGLE_SHEET_ID ||
   '1j3VgKy9fBHTTECzmRIYFijMtUAW5A0XdPoSNwdUDWOg'
@@ -510,7 +513,7 @@ function PlayerPhoto({ name, url, rank, size = 100 }) {
   )
 }
 
-function PlayerDetailDrawer({ player, rows, onClose }) {
+function PlayerDetailDrawer({ player, rows, externalMatches, onClose })
   if (!player) return null
 
   const sorted = [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
