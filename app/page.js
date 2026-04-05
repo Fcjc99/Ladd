@@ -116,11 +116,11 @@ function getRankTheme(rank) {
         'linear-gradient(180deg, rgba(243,213,191,1) 0%, rgba(210,150,103,1) 58%, rgba(181,111,66,1) 100%)',
       badgeColor: '#3f1f0d',
       cardBg:
-        'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+        'linear-gradient(180deg, rgba(18,36,61,0.98) 0%, rgba(11,22,39,1) 100%)',
       platformBg:
-        'linear-gradient(180deg, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0.03) 100%)',
+        'linear-gradient(180deg, rgba(210,150,103,0.09) 0%, rgba(255,255,255,0.03) 100%)',
       rail:
-        'linear-gradient(180deg, rgba(210,150,103,0.74) 0%, rgba(210,150,103,0.12) 100%)',
+        'linear-gradient(180deg, rgba(210,150,103,0.82) 0%, rgba(210,150,103,0.14) 100%)',
     }
   }
 
@@ -132,11 +132,11 @@ function getRankTheme(rank) {
     badgeBg: 'linear-gradient(180deg, #eff5ff 0%, #dbe7f7 100%)',
     badgeColor: '#182235',
     cardBg:
-      'linear-gradient(180deg, rgba(14,31,58,0.96) 0%, rgba(10,21,39,0.98) 100%)',
+      'linear-gradient(180deg, rgba(11,24,44,0.96) 0%, rgba(7,15,28,0.99) 100%)',
     platformBg:
-      'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
+      'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.02) 100%)',
     rail:
-      'linear-gradient(180deg, rgba(184,201,230,0.55) 0%, rgba(184,201,230,0.10) 100%)',
+      'linear-gradient(180deg, rgba(184,201,230,0.52) 0%, rgba(184,201,230,0.10) 100%)',
   }
 }
 
@@ -152,7 +152,6 @@ function getMoveInfo(moveValue) {
       bg: 'rgba(255,255,255,0.05)',
       border: 'rgba(255,255,255,0.08)',
       icon: '',
-      amount: 0,
     }
   }
 
@@ -164,7 +163,6 @@ function getMoveInfo(moveValue) {
       bg: 'linear-gradient(180deg, rgba(41,84,54,0.92) 0%, rgba(23,49,32,0.98) 100%)',
       border: 'rgba(132,255,172,0.20)',
       icon: '↗',
-      amount: 3,
     }
   }
 
@@ -178,7 +176,6 @@ function getMoveInfo(moveValue) {
         bg: 'linear-gradient(180deg, rgba(41,84,54,0.92) 0%, rgba(23,49,32,0.98) 100%)',
         border: 'rgba(132,255,172,0.22)',
         icon: '↗',
-        amount: Math.min(3, n),
       }
     }
 
@@ -190,7 +187,6 @@ function getMoveInfo(moveValue) {
         bg: 'linear-gradient(180deg, rgba(92,38,38,0.92) 0%, rgba(48,20,20,0.98) 100%)',
         border: 'rgba(255,132,132,0.20)',
         icon: '↘',
-        amount: Math.min(3, Math.abs(n)),
       }
     }
   }
@@ -202,58 +198,15 @@ function getMoveInfo(moveValue) {
     bg: 'rgba(255,255,255,0.05)',
     border: 'rgba(255,255,255,0.08)',
     icon: '',
-    amount: 0,
   }
 }
 
-function getStatusLabel(row, activeChallengesByPlayer) {
-  const rank = toNumber(row.rank)
-  const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
-  const move = getMoveInfo(row.move)
-
-  if (rank === 1) return 'Champion'
-  if (activeCount > 0 && rank <= 7) return 'Under Pressure'
-  if (move.type === 'up') return 'Rising'
-  if (rank <= 3) return 'Defending'
-  return row.status || 'Active'
-}
-
-function TrendBars({ move, compact = false }) {
-  const info = getMoveInfo(move)
-  const count = Math.max(1, info.amount || 1)
-  const bars = [0, 1, 2]
-
-  const color =
-    info.type === 'up'
-      ? 'rgba(132,255,172,0.82)'
-      : info.type === 'down'
-        ? 'rgba(255,132,132,0.78)'
-        : 'rgba(220,232,255,0.38)'
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        gap: compact ? 3 : 4,
-        alignItems: 'flex-end',
-        height: compact ? 14 : 18,
-      }}
-    >
-      {bars.map((bar) => (
-        <div
-          key={bar}
-          style={{
-            width: compact ? 4 : 5,
-            height: bar < count ? (compact ? 6 + bar * 3 : 8 + bar * 4) : (compact ? 5 : 6),
-            borderRadius: 999,
-            background: color,
-            boxShadow: bar < count ? `0 0 10px ${color}` : 'none',
-            opacity: bar < count ? 1 : 0.45,
-          }}
-        />
-      ))}
-    </div>
-  )
+function getTierLabel(rank) {
+  const n = Number(rank)
+  if (n === 1) return 'Champion'
+  if (n <= 3) return 'Podium'
+  if (n <= 7) return 'Chase Pack'
+  return 'Field'
 }
 
 function SmallStat({ label, value }) {
@@ -293,7 +246,7 @@ function SmallStat({ label, value }) {
   )
 }
 
-function HeroStoryStrip({ leader, biggestMove, activeCount }) {
+function HeroStoryStrip({ leader, biggestMove }) {
   return (
     <div
       className="fade-in"
@@ -319,12 +272,12 @@ function HeroStoryStrip({ leader, biggestMove, activeCount }) {
           {leader} holds the summit
         </div>
         <div style={{ color: '#eef6ff', fontSize: 15, fontWeight: 800 }}>
-          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Momentum: </span>
+          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Biggest Move: </span>
           {biggestMove}
         </div>
         <div style={{ color: '#eef6ff', fontSize: 15, fontWeight: 800 }}>
-          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Pressure: </span>
-          {activeCount} active challenge{activeCount === 1 ? '' : 's'}
+          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Podium: </span>
+          Top three hold the headline positions
         </div>
       </div>
     </div>
@@ -520,21 +473,136 @@ function PlayerPhoto({ name, url, rank, size = 100 }) {
   )
 }
 
+function SignatureChampionMark() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 12px',
+        borderRadius: 999,
+        background: 'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.05) 100%)',
+        border: '1px solid rgba(174,242,255,0.22)',
+        boxShadow: '0 10px 24px rgba(0,0,0,0.18), 0 0 20px rgba(174,242,255,0.16)',
+      }}
+    >
+      <span
+        style={{
+          fontSize: 13,
+          lineHeight: 1,
+          filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.28))',
+        }}
+      >
+        👑
+      </span>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 900,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: '#dffcff',
+        }}
+      >
+        Champion Crest
+      </span>
+    </div>
+  )
+}
+
+function ChallengeMapCard({ title, players, emptyText }) {
+  return (
+    <div
+      style={{
+        borderRadius: 18,
+        padding: 14,
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.58)',
+          marginBottom: 12,
+        }}
+      >
+        {title}
+      </div>
+
+      {players.length === 0 ? (
+        <div
+          style={{
+            fontSize: 14,
+            color: 'rgba(220,232,255,0.68)',
+          }}
+        >
+          {emptyText}
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {players.map((item) => (
+            <div
+              key={`${title}-${item.rank}-${item.player}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                borderRadius: 14,
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#eef6ff',
+                }}
+              >
+                {item.player}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 900,
+                  color: 'rgba(220,232,255,0.70)',
+                }}
+              >
+                #{item.rank}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function PlayerDetailDrawer({
   player,
   rows,
-  activeChallengesByPlayer,
   onClose,
 }) {
   if (!player) return null
 
-  const row = rows.find((item) => normalizeUpper(item.player) === normalizeUpper(player))
-  if (!row) return null
+  const sorted = [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
+  const index = sorted.findIndex((item) => normalizeUpper(item.player) === normalizeUpper(player))
+  if (index === -1) return null
 
+  const row = sorted[index]
   const rank = toNumber(row.rank)
   const move = getMoveInfo(row.move)
   const theme = getRankTheme(rank)
-  const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
+
+  const canChallenge = [sorted[index - 1], sorted[index - 2]].filter(Boolean)
+  const canBeChallengedBy = [sorted[index + 1], sorted[index + 2]].filter(Boolean)
 
   return (
     <div
@@ -555,7 +623,7 @@ function PlayerDetailDrawer({
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: 430,
+          maxWidth: 450,
           height: '100%',
           overflowY: 'auto',
           background:
@@ -583,7 +651,7 @@ function PlayerDetailDrawer({
               color: 'rgba(174,242,255,0.70)',
             }}
           >
-            Player Detail
+            Ladder Window
           </div>
 
           <button
@@ -654,36 +722,26 @@ function PlayerDetailDrawer({
               display: 'grid',
               gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
               gap: 10,
-              marginBottom: 12,
+              marginBottom: 14,
             }}
           >
-            <SmallStat label="Status" value={getStatusLabel(row, activeChallengesByPlayer)} />
-            <SmallStat label="Pressure" value={activeCount ? `${activeCount} live` : 'Quiet'} />
-            <SmallStat label="Trend" value={move.type === 'up' ? 'Rising' : move.type === 'down' ? 'Sliding' : 'Stable'} />
+            <SmallStat label="Tier" value={getTierLabel(rank)} />
+            <SmallStat label="Can Challenge" value={String(canChallenge.length)} />
+            <SmallStat label="Can Be Challenged By" value={String(canBeChallengedBy.length)} />
           </div>
+        </div>
 
-          <div
-            style={{
-              borderRadius: 18,
-              padding: 14,
-              background: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.08)',
-            }}
-          >
-            <div
-              style={{
-                fontSize: 11,
-                fontWeight: 800,
-                letterSpacing: '0.14em',
-                textTransform: 'uppercase',
-                color: 'rgba(220,232,255,0.58)',
-                marginBottom: 10,
-              }}
-            >
-              Rank Trend
-            </div>
-            <TrendBars move={row.move} />
-          </div>
+        <div style={{ display: 'grid', gap: 14 }}>
+          <ChallengeMapCard
+            title="Players This Rank Can Challenge"
+            players={canChallenge}
+            emptyText="No higher ranks available."
+          />
+          <ChallengeMapCard
+            title="Players Who Can Challenge This Rank"
+            players={canBeChallengedBy}
+            emptyText="No lower ranks in range."
+          />
         </div>
       </div>
     </div>
@@ -707,7 +765,7 @@ function PodiumCard({
     normalizeUpper(row.player) === normalizeUpper(highlightedCard)
 
   const heightMap = {
-    1: 520,
+    1: 540,
     2: 386,
     3: 368,
   }
@@ -730,7 +788,7 @@ function PodiumCard({
         position: 'relative',
         minHeight: heightMap[place],
         borderRadius: 34,
-        padding: place === 1 ? '38px 22px 24px' : '24px 18px 18px',
+        padding: place === 1 ? '42px 22px 24px' : '24px 18px 18px',
         background: theme.cardBg,
         border: `1px solid ${activeCount ? 'rgba(255,132,132,0.34)' : theme.border}`,
         overflow: 'hidden',
@@ -822,7 +880,7 @@ function PodiumCard({
           style={{
             display: 'flex',
             justifyContent: 'center',
-            marginBottom: isLeader ? 34 : 22,
+            marginBottom: isLeader ? 28 : 22,
           }}
         >
           <PlayerPhoto
@@ -834,6 +892,12 @@ function PodiumCard({
         </div>
 
         <div style={{ textAlign: 'center' }}>
+          {isLeader ? (
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 14 }}>
+              <SignatureChampionMark />
+            </div>
+          ) : null}
+
           <div
             className={isLeader ? 'leader-name' : rank === 2 ? 'metal-name-gold' : 'metal-name-silver'}
             style={{
@@ -842,17 +906,23 @@ function PodiumCard({
               color: '#eef6ff',
               lineHeight: 1.02,
               letterSpacing: '-0.04em',
-              marginBottom: 12,
+              marginBottom: 10,
             }}
           >
             {row.player || '—'}
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 10, alignItems: 'center', marginBottom: 12 }}>
-            <TrendBars move={row.move} compact />
-            <div style={{ fontSize: 12, fontWeight: 800, color: 'rgba(220,232,255,0.72)' }}>
-              {getStatusLabel(row, activeChallengesByPlayer)}
-            </div>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.72)',
+              marginBottom: 12,
+            }}
+          >
+            {getTierLabel(rank)}
           </div>
 
           {row.flag_url ? (
@@ -889,7 +959,7 @@ function PodiumCard({
           position: 'relative',
           zIndex: 3,
           marginTop: 18,
-          height: isLeader ? 106 : 66,
+          height: isLeader ? 110 : 66,
           borderRadius: 24,
           background: theme.platformBg,
           border: `1px solid ${theme.border}`,
@@ -975,11 +1045,13 @@ function LadderRow({
         alignItems: 'center',
         padding: '14px 16px',
         borderRadius: 22,
-        background: 'rgba(255,255,255,0.04)',
-        border: `1px solid ${activeCount ? 'rgba(255,132,132,0.26)' : 'rgba(255,255,255,0.08)'}`,
+        background: rank >= 4 && rank <= 7 ? 'rgba(210,150,103,0.06)' : 'rgba(255,255,255,0.04)',
+        border: `1px solid ${activeCount ? 'rgba(255,132,132,0.26)' : rank >= 4 && rank <= 7 ? 'rgba(210,150,103,0.12)' : 'rgba(255,255,255,0.08)'}`,
         boxShadow: activeCount
           ? '0 0 0 1px rgba(255,132,132,0.04), 0 12px 24px rgba(255,132,132,0.06)'
-          : `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
+          : rank >= 4 && rank <= 7
+            ? `0 0 0 1px rgba(210,150,103,0.03), 0 12px 24px ${theme.glow}`
+            : `0 0 0 1px rgba(255,255,255,0.01), 0 12px 24px ${theme.glow}`,
         position: 'relative',
         cursor: 'pointer',
       }}
@@ -1032,8 +1104,6 @@ function LadderRow({
           >
             {row.player || '—'}
           </div>
-
-          <TrendBars move={row.move} compact />
 
           {row.flag_url ? (
             <div
@@ -1091,7 +1161,7 @@ function LadderRow({
             color: 'rgba(220,232,255,0.62)',
           }}
         >
-          {getStatusLabel(row, activeChallengesByPlayer)}
+          {getTierLabel(rank)}
         </div>
       </div>
 
@@ -1214,11 +1284,6 @@ export default function LiveRankingPage() {
 
     return map
   }, [challengeRows])
-
-  const activeChallengeCount = useMemo(
-    () => challengeRows.filter(isActiveChallenge).length,
-    [challengeRows]
-  )
 
   return (
     <>
@@ -1870,7 +1935,7 @@ export default function LiveRankingPage() {
               </h1>
             </div>
 
-          <a
+            <a
               href="/match-center"
               className="interactive-card"
               style={{
@@ -1909,7 +1974,6 @@ export default function LiveRankingPage() {
           <HeroStoryStrip
             leader={leader}
             biggestMove={biggestMove}
-            activeCount={activeChallengeCount}
           />
 
           <div
@@ -2001,8 +2065,9 @@ export default function LiveRankingPage() {
                 borderRadius: 28,
                 padding: '18px 14px 8px',
                 background:
-                  'linear-gradient(180deg, rgba(210,150,103,0.05) 0%, rgba(255,255,255,0.00) 100%)',
-                border: '1px solid rgba(210,150,103,0.08)',
+                  'linear-gradient(180deg, rgba(210,150,103,0.08) 0%, rgba(210,150,103,0.02) 48%, rgba(255,255,255,0.00) 100%)',
+                border: '1px solid rgba(210,150,103,0.12)',
+                boxShadow: '0 18px 34px rgba(210,150,103,0.05)',
               }}
             >
               <div
@@ -2011,7 +2076,7 @@ export default function LiveRankingPage() {
                   fontWeight: 800,
                   letterSpacing: '0.16em',
                   textTransform: 'uppercase',
-                  color: 'rgba(210,150,103,0.76)',
+                  color: 'rgba(210,150,103,0.82)',
                   marginBottom: 14,
                 }}
               >
@@ -2092,7 +2157,6 @@ export default function LiveRankingPage() {
         <PlayerDetailDrawer
           player={selectedPlayer}
           rows={rows}
-          activeChallengesByPlayer={activeChallengesByPlayer}
           onClose={() => setSelectedPlayer(null)}
         />
       </div>
