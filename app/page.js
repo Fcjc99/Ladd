@@ -459,7 +459,7 @@ function PodiumCard({
         e.currentTarget.style.setProperty('--rotX', `${py * -7}deg`)
       }}
       onTouchEnd={(e) => { e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
-      className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} podium-${place} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
+      className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} ${rank === 1 ? 'hover-rank-1' : rank === 2 ? 'hover-rank-2' : rank === 3 ? 'hover-rank-3' : rank >= 4 && rank <= 7 ? 'hover-rank-bronze' : 'hover-rank-basic'} podium-${place} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
         animationDelay: `${place === 1 ? 0.10 : place === 2 ? 0.22 : 0.34}s`,
         position: 'relative',
@@ -494,10 +494,10 @@ function PodiumCard({
         }}
       />
 
-      <div className="podium-frame-outer parallax-frame" />
-      <div className="podium-frame-inner parallax-frame" />
-      <div className="podium-bottom-lip parallax-frame" />
-      <div className="podium-top-highlight parallax-frame" />
+      <div className="podium-frame-outer -frame" />
+      <div className="podium-frame-inner -frame" />
+      <div className="podium-bottom-lip -frame" />
+      <div className="podium-top-highlight -frame" />
 
       {isLeader ? <div className="podium-hero-breath" /> : <div className="podium-soft-breath" />}
       {isLeader ? <div className="podium-hero-outline" /> : null}
@@ -524,7 +524,7 @@ function PodiumCard({
           zIndex: 3,
         }}
       >
-        <div className="parallax-badge"><div className="parallax-badge"><RankBadge rank={row.rank} /></div></div>
+        <div className="-badge"><div className="-badge"><RankBadge rank={row.rank} /></div></div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {activeCount ? (
             <div
@@ -561,7 +561,7 @@ function PodiumCard({
             marginBottom: isLeader ? 34 : 22,
           }}
         >
-          <div className="parallax-photo"><PlayerPhoto
+          <div className="-photo"><PlayerPhoto
             name={row.player}
             url={row.photo_url}
             rank={row.rank}
@@ -571,7 +571,7 @@ function PodiumCard({
 
         <div style={{ textAlign: 'center' }}>
           <div
-            className={`parallax-name ${isLeader ? 'leader-name' : rank === 2 ? 'metal-name-gold' : rank === 3 ? 'metal-name-silver' : ''}`}
+            className={`-name ${isLeader ? 'leader-name' : rank === 2 ? 'metal-name-gold' : rank === 3 ? 'metal-name-silver' : ''}`}
             style={{
               fontSize: isLeader ? 44 : 27,
               fontWeight: isLeader ? 950 : 900,
@@ -695,7 +695,7 @@ function LadderRow({
         e.currentTarget.style.setProperty('--rotX', `${py * -4}deg`)
       }}
       onTouchEnd={(e) => { e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
-      className={`interactive-card fade-in ladder-row ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
+      className={`interactive-card fade-in ladder-row ${toNumber(row.rank) >= 4 && toNumber(row.rank) <= 7 ? 'hover-rank-bronze' : 'hover-rank-basic'} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
         animationDelay: `${Math.min(Number(row.rank) * 0.05, 0.82)}s`,
         transform: 'perspective(1200px) rotateX(var(--rotX, 0deg)) rotateY(var(--rotY, 0deg)) translateY(var(--lift, 0px))',
@@ -732,7 +732,7 @@ function LadderRow({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
-        <div className="parallax-photo"><PlayerPhoto
+        <div className="-photo"><PlayerPhoto
           name={row.player}
           url={row.photo_url}
           rank={row.rank}
@@ -751,7 +751,7 @@ function LadderRow({
           }}
         >
           <div
-            className="parallax-name"
+            className="-name"
             style={{
               fontSize: 20,
               fontWeight: 850,
@@ -875,8 +875,8 @@ export default function LiveRankingPage() {
   }, [])
 
   const topThree = useMemo(() => rows.slice(0, 3), [rows])
-  const middleTier = useMemo(() => rows.slice(3, 8), [rows])
-  const fullLadder = useMemo(() => rows.slice(8), [rows])
+  const middleTier = useMemo(() => rows.slice(3, 7), [rows])
+  const fullLadder = useMemo(() => rows.slice(7), [rows])
 
   const leader = rows[0]?.player || '—'
 
@@ -1002,9 +1002,9 @@ export default function LiveRankingPage() {
           transition: transform 0.16s ease, border-color 0.16s ease, box-shadow 0.16s ease;
         }
 
-        .interactive-card:hover { transform: translateY(-2px); }
+        .interactive-card:hover { transform: none; }
 
-        .photo-hover:hover { transform: scale(1.015); }
+        .photo-hover:hover { transform: none; }
 
         .leader-name {
           animation: heroNameGlow 3.2s ease-in-out infinite;
@@ -1240,10 +1240,67 @@ export default function LiveRankingPage() {
           pointer-events: none;
         }
 
+        
         .target-card-highlighted {
-          box-shadow: 0 0 0 1px rgba(174,242,255,0.14), 0 0 40px rgba(174,242,255,0.16) !important;
-          border-color: rgba(174,242,255,0.24) !important;
-          transform: translateY(-1px);
+          border-color: rgba(255,255,255,0.18) !important;
+        }
+
+        .hover-rank-1.target-card-highlighted {
+          border-color: rgba(174,242,255,0.50) !important;
+          box-shadow:
+            0 0 0 1px rgba(174,242,255,0.24),
+            0 0 34px rgba(174,242,255,0.34),
+            0 0 70px rgba(174,242,255,0.20),
+            inset 0 1px 0 rgba(255,255,255,0.18) !important;
+        }
+
+        .hover-rank-1.target-card-highlighted::after {
+          content: '';
+          position: absolute;
+          inset: -2px;
+          border-radius: inherit;
+          pointer-events: none;
+          background:
+            radial-gradient(circle at 18% 16%, rgba(255,255,255,0.95) 0 1.5px, transparent 3px),
+            radial-gradient(circle at 82% 22%, rgba(255,255,255,0.88) 0 1.5px, transparent 3px),
+            radial-gradient(circle at 24% 78%, rgba(255,255,255,0.70) 0 1px, transparent 2.5px),
+            linear-gradient(180deg, rgba(174,242,255,0.10), rgba(174,242,255,0.00));
+          filter: drop-shadow(0 0 8px rgba(174,242,255,0.35));
+        }
+
+        .hover-rank-2.target-card-highlighted {
+          border-color: rgba(246,213,111,0.44) !important;
+          box-shadow:
+            0 0 0 1px rgba(246,213,111,0.20),
+            0 0 28px rgba(246,213,111,0.24),
+            0 0 54px rgba(246,213,111,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.14) !important;
+        }
+
+        .hover-rank-3.target-card-highlighted {
+          border-color: rgba(221,230,240,0.42) !important;
+          box-shadow:
+            0 0 0 1px rgba(221,230,240,0.18),
+            0 0 26px rgba(221,230,240,0.22),
+            0 0 50px rgba(221,230,240,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.14) !important;
+        }
+
+        .hover-rank-bronze.target-card-highlighted {
+          border-color: rgba(210,150,103,0.42) !important;
+          box-shadow:
+            0 0 0 1px rgba(210,150,103,0.18),
+            0 0 22px rgba(210,150,103,0.20),
+            0 0 40px rgba(210,150,103,0.10),
+            inset 0 1px 0 rgba(255,255,255,0.12) !important;
+        }
+
+        .hover-rank-basic.target-card-highlighted {
+          border-color: rgba(184,201,230,0.22) !important;
+          box-shadow:
+            0 0 0 1px rgba(184,201,230,0.10),
+            0 0 18px rgba(184,201,230,0.12),
+            inset 0 1px 0 rgba(255,255,255,0.08) !important;
         }
 
         .podium-platform::before {
@@ -1285,24 +1342,24 @@ export default function LiveRankingPage() {
         }
 
 
-        .parallax-frame {
+        .-frame {
           transform: translate3d(calc(var(--mx, 0px) * -0.18), calc(var(--my, 0px) * -0.18), 0);
           transition: transform 0.18s ease;
         }
 
-        .parallax-photo {
+        .-photo {
           transform: translate3d(calc(var(--mx, 0px) * 0.52), calc(var(--my, 0px) * 0.52), 18px);
           transition: transform 0.18s ease;
           will-change: transform;
         }
 
-        .parallax-badge {
+        .-badge {
           transform: translate3d(calc(var(--mx, 0px) * 0.62), calc(var(--my, 0px) * 0.62), 22px);
           transition: transform 0.18s ease;
           will-change: transform;
         }
 
-        .parallax-name {
+        .-name {
           transform: translate3d(calc(var(--mx, 0px) * 0.26), calc(var(--my, 0px) * 0.26), 10px);
           transition: transform 0.18s ease;
           will-change: transform;
@@ -1412,15 +1469,15 @@ export default function LiveRankingPage() {
             --my: 0px;
           }
 
-          .podium-card-1 .parallax-photo {
+          .podium-card-1 .-photo {
             transform: translate3d(calc(var(--mx, 0px) * 0.72), calc(var(--my, 0px) * 0.72), 24px) !important;
           }
 
-          .podium-card-1 .parallax-badge {
+          .podium-card-1 .-badge {
             transform: translate3d(calc(var(--mx, 0px) * 0.82), calc(var(--my, 0px) * 0.82), 30px) !important;
           }
 
-          .podium-card-1 .parallax-name {
+          .podium-card-1 .-name {
             transform: translate3d(calc(var(--mx, 0px) * 0.34), calc(var(--my, 0px) * 0.34), 12px) !important;
           }
         }
