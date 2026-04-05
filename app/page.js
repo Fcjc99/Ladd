@@ -238,6 +238,281 @@ function SmallStat({ label, value }) {
   )
 }
 
+
+
+function TrendMini({ move }) {
+  const info = getMoveInfo(move)
+  const active = info.type === 'up' ? 4 : info.type === 'down' ? 1 : 2
+
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'flex-end',
+        gap: 3,
+        height: 20,
+      }}
+    >
+      {[0, 1, 2, 3].map((i) => (
+        <div
+          key={i}
+          style={{
+            width: 5,
+            height: 6 + i * 3,
+            borderRadius: 999,
+            background:
+              i <= active
+                ? info.type === 'up'
+                  ? 'linear-gradient(180deg, rgba(132,255,172,0.95) 0%, rgba(39,84,54,0.95) 100%)'
+                  : info.type === 'down'
+                    ? 'linear-gradient(180deg, rgba(255,132,132,0.95) 0%, rgba(92,38,38,0.95) 100%)'
+                    : 'linear-gradient(180deg, rgba(220,232,255,0.90) 0%, rgba(120,138,170,0.90) 100%)'
+                : 'rgba(255,255,255,0.08)',
+            boxShadow:
+              i <= active
+                ? info.type === 'up'
+                  ? '0 0 10px rgba(132,255,172,0.16)'
+                  : info.type === 'down'
+                    ? '0 0 10px rgba(255,132,132,0.14)'
+                    : '0 0 8px rgba(184,201,230,0.10)'
+                : 'none',
+          }}
+        />
+      ))}
+    </div>
+  )
+}
+
+function StoryStrip({ leader, biggestMove, activeCount }) {
+  return (
+    <div
+      className="fade-in"
+      style={{
+        animationDelay: '0.14s',
+        borderRadius: 24,
+        padding: '14px 16px',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.03) 100%)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        boxShadow: '0 16px 34px rgba(0,0,0,0.14), inset 0 1px 0 rgba(255,255,255,0.08)',
+        marginBottom: 28,
+      }}
+    >
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 800,
+          letterSpacing: '0.16em',
+          textTransform: 'uppercase',
+          color: 'rgba(174,242,255,0.72)',
+          marginBottom: 10,
+        }}
+      >
+        Center Court Story
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: 10,
+          alignItems: 'center',
+        }}
+      >
+        <div className="story-chip">Leader: {leader}</div>
+        <div className="story-chip">Biggest Move: {biggestMove}</div>
+        <div className="story-chip">{activeCount} Active Challenge{activeCount === 1 ? '' : 's'}</div>
+      </div>
+    </div>
+  )
+}
+
+function PlayerDrawer({ player, onClose }) {
+  if (!player) return null
+
+  const theme = getRankTheme(player.rank)
+  const moveInfo = getMoveInfo(player.move)
+
+  return (
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 1200,
+        background: 'rgba(0,0,0,0.54)',
+        backdropFilter: 'blur(6px)',
+        WebkitBackdropFilter: 'blur(6px)',
+        display: 'flex',
+        justifyContent: 'flex-end',
+      }}
+    >
+      <div
+        className="fade-in"
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxWidth: 430,
+          height: '100%',
+          overflowY: 'auto',
+          background:
+            'linear-gradient(180deg, rgba(10,23,43,0.98) 0%, rgba(7,17,32,0.995) 100%)',
+          borderLeft: `1px solid ${theme.border}`,
+          boxShadow: '-18px 0 50px rgba(0,0,0,0.34)',
+          padding: 20,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            gap: 12,
+            alignItems: 'center',
+            marginBottom: 18,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(174,242,255,0.72)',
+            }}
+          >
+            Player Detail
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            style={{
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(255,255,255,0.05)',
+              color: '#eef6ff',
+              fontSize: 18,
+              fontWeight: 900,
+              cursor: 'pointer',
+            }}
+          >
+            ×
+          </button>
+        </div>
+
+        <div
+          style={{
+            borderRadius: 26,
+            padding: 18,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginBottom: 16,
+            position: 'relative',
+            overflow: 'hidden',
+          }}
+        >
+          <div
+            style={{
+              position: 'absolute',
+              inset: -40,
+              background: `radial-gradient(circle at 50% 0%, ${theme.glow} 0%, rgba(0,0,0,0) 70%)`,
+              pointerEvents: 'none',
+            }}
+          />
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', gap: 14, alignItems: 'center', marginBottom: 16 }}>
+              <PlayerPhoto
+                name={player.player}
+                url={player.photo_url}
+                rank={player.rank}
+                size={108}
+              />
+              <div style={{ minWidth: 0 }}>
+                <div
+                  style={{
+                    fontSize: 30,
+                    fontWeight: 900,
+                    lineHeight: 1.02,
+                    color: '#eef6ff',
+                    marginBottom: 8,
+                  }}
+                >
+                  {player.player}
+                </div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
+                  <RankBadge rank={player.rank} />
+                  <MoveChip move={player.move} />
+                </div>
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: 10,
+              }}
+            >
+              <div className="drawer-stat">
+                <div className="drawer-stat-label">Status</div>
+                <div className="drawer-stat-value">{player.status || 'Active'}</div>
+              </div>
+              <div className="drawer-stat">
+                <div className="drawer-stat-label">Trend</div>
+                <div className="drawer-stat-value" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <TrendMini move={player.move} />
+                  <span>{moveInfo.label}</span>
+                </div>
+              </div>
+              <div className="drawer-stat">
+                <div className="drawer-stat-label">Active Challenges</div>
+                <div className="drawer-stat-value">{player.activeChallenges}</div>
+              </div>
+              <div className="drawer-stat">
+                <div className="drawer-stat-label">Tier</div>
+                <div className="drawer-stat-value">{player.rank <= 3 ? 'Podium' : player.rank <= 7 ? 'Chase Pack' : 'Field'}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div
+          style={{
+            borderRadius: 22,
+            padding: 16,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.60)',
+              marginBottom: 14,
+            }}
+          >
+            Ranking Snapshot
+          </div>
+          <div style={{ display: 'grid', gap: 12 }}>
+            <div className="drawer-note">
+              {player.rank === 1
+                ? `${player.player} currently holds the summit with the strongest champion treatment on the board.`
+                : `${player.player} is positioned at rank #${player.rank} and remains part of the live ladder race.`}
+            </div>
+            <div className="drawer-note">
+              {player.activeChallenges > 0
+                ? `${player.activeChallenges} active challenge${player.activeChallenges === 1 ? '' : 's'} could affect this position.`
+                : `No active challenge pressure is currently attached to this player.`}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function RankBadge({ rank }) {
   const n = Number(rank)
   const theme = getRankTheme(rank)
@@ -451,7 +726,7 @@ function PodiumCard({
   return (
     <div
       onMouseEnter={() => triggerHighlight(row.player || null)}
-      onClick={(e) => { e.preventDefault(); triggerHighlight(row.player || null) }}
+      onClick={(e) => { e.preventDefault(); triggerSelect(row.player || null) }}
       onTouchStart={(e) => { e.preventDefault(); triggerHighlight(row.player || null) }}
       className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} ${rank === 1 ? 'hover-rank-1' : rank === 2 ? 'hover-rank-2' : 'hover-rank-3'} podium-${place} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
@@ -601,6 +876,10 @@ function PodiumCard({
               />
             </div>
           ) : null}
+
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 4 }}>
+            <TrendMini move={row.move} />
+          </div>
         </div>
       </div>
 
@@ -677,7 +956,7 @@ function LadderRow({
   return (
     <div
       onMouseEnter={() => triggerHighlight(row.player || null)}
-      onClick={(e) => { e.preventDefault(); triggerHighlight(row.player || null) }}
+      onClick={(e) => { e.preventDefault(); triggerSelect(row.player || null) }}
       onTouchStart={(e) => { e.preventDefault(); triggerHighlight(row.player || null) }}
       className={`interactive-card fade-in ladder-row ${rank >= 4 && rank <= 7 ? 'hover-rank-bronze' : 'hover-rank-basic'} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
@@ -796,12 +1075,22 @@ function LadderRow({
 
         <div
           style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: 'rgba(220,232,255,0.62)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+            flexWrap: 'wrap',
           }}
         >
-          {row.status || 'Active'}
+          <div
+            style={{
+              fontSize: 13,
+              fontWeight: 700,
+              color: 'rgba(220,232,255,0.62)',
+            }}
+          >
+            {row.status || 'Active'}
+          </div>
+          <TrendMini move={row.move} />
         </div>
       </div>
 
@@ -829,6 +1118,7 @@ export default function LiveRankingPage() {
   const [challengeRows, setChallengeRows] = useState([])
   const [loading, setLoading] = useState(true)
   const [highlightedCard, setHighlightedCard] = useState(null)
+  const [selectedPlayerName, setSelectedPlayerName] = useState(null)
   const highlightTimerRef = useRef(null)
 
   useEffect(() => {
@@ -870,6 +1160,12 @@ export default function LiveRankingPage() {
     highlightTimerRef.current = setTimeout(() => {
       setHighlightedCard(null)
     }, 2000)
+  }
+
+  function triggerSelect(name) {
+    if (!name) return
+    triggerHighlight(name)
+    setSelectedPlayerName(name)
   }
 
   const topThree = useMemo(() => rows.slice(0, 3), [rows])
@@ -919,6 +1215,24 @@ export default function LiveRankingPage() {
 
     return map
   }, [challengeRows])
+
+
+  const activeChallengeCount = useMemo(
+    () => challengeRows.filter(isActiveChallenge).length,
+    [challengeRows]
+  )
+
+  const selectedPlayer = useMemo(() => {
+    if (!selectedPlayerName) return null
+    const base = rows.find((row) => normalizeUpper(row.player) === normalizeUpper(selectedPlayerName))
+    if (!base) return null
+    return {
+      ...base,
+      rank: toNumber(base.rank),
+      activeChallenges: activeChallengesByPlayer[normalizeUpper(base.player)] || 0,
+    }
+  }, [selectedPlayerName, rows, activeChallengesByPlayer])
+
 
   return (
     <>
@@ -1303,6 +1617,55 @@ export default function LiveRankingPage() {
             inset 0 1px 0 rgba(255,255,255,0.08) !important;
         }
 
+        
+        .story-chip {
+          min-height: 34px;
+          padding: 0 12px;
+          border-radius: 999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          background: rgba(255,255,255,0.05);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: #eef6ff;
+          font-size: 13px;
+          font-weight: 800;
+          white-space: nowrap;
+        }
+
+        .drawer-stat {
+          border-radius: 16px;
+          padding: 12px 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .drawer-stat-label {
+          font-size: 11px;
+          font-weight: 800;
+          letter-spacing: 0.14em;
+          text-transform: uppercase;
+          color: rgba(220,232,255,0.56);
+          margin-bottom: 8px;
+        }
+
+        .drawer-stat-value {
+          font-size: 15px;
+          font-weight: 800;
+          color: #eef6ff;
+        }
+
+        .drawer-note {
+          border-radius: 16px;
+          padding: 14px;
+          background: rgba(255,255,255,0.04);
+          border: 1px solid rgba(255,255,255,0.08);
+          color: rgba(220,232,255,0.82);
+          font-size: 14px;
+          line-height: 1.45;
+        }
+
+
         .skeleton-card {
           background: linear-gradient(
             90deg,
@@ -1613,12 +1976,18 @@ export default function LiveRankingPage() {
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 220px))',
               gap: 12,
-              marginBottom: 36,
+              marginBottom: 18,
             }}
           >
             <SmallStat label="Leader" value={leader} />
             <SmallStat label="Biggest Move" value={biggestMove} />
           </div>
+
+          <StoryStrip
+            leader={leader}
+            biggestMove={biggestMove}
+            activeCount={activeChallengeCount}
+          />
 
           <div style={{ display: 'grid', gap: 40 }}>
             <section>
@@ -1759,6 +2128,11 @@ export default function LiveRankingPage() {
             </section>
           </div>
         </div>
+
+        <PlayerDrawer
+          player={selectedPlayer}
+          onClose={() => setSelectedPlayerName(null)}
+        />
       </div>
     </>
   )
