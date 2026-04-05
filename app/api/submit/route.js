@@ -16,28 +16,30 @@ export async function POST(req) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(body),
+      cache: 'no-store',
     })
 
     const text = await res.text()
 
-    let data
     try {
-      data = JSON.parse(text)
+      const data = JSON.parse(text)
+      return Response.json(data, { status: res.status })
     } catch {
       return Response.json(
         {
           success: false,
-          error: 'Apps Script did not return JSON',
+          error: 'Apps Script returned non-JSON response',
           raw: text,
         },
         { status: 500 }
       )
     }
-
-    return Response.json(data, { status: data.success ? 200 : 500 })
   } catch (error) {
     return Response.json(
-      { success: false, error: error.message },
+      {
+        success: false,
+        error: error?.message || 'Unknown server error',
+      },
       { status: 500 }
     )
   }
