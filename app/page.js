@@ -427,8 +427,6 @@ function PodiumCard({
     highlightedTarget &&
     normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
 
-  const targetName = targetMap[normalizeUpper(row.player)] || ''
-
   const heightMap = {
     1: 500,
     2: 386,
@@ -437,13 +435,37 @@ function PodiumCard({
 
   return (
     <div
-      onMouseEnter={() => onHighlightTarget(targetName || null)}
-      onMouseLeave={() => onHighlightTarget(null)}
+      onMouseEnter={(e) => { onHighlightTarget(row.player || null); e.currentTarget.style.setProperty('--lift','-3px') }}
+      onMouseLeave={(e) => { onHighlightTarget(null); e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const px = (e.clientX - rect.left) / rect.width - 0.5
+        const py = (e.clientY - rect.top) / rect.height - 0.5
+        e.currentTarget.style.setProperty('--mx', `${px * 20}px`)
+        e.currentTarget.style.setProperty('--my', `${py * 20}px`)
+        e.currentTarget.style.setProperty('--rotY', `${px * 6}deg`)
+        e.currentTarget.style.setProperty('--rotX', `${py * -6}deg`)
+      }}
+      onTouchStart={(e) => { e.currentTarget.style.setProperty('--lift','-2px'); onHighlightTarget(row.player || null) }}
+      onTouchMove={(e) => {
+        const touch = e.touches[0]
+        if (!touch) return
+        const rect = e.currentTarget.getBoundingClientRect()
+        const px = (touch.clientX - rect.left) / rect.width - 0.5
+        const py = (touch.clientY - rect.top) / rect.height - 0.5
+        e.currentTarget.style.setProperty('--mx', `${px * 24}px`)
+        e.currentTarget.style.setProperty('--my', `${py * 24}px`)
+        e.currentTarget.style.setProperty('--rotY', `${px * 7}deg`)
+        e.currentTarget.style.setProperty('--rotX', `${py * -7}deg`)
+      }}
+      onTouchEnd={(e) => { e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
       className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} podium-${place} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
         animationDelay: `${place === 1 ? 0.10 : place === 2 ? 0.22 : 0.34}s`,
         position: 'relative',
         minHeight: heightMap[place],
+        transform: 'perspective(1400px) rotateX(var(--rotX, 0deg)) rotateY(var(--rotY, 0deg)) translateY(var(--lift, 0px))',
+        transformStyle: 'preserve-3d',
         borderRadius: 34,
         padding: place === 1 ? '34px 22px 22px' : '24px 18px 18px',
         background: theme.cardBg,
@@ -472,10 +494,10 @@ function PodiumCard({
         }}
       />
 
-      <div className="podium-frame-outer" />
-      <div className="podium-frame-inner" />
-      <div className="podium-bottom-lip" />
-      <div className="podium-top-highlight" />
+      <div className="podium-frame-outer parallax-frame" />
+      <div className="podium-frame-inner parallax-frame" />
+      <div className="podium-bottom-lip parallax-frame" />
+      <div className="podium-top-highlight parallax-frame" />
 
       {isLeader ? <div className="podium-hero-breath" /> : <div className="podium-soft-breath" />}
       {isLeader ? <div className="podium-hero-outline" /> : null}
@@ -502,7 +524,7 @@ function PodiumCard({
           zIndex: 3,
         }}
       >
-        <RankBadge rank={row.rank} />
+        <div className="parallax-badge"><div className="parallax-badge"><RankBadge rank={row.rank} /></div></div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
           {activeCount ? (
             <div
@@ -539,17 +561,17 @@ function PodiumCard({
             marginBottom: isLeader ? 34 : 22,
           }}
         >
-          <PlayerPhoto
+          <div className="parallax-photo"><PlayerPhoto
             name={row.player}
             url={row.photo_url}
             rank={row.rank}
             size={isLeader ? 206 : 116}
-          />
+          /></div>
         </div>
 
         <div style={{ textAlign: 'center' }}>
           <div
-            className={isLeader ? 'leader-name' : rank === 2 ? 'metal-name-gold' : rank === 3 ? 'metal-name-silver' : ''}
+            className={`parallax-name ${isLeader ? 'leader-name' : rank === 2 ? 'metal-name-gold' : rank === 3 ? 'metal-name-silver' : ''}`}
             style={{
               fontSize: isLeader ? 44 : 27,
               fontWeight: isLeader ? 950 : 900,
@@ -643,18 +665,41 @@ function LadderRow({
 }) {
   const theme = getRankTheme(row.rank)
   const activeCount = activeChallengesByPlayer[normalizeUpper(row.player)] || 0
-  const targetName = targetMap[normalizeUpper(row.player)] || ''
   const isHighlighted =
     highlightedTarget &&
     normalizeUpper(row.player) === normalizeUpper(highlightedTarget)
 
   return (
     <div
-      onMouseEnter={() => onHighlightTarget(targetName || null)}
-      onMouseLeave={() => onHighlightTarget(null)}
+      onMouseEnter={(e) => { onHighlightTarget(row.player || null); e.currentTarget.style.setProperty('--lift','-2px') }}
+      onMouseLeave={(e) => { onHighlightTarget(null); e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
+      onMouseMove={(e) => {
+        const rect = e.currentTarget.getBoundingClientRect()
+        const px = (e.clientX - rect.left) / rect.width - 0.5
+        const py = (e.clientY - rect.top) / rect.height - 0.5
+        e.currentTarget.style.setProperty('--mx', `${px * 12}px`)
+        e.currentTarget.style.setProperty('--my', `${py * 12}px`)
+        e.currentTarget.style.setProperty('--rotY', `${px * 3}deg`)
+        e.currentTarget.style.setProperty('--rotX', `${py * -3}deg`)
+      }}
+      onTouchStart={(e) => { onHighlightTarget(row.player || null); e.currentTarget.style.setProperty('--lift','-1px') }}
+      onTouchMove={(e) => {
+        const touch = e.touches[0]
+        if (!touch) return
+        const rect = e.currentTarget.getBoundingClientRect()
+        const px = (touch.clientX - rect.left) / rect.width - 0.5
+        const py = (touch.clientY - rect.top) / rect.height - 0.5
+        e.currentTarget.style.setProperty('--mx', `${px * 14}px`)
+        e.currentTarget.style.setProperty('--my', `${py * 14}px`)
+        e.currentTarget.style.setProperty('--rotY', `${px * 4}deg`)
+        e.currentTarget.style.setProperty('--rotX', `${py * -4}deg`)
+      }}
+      onTouchEnd={(e) => { e.currentTarget.style.setProperty('--mx','0px'); e.currentTarget.style.setProperty('--my','0px'); e.currentTarget.style.setProperty('--rotX','0deg'); e.currentTarget.style.setProperty('--rotY','0deg'); e.currentTarget.style.setProperty('--lift','0px') }}
       className={`interactive-card fade-in ladder-row ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
       style={{
         animationDelay: `${Math.min(Number(row.rank) * 0.05, 0.82)}s`,
+        transform: 'perspective(1200px) rotateX(var(--rotX, 0deg)) rotateY(var(--rotY, 0deg)) translateY(var(--lift, 0px))',
+        transformStyle: 'preserve-3d',
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto',
         gap: 16,
@@ -687,12 +732,12 @@ function LadderRow({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
-        <PlayerPhoto
+        <div className="parallax-photo"><PlayerPhoto
           name={row.player}
           url={row.photo_url}
           rank={row.rank}
           size={58}
-        />
+        /></div>
       </div>
 
       <div style={{ minWidth: 0 }}>
@@ -706,6 +751,7 @@ function LadderRow({
           }}
         >
           <div
+            className="parallax-name"
             style={{
               fontSize: 20,
               fontWeight: 850,
@@ -1238,6 +1284,30 @@ export default function LiveRankingPage() {
           animation: shimmer 1.3s linear infinite;
         }
 
+
+        .parallax-frame {
+          transform: translate3d(calc(var(--mx, 0px) * -0.18), calc(var(--my, 0px) * -0.18), 0);
+          transition: transform 0.18s ease;
+        }
+
+        .parallax-photo {
+          transform: translate3d(calc(var(--mx, 0px) * 0.52), calc(var(--my, 0px) * 0.52), 18px);
+          transition: transform 0.18s ease;
+          will-change: transform;
+        }
+
+        .parallax-badge {
+          transform: translate3d(calc(var(--mx, 0px) * 0.62), calc(var(--my, 0px) * 0.62), 22px);
+          transition: transform 0.18s ease;
+          will-change: transform;
+        }
+
+        .parallax-name {
+          transform: translate3d(calc(var(--mx, 0px) * 0.26), calc(var(--my, 0px) * 0.26), 10px);
+          transition: transform 0.18s ease;
+          will-change: transform;
+        }
+
         @media (max-width: 980px) {
           .podium-grid {
             grid-template-columns: 1fr !important;
@@ -1335,6 +1405,23 @@ export default function LiveRankingPage() {
 
           .rank-badge-1 {
             transform: scale(1.04);
+          }
+
+          .podium-card-1 {
+            --mx: 0px;
+            --my: 0px;
+          }
+
+          .podium-card-1 .parallax-photo {
+            transform: translate3d(calc(var(--mx, 0px) * 0.72), calc(var(--my, 0px) * 0.72), 24px) !important;
+          }
+
+          .podium-card-1 .parallax-badge {
+            transform: translate3d(calc(var(--mx, 0px) * 0.82), calc(var(--my, 0px) * 0.82), 30px) !important;
+          }
+
+          .podium-card-1 .parallax-name {
+            transform: translate3d(calc(var(--mx, 0px) * 0.34), calc(var(--my, 0px) * 0.34), 12px) !important;
           }
         }
       `}</style>
