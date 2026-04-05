@@ -209,15 +209,53 @@ function getTierLabel(rank) {
   return 'Field'
 }
 
-function SmallStat({ label, value }) {
+function SignatureChampionMark() {
+  return (
+    <div
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: 8,
+        padding: '8px 12px',
+        borderRadius: 999,
+        background:
+          'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.05) 100%)',
+        border: '1px solid rgba(174,242,255,0.22)',
+        boxShadow: '0 10px 24px rgba(0,0,0,0.18), 0 0 20px rgba(174,242,255,0.16)',
+      }}
+    >
+      <span
+        style={{
+          fontSize: 13,
+          lineHeight: 1,
+          filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.28))',
+        }}
+      >
+        👑
+      </span>
+      <span
+        style={{
+          fontSize: 11,
+          fontWeight: 900,
+          letterSpacing: '0.18em',
+          textTransform: 'uppercase',
+          color: '#dffcff',
+        }}
+      >
+        Champion Crest
+      </span>
+    </div>
+  )
+}
+
+function ChallengeMapCard({ title, players, emptyText }) {
   return (
     <div
       style={{
         borderRadius: 18,
-        padding: '12px 14px',
+        padding: 14,
         background: 'rgba(255,255,255,0.04)',
         border: '1px solid rgba(255,255,255,0.08)',
-        minWidth: 150,
       }}
     >
       <div
@@ -226,60 +264,60 @@ function SmallStat({ label, value }) {
           fontWeight: 800,
           letterSpacing: '0.14em',
           textTransform: 'uppercase',
-          color: 'rgba(220,232,255,0.56)',
-          marginBottom: 8,
+          color: 'rgba(220,232,255,0.58)',
+          marginBottom: 12,
         }}
       >
-        {label}
+        {title}
       </div>
-      <div
-        style={{
-          fontSize: 16,
-          fontWeight: 800,
-          color: '#eef6ff',
-          lineHeight: 1.2,
-        }}
-      >
-        {value}
-      </div>
-    </div>
-  )
-}
 
-function HeroStoryStrip({ leader, biggestMove }) {
-  return (
-    <div
-      className="fade-in"
-      style={{
-        animationDelay: '0.12s',
-        borderRadius: 24,
-        padding: '16px 18px',
-        background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.03) 100%)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        boxShadow: '0 16px 36px rgba(0,0,0,0.18)',
-        marginBottom: 28,
-      }}
-    >
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          gap: 12,
-        }}
-      >
-        <div style={{ color: '#eef6ff', fontSize: 15, fontWeight: 800 }}>
-          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Story: </span>
-          {leader} holds the summit
+      {players.length === 0 ? (
+        <div
+          style={{
+            fontSize: 14,
+            color: 'rgba(220,232,255,0.68)',
+          }}
+        >
+          {emptyText}
         </div>
-        <div style={{ color: '#eef6ff', fontSize: 15, fontWeight: 800 }}>
-          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Biggest Move: </span>
-          {biggestMove}
+      ) : (
+        <div style={{ display: 'grid', gap: 10 }}>
+          {players.map((item) => (
+            <div
+              key={`${title}-${item.rank}-${item.player}`}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 12,
+                borderRadius: 14,
+                padding: '10px 12px',
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px solid rgba(255,255,255,0.06)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 15,
+                  fontWeight: 800,
+                  color: '#eef6ff',
+                }}
+              >
+                {item.player}
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  fontWeight: 900,
+                  color: 'rgba(220,232,255,0.70)',
+                }}
+              >
+                #{item.rank}
+              </div>
+            </div>
+          ))}
         </div>
-        <div style={{ color: '#eef6ff', fontSize: 15, fontWeight: 800 }}>
-          <span style={{ color: 'rgba(220,232,255,0.64)', fontWeight: 700 }}>Podium: </span>
-          Top three hold the headline positions
-        </div>
-      </div>
+      )}
     </div>
   )
 }
@@ -341,10 +379,9 @@ function RankBadge({ rank }) {
           fontSize: isLeader ? 16 : 13,
           fontWeight: 950,
           letterSpacing: '-0.02em',
-          textShadow:
-            isLeader
-              ? '0 1px 0 rgba(255,255,255,0.50), 0 -1px 0 rgba(0,0,0,0.08)'
-              : '0 1px 0 rgba(255,255,255,0.24)',
+          textShadow: isLeader
+            ? '0 1px 0 rgba(255,255,255,0.50), 0 -1px 0 rgba(0,0,0,0.08)'
+            : '0 1px 0 rgba(255,255,255,0.24)',
         }}
       >
         #{rank}
@@ -473,123 +510,7 @@ function PlayerPhoto({ name, url, rank, size = 100 }) {
   )
 }
 
-function SignatureChampionMark() {
-  return (
-    <div
-      style={{
-        display: 'inline-flex',
-        alignItems: 'center',
-        gap: 8,
-        padding: '8px 12px',
-        borderRadius: 999,
-        background: 'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.05) 100%)',
-        border: '1px solid rgba(174,242,255,0.22)',
-        boxShadow: '0 10px 24px rgba(0,0,0,0.18), 0 0 20px rgba(174,242,255,0.16)',
-      }}
-    >
-      <span
-        style={{
-          fontSize: 13,
-          lineHeight: 1,
-          filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.28))',
-        }}
-      >
-        👑
-      </span>
-      <span
-        style={{
-          fontSize: 11,
-          fontWeight: 900,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: '#dffcff',
-        }}
-      >
-        Champion Crest
-      </span>
-    </div>
-  )
-}
-
-function ChallengeMapCard({ title, players, emptyText }) {
-  return (
-    <div
-      style={{
-        borderRadius: 18,
-        padding: 14,
-        background: 'rgba(255,255,255,0.04)',
-        border: '1px solid rgba(255,255,255,0.08)',
-      }}
-    >
-      <div
-        style={{
-          fontSize: 11,
-          fontWeight: 800,
-          letterSpacing: '0.14em',
-          textTransform: 'uppercase',
-          color: 'rgba(220,232,255,0.58)',
-          marginBottom: 12,
-        }}
-      >
-        {title}
-      </div>
-
-      {players.length === 0 ? (
-        <div
-          style={{
-            fontSize: 14,
-            color: 'rgba(220,232,255,0.68)',
-          }}
-        >
-          {emptyText}
-        </div>
-      ) : (
-        <div style={{ display: 'grid', gap: 10 }}>
-          {players.map((item) => (
-            <div
-              key={`${title}-${item.rank}-${item.player}`}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                gap: 12,
-                borderRadius: 14,
-                padding: '10px 12px',
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.06)',
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: '#eef6ff',
-                }}
-              >
-                {item.player}
-              </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  fontWeight: 900,
-                  color: 'rgba(220,232,255,0.70)',
-                }}
-              >
-                #{item.rank}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function PlayerDetailDrawer({
-  player,
-  rows,
-  onClose,
-}) {
+function PlayerDetailDrawer({ player, rows, onClose }) {
   if (!player) return null
 
   const sorted = [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
@@ -719,15 +640,14 @@ function PlayerDetailDrawer({
 
           <div
             style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-              gap: 10,
-              marginBottom: 14,
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.62)',
             }}
           >
-            <SmallStat label="Tier" value={getTierLabel(rank)} />
-            <SmallStat label="Can Challenge" value={String(canChallenge.length)} />
-            <SmallStat label="Can Be Challenged By" value={String(canBeChallengedBy.length)} />
+            Rank #{row.rank} · {getTierLabel(rank)}
           </div>
         </div>
 
@@ -750,7 +670,6 @@ function PlayerDetailDrawer({
 
 function PodiumCard({
   row,
-  place,
   activeChallengesByPlayer,
   highlightedCard,
   triggerHighlight,
@@ -782,13 +701,16 @@ function PodiumCard({
         e.preventDefault()
         triggerHighlight(row.player || null)
       }}
-      className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} ${rank === 1 ? 'hover-rank-1' : rank === 2 ? 'hover-rank-2' : 'hover-rank-3'} podium-${place} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
+      className={`interactive-card fade-in podium-card ${isLeader ? 'podium-card-1' : ''} ${
+        rank === 1 ? 'hover-rank-1' : rank === 2 ? 'hover-rank-2' : 'hover-rank-3'
+      } ${activeCount ? 'active-outline-card' : ''} ${
+        isHighlighted ? 'target-card-highlighted' : ''
+      }`}
       style={{
-        animationDelay: `${place === 1 ? 0.10 : place === 2 ? 0.22 : 0.34}s`,
         position: 'relative',
-        minHeight: heightMap[place],
+        minHeight: heightMap[rank] || 368,
         borderRadius: 34,
-        padding: place === 1 ? '42px 22px 24px' : '24px 18px 18px',
+        padding: rank === 1 ? '42px 22px 24px' : '24px 18px 18px',
         background: theme.cardBg,
         border: `1px solid ${activeCount ? 'rgba(255,132,132,0.34)' : theme.border}`,
         overflow: 'hidden',
@@ -912,19 +834,6 @@ function PodiumCard({
             {row.player || '—'}
           </div>
 
-          <div
-            style={{
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.72)',
-              marginBottom: 12,
-            }}
-          >
-            {getTierLabel(rank)}
-          </div>
-
           {row.flag_url ? (
             <div
               style={{
@@ -1036,9 +945,12 @@ function LadderRow({
         e.preventDefault()
         triggerHighlight(row.player || null)
       }}
-      className={`interactive-card fade-in ladder-row ${rank >= 4 && rank <= 7 ? 'hover-rank-bronze' : 'hover-rank-basic'} ${activeCount ? 'active-outline-card' : ''} ${isHighlighted ? 'target-card-highlighted' : ''}`}
+      className={`interactive-card fade-in ladder-row ${
+        rank >= 4 && rank <= 7 ? 'hover-rank-bronze' : 'hover-rank-basic'
+      } ${activeCount ? 'active-outline-card' : ''} ${
+        isHighlighted ? 'target-card-highlighted' : ''
+      }`}
       style={{
-        animationDelay: `${Math.min(Number(row.rank) * 0.05, 0.82)}s`,
         display: 'grid',
         gridTemplateColumns: 'auto 1fr auto',
         gap: 16,
@@ -1046,7 +958,13 @@ function LadderRow({
         padding: '14px 16px',
         borderRadius: 22,
         background: rank >= 4 && rank <= 7 ? 'rgba(210,150,103,0.06)' : 'rgba(255,255,255,0.04)',
-        border: `1px solid ${activeCount ? 'rgba(255,132,132,0.26)' : rank >= 4 && rank <= 7 ? 'rgba(210,150,103,0.12)' : 'rgba(255,255,255,0.08)'}`,
+        border: `1px solid ${
+          activeCount
+            ? 'rgba(255,132,132,0.26)'
+            : rank >= 4 && rank <= 7
+              ? 'rgba(210,150,103,0.12)'
+              : 'rgba(255,255,255,0.08)'
+        }`,
         boxShadow: activeCount
           ? '0 0 0 1px rgba(255,132,132,0.04), 0 12px 24px rgba(255,132,132,0.06)'
           : rank >= 4 && rank <= 7
@@ -1074,12 +992,7 @@ function LadderRow({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
-        <PlayerPhoto
-          name={row.player}
-          url={row.photo_url}
-          rank={row.rank}
-          size={58}
-        />
+        <PlayerPhoto name={row.player} url={row.photo_url} rank={row.rank} size={58} />
       </div>
 
       <div style={{ minWidth: 0 }}>
@@ -1152,16 +1065,6 @@ function LadderRow({
               live
             </div>
           ) : null}
-        </div>
-
-        <div
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: 'rgba(220,232,255,0.62)',
-          }}
-        >
-          {getTierLabel(rank)}
         </div>
       </div>
 
@@ -1684,10 +1587,6 @@ export default function LiveRankingPage() {
             grid-template-columns: 1fr !important;
           }
 
-          .podium-1 { order: 1 !important; }
-          .podium-2 { order: 2 !important; }
-          .podium-3 { order: 3 !important; }
-
           .hero-spotlight-behind-photo {
             width: 360px;
             height: 300px;
@@ -1971,11 +1870,6 @@ export default function LiveRankingPage() {
             }}
           />
 
-          <HeroStoryStrip
-            leader={leader}
-            biggestMove={biggestMove}
-          />
-
           <div
             className="stats-row fade-in"
             style={{
@@ -1986,8 +1880,71 @@ export default function LiveRankingPage() {
               marginBottom: 36,
             }}
           >
-            <SmallStat label="Leader" value={leader} />
-            <SmallStat label="Biggest Move" value={biggestMove} />
+            <div
+              style={{
+                borderRadius: 18,
+                padding: '12px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                minWidth: 150,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(220,232,255,0.56)',
+                  marginBottom: 8,
+                }}
+              >
+                Leader
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: '#eef6ff',
+                  lineHeight: 1.2,
+                }}
+              >
+                {leader}
+              </div>
+            </div>
+
+            <div
+              style={{
+                borderRadius: 18,
+                padding: '12px 14px',
+                background: 'rgba(255,255,255,0.04)',
+                border: '1px solid rgba(255,255,255,0.08)',
+                minWidth: 150,
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.14em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(220,232,255,0.56)',
+                  marginBottom: 8,
+                }}
+              >
+                Biggest Move
+              </div>
+              <div
+                style={{
+                  fontSize: 16,
+                  fontWeight: 800,
+                  color: '#eef6ff',
+                  lineHeight: 1.2,
+                }}
+              >
+                {biggestMove}
+              </div>
+            </div>
           </div>
 
           <div style={{ display: 'grid', gap: 40 }}>
@@ -2018,7 +1975,6 @@ export default function LiveRankingPage() {
                   {topThree[1] ? (
                     <PodiumCard
                       row={topThree[1]}
-                      place={2}
                       activeChallengesByPlayer={activeChallengesByPlayer}
                       highlightedCard={highlightedCard}
                       triggerHighlight={triggerHighlight}
@@ -2031,7 +1987,6 @@ export default function LiveRankingPage() {
                   {topThree[0] ? (
                     <PodiumCard
                       row={topThree[0]}
-                      place={1}
                       activeChallengesByPlayer={activeChallengesByPlayer}
                       highlightedCard={highlightedCard}
                       triggerHighlight={triggerHighlight}
@@ -2044,7 +1999,6 @@ export default function LiveRankingPage() {
                   {topThree[2] ? (
                     <PodiumCard
                       row={topThree[2]}
-                      place={3}
                       activeChallengesByPlayer={activeChallengesByPlayer}
                       highlightedCard={highlightedCard}
                       triggerHighlight={triggerHighlight}
@@ -2070,19 +2024,6 @@ export default function LiveRankingPage() {
                 boxShadow: '0 18px 34px rgba(210,150,103,0.05)',
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(210,150,103,0.82)',
-                  marginBottom: 14,
-                }}
-              >
-                Chase Pack
-              </div>
-
               {loading ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2, 3, 4].map((i) => (
@@ -2117,19 +2058,6 @@ export default function LiveRankingPage() {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              <div
-                style={{
-                  fontSize: 11,
-                  fontWeight: 800,
-                  letterSpacing: '0.16em',
-                  textTransform: 'uppercase',
-                  color: 'rgba(220,232,255,0.62)',
-                  marginBottom: 14,
-                }}
-              >
-                Field
-              </div>
-
               {loading ? (
                 <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2, 3, 4].map((i) => (
