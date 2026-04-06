@@ -8,6 +8,7 @@ const sheetId =
 
 const rankingUrl = `https://opensheet.elk.sh/${sheetId}/LiveRankingFeed`
 const challengeFeedUrl = `https://opensheet.elk.sh/${sheetId}/ChallengeFeed`
+const externalMatchLogUrl = `https://opensheet.elk.sh/${sheetId}/ExternalMatchLog`
 
 function normalizeText(value) {
   return String(value || '').trim()
@@ -20,6 +21,17 @@ function normalizeUpper(value) {
 function toNumber(value, fallback = 999) {
   const n = Number(String(value || '').replace(/[^\d.-]/g, ''))
   return Number.isFinite(n) ? n : fallback
+}
+
+function formatDate(value) {
+  if (!value) return '—'
+  const d = new Date(value)
+  if (Number.isNaN(d.getTime())) return value
+  return d.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  })
 }
 
 function isCompleted(row) {
@@ -322,6 +334,112 @@ function ChallengeMapCard({ title, players, emptyText }) {
   )
 }
 
+function ExternalMatchCard({ item }) {
+  return (
+    <div
+      style={{
+        borderRadius: 16,
+        padding: 14,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.06)',
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          gap: 10,
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          marginBottom: 10,
+        }}
+      >
+        <div
+          style={{
+            fontSize: 14,
+            fontWeight: 800,
+            color: '#eef6ff',
+          }}
+        >
+          {formatDate(item.match_date)}
+        </div>
+
+        <div
+          style={{
+            fontSize: 12,
+            fontWeight: 900,
+            color: '#dffcff',
+            padding: '6px 10px',
+            borderRadius: 999,
+            background: 'rgba(174,242,255,0.08)',
+            border: '1px solid rgba(174,242,255,0.16)',
+          }}
+        >
+          {item.set_score || '—'}
+        </div>
+      </div>
+
+      <div
+        style={{
+          fontSize: 14,
+          color: 'rgba(220,232,255,0.76)',
+          marginBottom: 6,
+        }}
+      >
+        <strong style={{ color: '#eef6ff' }}>Team:</strong> {item.team_name || '—'}
+      </div>
+
+      <div
+        style={{
+          fontSize: 14,
+          color: 'rgba(220,232,255,0.76)',
+        }}
+      >
+        <strong style={{ color: '#eef6ff' }}>Opponent:</strong> {item.opponent_name || '—'}
+      </div>
+    </div>
+  )
+}
+
+function DrawerInput({ label, value, onChange, type = 'text', placeholder = '' }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: 'block',
+          marginBottom: 8,
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.72)',
+        }}
+      >
+        {label}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        style={{
+          width: '100%',
+          height: 50,
+          borderRadius: 14,
+          border: '1px solid rgba(255,255,255,0.12)',
+          outline: 'none',
+          padding: '0 14px',
+          fontSize: 15,
+          background: 'rgba(243,244,246,0.96)',
+          color: '#111827',
+          boxSizing: 'border-box',
+        }}
+      />
+    </div>
+  )
+}
+
 function RankBadge({ rank }) {
   const n = Number(rank)
   const theme = getRankTheme(rank)
@@ -510,7 +628,30 @@ function PlayerPhoto({ name, url, rank, size = 100 }) {
   )
 }
 
-function PlayerDetailDrawer({ player, rows, onClose }) {
+function PlayerDetailDrawer({
+  player,
+  rows,
+  externalMatches,
+  onClose,
+  onExternalMatchSaved,
+}) {
+  const [form, setForm] = useState({
+    match_date: '',
+    team_name: '',
+    opponent_name: '',
+    set_score: '',
+  })
+  const [saving, setSaving] = useState(false)
+
+  useEffect(() => {
+    setForm({
+      match_date: '',
+      team_name: '',
+      opponent_name: '',
+      set_score: '',
+    })
+  }, [player])
+
   if (!player) return null
 
   const sorted = [...rows].sort((a, b) => toNumber(a.rank) - toNumber(b.rank))
@@ -524,6 +665,58 @@ function PlayerDetailDrawer({ player, rows, onClose }) {
 
   const canChallenge = [sorted[index - 1], sorted[index - 2]].filter(Boolean)
   const canBeChallengedBy = [sorted[index + 1], sorted[index + 2]].filter(Boolean)
+
+  const playerExternalMatches = [...(externalMatches || [])]
+    .filter((entry) => normalizeUpper(entry.player) === normalizeUpper(player))
+    .sort((a, b) => {
+      const da = new Date(a.match_date)
+      const db = new Date(b.match_date)
+      return db - da
+    })
+
+  async function handleSaveExternalMatch(e) {
+    e.preventDefault()
+
+    try {
+      if (!form.match_date || !form.team_name || !form.opponent_name || !form.set_score) {
+        throw new Error('Please complete all fields')
+      }
+
+      setSaving(true)
+
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'external_match_log',
+          player: row.player,
+          match_date: form.match_date,
+          team_name: form.team_name,
+          opponent_name: form.opponent_name,
+          set_score: form.set_score,
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.raw || 'Failed to save outside match')
+      }
+
+      setForm({
+        match_date: '',
+        team_name: '',
+        opponent_name: '',
+        set_score: '',
+      })
+
+      if (onExternalMatchSaved) await onExternalMatchSaved()
+    } catch (err) {
+      alert(err.message || 'Failed to save outside match')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   return (
     <div
@@ -544,7 +737,7 @@ function PlayerDetailDrawer({ player, rows, onClose }) {
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          maxWidth: 450,
+          maxWidth: 470,
           height: '100%',
           overflowY: 'auto',
           background:
@@ -651,7 +844,7 @@ function PlayerDetailDrawer({ player, rows, onClose }) {
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 14 }}>
+        <div style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
           <ChallengeMapCard
             title="Players This Rank Can Challenge"
             players={canChallenge}
@@ -662,6 +855,131 @@ function PlayerDetailDrawer({ player, rows, onClose }) {
             players={canBeChallengedBy}
             emptyText="No lower ranks in range."
           />
+        </div>
+
+        <div
+          style={{
+            borderRadius: 20,
+            padding: 16,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+            marginBottom: 16,
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.62)',
+              marginBottom: 14,
+            }}
+          >
+            Log Outside Match
+          </div>
+
+          <form onSubmit={handleSaveExternalMatch}>
+            <div style={{ display: 'grid', gap: 12 }}>
+              <DrawerInput
+                label="Date"
+                type="date"
+                value={form.match_date}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, match_date: e.target.value }))
+                }
+              />
+
+              <DrawerInput
+                label="Team Name"
+                value={form.team_name}
+                placeholder="Enter team name"
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, team_name: e.target.value }))
+                }
+              />
+
+              <DrawerInput
+                label="Opponent Name"
+                value={form.opponent_name}
+                placeholder="Enter opponent name"
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, opponent_name: e.target.value }))
+                }
+              />
+
+              <DrawerInput
+                label="Set Score"
+                value={form.set_score}
+                placeholder="Example: 6-3, 6-4"
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, set_score: e.target.value }))
+                }
+              />
+
+              <button
+                type="submit"
+                disabled={saving}
+                style={{
+                  width: '100%',
+                  height: 50,
+                  borderRadius: 14,
+                  border: '1px solid rgba(174,242,255,0.16)',
+                  background:
+                    'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(174,242,255,0.06) 100%)',
+                  color: '#dffcff',
+                  fontSize: 15,
+                  fontWeight: 900,
+                  cursor: saving ? 'not-allowed' : 'pointer',
+                  opacity: saving ? 0.7 : 1,
+                }}
+              >
+                {saving ? 'Saving...' : 'Save Outside Match'}
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <div
+          style={{
+            borderRadius: 20,
+            padding: 16,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.08)',
+          }}
+        >
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 800,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              color: 'rgba(220,232,255,0.62)',
+              marginBottom: 14,
+            }}
+          >
+            Outside Match History
+          </div>
+
+          {playerExternalMatches.length === 0 ? (
+            <div
+              style={{
+                fontSize: 14,
+                color: 'rgba(220,232,255,0.68)',
+              }}
+            >
+              No outside matches logged yet.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 12 }}>
+              {playerExternalMatches.map((item, index) => (
+                <ExternalMatchCard
+                  key={`${item.player}-${item.match_date}-${item.opponent_name}-${index}`}
+                  item={item}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -992,7 +1310,12 @@ function LadderRow({
 
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
         <RankBadge rank={row.rank} />
-        <PlayerPhoto name={row.player} url={row.photo_url} rank={row.rank} size={58} />
+        <PlayerPhoto
+          name={row.player}
+          url={row.photo_url}
+          rank={row.rank}
+          size={58}
+        />
       </div>
 
       <div style={{ minWidth: 0 }}>
@@ -1090,34 +1413,40 @@ function LoadingCard() {
 export default function LiveRankingPage() {
   const [rows, setRows] = useState([])
   const [challengeRows, setChallengeRows] = useState([])
+  const [externalMatches, setExternalMatches] = useState([])
   const [loading, setLoading] = useState(true)
   const [highlightedCard, setHighlightedCard] = useState(null)
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const highlightTimerRef = useRef(null)
 
-  useEffect(() => {
-    async function loadData() {
-      try {
-        setLoading(true)
-        const [rankingRes, challengeRes] = await Promise.all([
-          fetch(rankingUrl, { cache: 'no-store' }),
-          fetch(challengeFeedUrl, { cache: 'no-store' }),
-        ])
+  async function loadData() {
+    try {
+      setLoading(true)
 
-        const rankingData = await rankingRes.json()
-        const challengeData = await challengeRes.json()
+      const [rankingRes, challengeRes, externalRes] = await Promise.all([
+        fetch(rankingUrl, { cache: 'no-store' }),
+        fetch(challengeFeedUrl, { cache: 'no-store' }),
+        fetch(externalMatchLogUrl, { cache: 'no-store' }),
+      ])
 
-        setRows(Array.isArray(rankingData) ? sortRankings(rankingData) : [])
-        setChallengeRows(Array.isArray(challengeData) ? challengeData : [])
-      } catch (err) {
-        console.error('Failed to load rankings:', err)
-        setRows([])
-        setChallengeRows([])
-      } finally {
-        setLoading(false)
-      }
+      const rankingData = await rankingRes.json()
+      const challengeData = await challengeRes.json()
+      const externalData = await externalRes.json()
+
+      setRows(Array.isArray(rankingData) ? sortRankings(rankingData) : [])
+      setChallengeRows(Array.isArray(challengeData) ? challengeData : [])
+      setExternalMatches(Array.isArray(externalData) ? externalData : [])
+    } catch (err) {
+      console.error('Failed to load rankings:', err)
+      setRows([])
+      setChallengeRows([])
+      setExternalMatches([])
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     loadData()
   }, [])
 
@@ -2085,9 +2414,11 @@ export default function LiveRankingPage() {
         <PlayerDetailDrawer
           player={selectedPlayer}
           rows={rows}
+          externalMatches={externalMatches}
+          onExternalMatchSaved={loadData}
           onClose={() => setSelectedPlayer(null)}
         />
       </div>
     </>
   )
-          }
+}
