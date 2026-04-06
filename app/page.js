@@ -257,6 +257,94 @@ function SignatureChampionMark() {
   )
 }
 
+function PlayerPhoto({ name, url, rank, size = 100 }) {
+  const theme = getRankTheme(rank)
+  const isLeader = Number(rank) === 1
+
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        borderRadius: Math.round(size * 0.28),
+        display: 'grid',
+        placeItems: 'center',
+        flexShrink: 0,
+      }}
+    >
+      {isLeader ? <div className="leader-photo-bloom" /> : null}
+
+      <div
+        style={{
+          position: 'relative',
+          width: size,
+          height: size,
+          borderRadius: Math.round(size * 0.28),
+          padding: isLeader ? 8 : 0,
+          background: isLeader
+            ? `linear-gradient(145deg, ${theme.accentStrong} 0%, ${theme.border} 42%, rgba(255,255,255,0.08) 100%)`
+            : 'transparent',
+          boxShadow: isLeader
+            ? `0 30px 58px rgba(0,0,0,0.36), 0 0 46px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.40)`
+            : 'none',
+        }}
+      >
+        {isLeader ? <div className="leader-photo-outer-ring" /> : null}
+        {isLeader ? <div className="leader-photo-inner-bevel" /> : null}
+        {isLeader ? <div className="leader-photo-halo" /> : null}
+        {isLeader ? <div className="leader-photo-sheen" /> : null}
+
+        <div
+          style={{
+            width: isLeader ? size - 16 : size,
+            height: isLeader ? size - 16 : size,
+            borderRadius: Math.round(size * 0.22),
+            overflow: 'hidden',
+            border: `2px solid ${theme.border}`,
+            background:
+              'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
+            boxShadow: isLeader
+              ? `0 18px 40px rgba(0,0,0,0.30), 0 0 30px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.24)`
+              : `0 14px 30px rgba(0,0,0,0.22), 0 0 18px ${theme.glow}`,
+            position: 'relative',
+            zIndex: 2,
+          }}
+        >
+          {url ? (
+            <img
+              draggable={false}
+              src={url}
+              alt={name || 'Player'}
+              style={{
+                width: '100%',
+                height: '100%',
+                objectFit: 'cover',
+                display: 'block',
+              }}
+            />
+          ) : (
+            <div
+              style={{
+                width: '100%',
+                height: '100%',
+                display: 'grid',
+                placeItems: 'center',
+                color: 'rgba(255,255,255,0.78)',
+                fontWeight: 900,
+                fontSize: Math.max(18, size * 0.22),
+                letterSpacing: '-0.03em',
+              }}
+            >
+              {(name || '?').slice(0, 1).toUpperCase()}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function ChallengeMapCard({ title, players, emptyText }) {
   return (
     <div
@@ -310,27 +398,42 @@ function ChallengeMapCard({ title, players, emptyText }) {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <RankBadge rank={item.rank} />
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  minWidth: 0,
+                }}
+              >
+                <PlayerPhoto
+                  name={item.player}
+                  url={item.photo_url}
+                  rank={item.rank}
+                  size={42}
+                />
+
                 <div
                   style={{
                     fontSize: 15,
                     fontWeight: 800,
                     color: '#eef6ff',
                     minWidth: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {item.player}
                 </div>
               </div>
+
               <div
                 style={{
-                  fontSize: 11,
+                  fontSize: 12,
                   fontWeight: 900,
-                  color: 'rgba(220,232,255,0.56)',
-                  letterSpacing: '0.06em',
-                  textTransform: 'uppercase',
-                  whiteSpace: 'nowrap',
+                  color: 'rgba(220,232,255,0.70)',
+                  flexShrink: 0,
                 }}
               >
                 #{item.rank}
@@ -636,93 +739,6 @@ function MoveChip({ move }) {
     >
       {info.icon ? <span style={{ fontSize: 12 }}>{info.icon}</span> : null}
       <span>{info.label}</span>
-    </div>
-  )
-}
-
-function PlayerPhoto({ name, url, rank, size = 100 }) {
-  const theme = getRankTheme(rank)
-  const isLeader = Number(rank) === 1
-
-  return (
-    <div
-      style={{
-        width: size,
-        height: size,
-        position: 'relative',
-        borderRadius: Math.round(size * 0.28),
-        display: 'grid',
-        placeItems: 'center',
-      }}
-    >
-      {isLeader ? <div className="leader-photo-bloom" /> : null}
-
-      <div
-        style={{
-          position: 'relative',
-          width: size,
-          height: size,
-          borderRadius: Math.round(size * 0.28),
-          padding: isLeader ? 8 : 0,
-          background: isLeader
-            ? `linear-gradient(145deg, ${theme.accentStrong} 0%, ${theme.border} 42%, rgba(255,255,255,0.08) 100%)`
-            : 'transparent',
-          boxShadow: isLeader
-            ? `0 30px 58px rgba(0,0,0,0.36), 0 0 46px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.40)`
-            : 'none',
-        }}
-      >
-        {isLeader ? <div className="leader-photo-outer-ring" /> : null}
-        {isLeader ? <div className="leader-photo-inner-bevel" /> : null}
-        {isLeader ? <div className="leader-photo-halo" /> : null}
-        {isLeader ? <div className="leader-photo-sheen" /> : null}
-
-        <div
-          style={{
-            width: isLeader ? size - 16 : size,
-            height: isLeader ? size - 16 : size,
-            borderRadius: Math.round(size * 0.22),
-            overflow: 'hidden',
-            border: `2px solid ${theme.border}`,
-            background:
-              'linear-gradient(180deg, rgba(255,255,255,0.10) 0%, rgba(255,255,255,0.04) 100%)',
-            boxShadow: isLeader
-              ? `0 18px 40px rgba(0,0,0,0.30), 0 0 30px ${theme.glow}, inset 0 1px 0 rgba(255,255,255,0.24)`
-              : `0 14px 30px rgba(0,0,0,0.22), 0 0 18px ${theme.glow}`,
-            position: 'relative',
-            zIndex: 2,
-          }}
-        >
-          {url ? (
-            <img
-              draggable={false}
-              src={url}
-              alt={name || 'Player'}
-              style={{
-                width: '100%',
-                height: '100%',
-                objectFit: 'cover',
-                display: 'block',
-              }}
-            />
-          ) : (
-            <div
-              style={{
-                width: '100%',
-                height: '100%',
-                display: 'grid',
-                placeItems: 'center',
-                color: 'rgba(255,255,255,0.78)',
-                fontWeight: 900,
-                fontSize: Math.max(18, size * 0.22),
-                letterSpacing: '-0.03em',
-              }}
-            >
-              {(name || '?').slice(0, 1).toUpperCase()}
-            </div>
-          )}
-        </div>
-      </div>
     </div>
   )
 }
