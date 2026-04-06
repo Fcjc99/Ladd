@@ -2550,7 +2550,7 @@ export default function MatchCenterPage() {
                   color: 'rgba(220,232,255,0.72)',
                 }}
               >
-                Submit challenges, enter results, and cancel active matchups if someone accidentally entered the wrong players.
+                Submit challenges, enter results, and cancel active matchups
               </div>
             </div>
 
