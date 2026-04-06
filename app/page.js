@@ -221,6 +221,14 @@ function getTierLabel(rank) {
   return 'Field'
 }
 
+function getExternalRecord(matches) {
+  const wins = matches.filter((m) => normalizeUpper(m.result) === 'WIN').length
+  const losses = matches.filter((m) => normalizeUpper(m.result) === 'LOSS').length
+  const total = wins + losses
+  const pct = total ? Math.round((wins / total) * 100) : 0
+  return { wins, losses, pct }
+}
+
 function SignatureChampionMark() {
   return (
     <div
@@ -381,6 +389,19 @@ function ExternalMatchCard({ item }) {
 
       <div
         style={{
+          fontSize: 12,
+          fontWeight: 900,
+          color: normalizeUpper(item.result) === 'WIN' ? '#c7ffd7' : '#ffd7d7',
+          marginBottom: 10,
+          letterSpacing: '0.04em',
+          textTransform: 'uppercase',
+        }}
+      >
+        {item.result || '—'}
+      </div>
+
+      <div
+        style={{
           fontSize: 14,
           color: 'rgba(220,232,255,0.76)',
           marginBottom: 6,
@@ -436,6 +457,74 @@ function DrawerInput({ label, value, onChange, type = 'text', placeholder = '' }
           boxSizing: 'border-box',
         }}
       />
+    </div>
+  )
+}
+
+function DrawerSelect({ label, value, onChange, options }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: 'block',
+          marginBottom: 8,
+          fontSize: 12,
+          fontWeight: 800,
+          letterSpacing: '0.14em',
+          textTransform: 'uppercase',
+          color: 'rgba(220,232,255,0.72)',
+        }}
+      >
+        {label}
+      </label>
+
+      <select
+        value={value}
+        onChange={onChange}
+        style={{
+          width: '100%',
+          height: 50,
+          borderRadius: 14,
+          border: '1px solid rgba(255,255,255,0.12)',
+          outline: 'none',
+          padding: '0 14px',
+          fontSize: 15,
+          background: 'rgba(243,244,246,0.96)',
+          color: '#111827',
+          boxSizing: 'border-box',
+        }}
+      >
+        {options.map((option) => (
+          <option key={option.value} value={option.value}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  )
+}
+
+function RecordPill({ label, value }) {
+  return (
+    <div
+      style={{
+        minHeight: 36,
+        padding: '0 12px',
+        borderRadius: 999,
+        display: 'inline-flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'rgba(255,255,255,0.05)',
+        border: '1px solid rgba(255,255,255,0.10)',
+        color: '#eef6ff',
+        fontSize: 12,
+        fontWeight: 900,
+        letterSpacing: '0.04em',
+        gap: 6,
+      }}
+    >
+      <span style={{ color: 'rgba(220,232,255,0.64)' }}>{label}</span>
+      <span>{value}</span>
     </div>
   )
 }
@@ -640,6 +729,7 @@ function PlayerDetailDrawer({
     team_name: '',
     opponent_name: '',
     set_score: '',
+    result: 'WIN',
   })
   const [saving, setSaving] = useState(false)
 
@@ -649,6 +739,7 @@ function PlayerDetailDrawer({
       team_name: '',
       opponent_name: '',
       set_score: '',
+      result: 'WIN',
     })
   }, [player])
 
@@ -660,7 +751,6 @@ function PlayerDetailDrawer({
 
   const row = sorted[index]
   const rank = toNumber(row.rank)
-  const move = getMoveInfo(row.move)
   const theme = getRankTheme(rank)
 
   const canChallenge = [sorted[index - 1], sorted[index - 2]].filter(Boolean)
@@ -673,6 +763,8 @@ function PlayerDetailDrawer({
       const db = new Date(b.match_date)
       return db - da
     })
+
+  const externalRecord = getExternalRecord(playerExternalMatches)
 
   async function handleSaveExternalMatch(e) {
     e.preventDefault()
@@ -694,6 +786,7 @@ function PlayerDetailDrawer({
           team_name: form.team_name,
           opponent_name: form.opponent_name,
           set_score: form.set_score,
+          result: form.result,
         }),
       })
 
@@ -708,6 +801,7 @@ function PlayerDetailDrawer({
         team_name: '',
         opponent_name: '',
         set_score: '',
+        result: 'WIN',
       })
 
       if (onExternalMatchSaved) await onExternalMatchSaved()
@@ -842,6 +936,11 @@ function PlayerDetailDrawer({
           >
             Rank #{row.rank} · {getTierLabel(rank)}
           </div>
+
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+            <RecordPill label="W-L" value={`${externalRecord.wins}-${externalRecord.losses}`} />
+            <RecordPill label="Win %" value={`${externalRecord.pct}%`} />
+          </div>
         </div>
 
         <div style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
@@ -915,6 +1014,18 @@ function PlayerDetailDrawer({
                 onChange={(e) =>
                   setForm((prev) => ({ ...prev, set_score: e.target.value }))
                 }
+              />
+
+              <DrawerSelect
+                label="Result"
+                value={form.result}
+                onChange={(e) =>
+                  setForm((prev) => ({ ...prev, result: e.target.value }))
+                }
+                options={[
+                  { label: 'Win', value: 'WIN' },
+                  { label: 'Loss', value: 'LOSS' },
+                ]}
               />
 
               <button
@@ -1002,9 +1113,9 @@ function PodiumCard({
     normalizeUpper(row.player) === normalizeUpper(highlightedCard)
 
   const heightMap = {
-    1: 540,
-    2: 386,
-    3: 368,
+    1: 580,
+    2: 350,
+    3: 338,
   }
 
   return (
@@ -1916,6 +2027,18 @@ export default function LiveRankingPage() {
             grid-template-columns: 1fr !important;
           }
 
+          .podium-mobile-rank1 {
+            order: 1 !important;
+          }
+
+          .podium-mobile-rank2 {
+            order: 2 !important;
+          }
+
+          .podium-mobile-rank3 {
+            order: 3 !important;
+          }
+
           .hero-spotlight-behind-photo {
             width: 360px;
             height: 300px;
@@ -1949,8 +2072,8 @@ export default function LiveRankingPage() {
           }
 
           .podium-card-1 {
-            min-height: 560px !important;
-            padding-top: 42px !important;
+            min-height: 520px !important;
+            padding-top: 34px !important;
             border-radius: 30px !important;
           }
 
@@ -2283,7 +2406,7 @@ export default function LiveRankingPage() {
                   className="podium-grid"
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1.15fr 1fr',
+                    gridTemplateColumns: '0.88fr 1.28fr 0.88fr',
                     gap: 18,
                   }}
                 >
@@ -2296,46 +2419,52 @@ export default function LiveRankingPage() {
                   className="podium-grid"
                   style={{
                     display: 'grid',
-                    gridTemplateColumns: '1fr 1.15fr 1fr',
+                    gridTemplateColumns: '0.88fr 1.28fr 0.88fr',
                     gap: 18,
                     alignItems: 'stretch',
                   }}
                 >
-                  {topThree[1] ? (
-                    <PodiumCard
-                      row={topThree[1]}
-                      activeChallengesByPlayer={activeChallengesByPlayer}
-                      highlightedCard={highlightedCard}
-                      triggerHighlight={triggerHighlight}
-                      openPlayer={openPlayer}
-                    />
-                  ) : (
-                    <div />
-                  )}
+                  <div className="podium-mobile-rank2">
+                    {topThree[1] ? (
+                      <PodiumCard
+                        row={topThree[1]}
+                        activeChallengesByPlayer={activeChallengesByPlayer}
+                        highlightedCard={highlightedCard}
+                        triggerHighlight={triggerHighlight}
+                        openPlayer={openPlayer}
+                      />
+                    ) : (
+                      <div />
+                    )}
+                  </div>
 
-                  {topThree[0] ? (
-                    <PodiumCard
-                      row={topThree[0]}
-                      activeChallengesByPlayer={activeChallengesByPlayer}
-                      highlightedCard={highlightedCard}
-                      triggerHighlight={triggerHighlight}
-                      openPlayer={openPlayer}
-                    />
-                  ) : (
-                    <div />
-                  )}
+                  <div className="podium-mobile-rank1">
+                    {topThree[0] ? (
+                      <PodiumCard
+                        row={topThree[0]}
+                        activeChallengesByPlayer={activeChallengesByPlayer}
+                        highlightedCard={highlightedCard}
+                        triggerHighlight={triggerHighlight}
+                        openPlayer={openPlayer}
+                      />
+                    ) : (
+                      <div />
+                    )}
+                  </div>
 
-                  {topThree[2] ? (
-                    <PodiumCard
-                      row={topThree[2]}
-                      activeChallengesByPlayer={activeChallengesByPlayer}
-                      highlightedCard={highlightedCard}
-                      triggerHighlight={triggerHighlight}
-                      openPlayer={openPlayer}
-                    />
-                  ) : (
-                    <div />
-                  )}
+                  <div className="podium-mobile-rank3">
+                    {topThree[2] ? (
+                      <PodiumCard
+                        row={topThree[2]}
+                        activeChallengesByPlayer={activeChallengesByPlayer}
+                        highlightedCard={highlightedCard}
+                        triggerHighlight={triggerHighlight}
+                        openPlayer={openPlayer}
+                      />
+                    ) : (
+                      <div />
+                    )}
+                  </div>
                 </div>
               )}
             </section>
