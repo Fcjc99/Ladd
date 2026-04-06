@@ -40,16 +40,17 @@ function normalizeUpper(value) {
 }
 
 function isArchived(row) {
-  const archived = normalizeUpper(row.archived)
+  const archived = normalizeUpper(row?.archived)
   return archived === 'YES' || archived === 'TRUE'
 }
 
 function isCompleted(row) {
-  const status = normalizeUpper(row.status)
-  return status === 'COMPLETE' || status === 'COMPLETED'
+  const status = normalizeUpper(row?.status)
+  return status === 'COMPLETE' || status === 'COMPLETED' || status === 'CANCELLED'
 }
 
 function isActive(row) {
+  if (!row) return false
   if (isArchived(row)) return false
   if (isCompleted(row)) return false
 
@@ -176,8 +177,8 @@ function getLoserName(row) {
 
 function sortActiveRows(rows) {
   return [...rows].sort((a, b) => {
-    const da = safeDateValue(a.match_date)
-    const db = safeDateValue(b.match_date)
+    const da = safeDateValue(a.match_date || a.scheduled_date)
+    const db = safeDateValue(b.match_date || b.scheduled_date)
     if (da && db) return da - db
     if (da) return -1
     if (db) return 1
@@ -187,8 +188,8 @@ function sortActiveRows(rows) {
 
 function sortCompletedRows(rows) {
   return [...rows].sort((a, b) => {
-    const da = safeDateValue(a.match_date)
-    const db = safeDateValue(b.match_date)
+    const da = safeDateValue(a.match_date || a.scheduled_date)
+    const db = safeDateValue(b.match_date || b.scheduled_date)
     if (da && db) return db - da
     if (da) return -1
     if (db) return 1
@@ -237,6 +238,7 @@ function matchesSearch(row, query) {
   if (!q) return true
 
   const haystack = [
+    row.challenge_id,
     row.challenger,
     row.opponent,
     row.winner,
@@ -244,6 +246,7 @@ function matchesSearch(row, query) {
     row.approval,
     row.score,
     formatDate(row.match_date),
+    formatDate(row.scheduled_date),
   ]
     .map((v) => normalizeUpper(v))
     .join(' ')
@@ -254,7 +257,7 @@ function matchesSearch(row, query) {
 function getLatestWinnerText(completedChallenges) {
   const latest = completedChallenges[0]
   if (!latest?.winner) return 'No result yet'
-  return latest.winner
+  return `${latest.winner} def. ${getLoserName(latest)}`
 }
 
 function getPlayerFormString(playerName, recentMatches) {
@@ -264,6 +267,11 @@ function getPlayerFormString(playerName, recentMatches) {
     .map((row) => (normalizeUpper(row.winner) === normalizeUpper(playerName) ? 'W' : 'L'))
 
   return relevant.length ? relevant.join(' ') : '—'
+}
+
+function jsonSafe(value) {
+  if (value === undefined || value === null) return ''
+  return String(value)
 }
 
 function SectionCard({
@@ -463,6 +471,30 @@ function RankChip({ rank }) {
   )
 }
 
+const scorePanelOuterStyle = {
+  display: 'flex',
+  justifyContent: 'stretch',
+  width: '100%',
+}
+
+const scorePanelInnerStyle = {
+  width: '100%',
+  borderRadius: 20,
+  padding: 16,
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.08)',
+}
+
+const scoreTitleStyle = {
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'rgba(220,232,255,0.56)',
+  marginBottom: 14,
+  textAlign: 'center',
+}
+
 function ScoreDisplayPro({ row }) {
   const sets = parseScore(row.score)
   const winnerIsChall = winnerIsChallenger(row)
@@ -596,7 +628,6 @@ function ActiveMatchCard({
 
   return (
     <div
-      onClick={onClick}
       className="interactive-card active-card fade-in"
       style={{
         background:
@@ -609,6 +640,7 @@ function ActiveMatchCard({
         position: 'relative',
         overflow: 'hidden',
       }}
+      onClick={onClick}
     >
       <div
         style={{
@@ -820,7 +852,7 @@ function ActiveMatchCard({
 
           {row.approval ? <Pill muted>Approval: {row.approval}</Pill> : null}
 
-          <Pill muted>📅 {formatDate(row.match_date) || '-'}</Pill>
+          <Pill muted>📅 {formatDate(row.match_date || row.scheduled_date) || '-'}</Pill>
         </div>
 
         <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
@@ -994,7 +1026,7 @@ function CompletedMatchCard({ row, getPlayerPhotoUrl, onPlayerClick }) {
             }}
           >
             <Pill accent="#bdefff">Completed</Pill>
-            <Pill muted>📅 {formatDate(row.match_date) || '-'}</Pill>
+            <Pill muted>📅 {formatDate(row.match_date || row.scheduled_date) || '-'}</Pill>
           </div>
         </div>
 
@@ -1150,8 +1182,8 @@ function Toast({ toast }) {
           ? 'linear-gradient(180deg, rgba(16,72,56,0.96) 0%, rgba(9,43,34,0.98) 100%)'
           : 'linear-gradient(180deg, rgba(89,25,25,0.96) 0%, rgba(53,14,14,0.98) 100%)',
         border: isSuccess
-          ? '1px solid rgba(110, 255, 190, 0.24)'
-          : '1px solid rgba(255, 132, 132, 0.24)',
+          ? '1px solid rgba(110,255,190,0.24)'
+          : '1px solid rgba(255,132,132,0.24)',
         boxShadow: '0 20px 40px rgba(0,0,0,0.26)',
       }}
     >
@@ -1317,6 +1349,7 @@ function PlayerPicker({
                 color: 'white',
                 padding: '0 12px',
                 outline: 'none',
+                boxSizing: 'border-box',
               }}
             />
           </div>
@@ -1498,7 +1531,7 @@ function ScorePreviewCard({ match, winner, score, getPlayerPhotoUrl }) {
     opponent: match.opponent,
     winner,
     score,
-    match_date: match.match_date,
+    match_date: match.match_date || match.scheduled_date,
   }
 
   return (
@@ -1672,13 +1705,13 @@ function PlayerProfileDrawer({
 
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                 <RankChip rank={rank} />
-                {profile?.status ? <Pill accent={theme.accent}>{profile.status}</Pill> : null}
                 <Pill muted>Form: {formString}</Pill>
               </div>
             </div>
           </div>
 
           <div
+            className="hero-stats-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
@@ -1687,43 +1720,10 @@ function PlayerProfileDrawer({
             }}
           >
             <MetaBox label="Current Rank" value={`#${rank}`} />
-            <MetaBox
-              label="Country"
-              value={
-                profile?.flag_url ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <img
-                      src={profile.flag_url}
-                      alt=""
-                      style={{
-                        width: 24,
-                        height: 16,
-                        objectFit: 'cover',
-                        borderRadius: 4,
-                        border: '1px solid rgba(255,255,255,0.16)',
-                      }}
-                    />
-                    <span>On file</span>
-                  </div>
-                ) : (
-                  '—'
-                )
-              }
-            />
+            <MetaBox label="Wins" value={String(stats.wins)} />
+            <MetaBox label="Active" value={String(stats.active)} />
+            <MetaBox label="Completed" value={String(stats.completed)} />
           </div>
-        </div>
-
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
-            gap: 10,
-            marginBottom: 16,
-          }}
-        >
-          <MetaBox label="Wins" value={String(stats.wins)} />
-          <MetaBox label="Active" value={String(stats.active)} />
-          <MetaBox label="Completed" value={String(stats.completed)} />
         </div>
 
         <div
@@ -1786,52 +1786,43 @@ function PlayerProfileDrawer({
                       }}
                     >
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        {row.winner ? (
-                          <Pill
-                            accent={isWinner ? '#bff7d2' : '#ffd0d0'}
-                            background={
-                              isWinner
-                                ? 'rgba(110,255,190,0.10)'
-                                : 'rgba(255,132,132,0.10)'
-                            }
-                            borderColor={
-                              isWinner
-                                ? 'rgba(110,255,190,0.18)'
-                                : 'rgba(255,132,132,0.18)'
-                            }
-                          >
-                            {isWinner ? 'Win' : 'Loss'}
-                          </Pill>
-                        ) : (
-                          <Pill accent="#bdefff">Pending</Pill>
-                        )}
-
-                        <Pill muted>{formatDate(row.match_date) || '-'}</Pill>
+                        <Pill
+                          accent={isWinner ? '#bff7d2' : '#ffd0d0'}
+                          background={
+                            isWinner
+                              ? 'rgba(110,255,190,0.10)'
+                              : 'rgba(255,132,132,0.10)'
+                          }
+                          borderColor={
+                            isWinner
+                              ? 'rgba(110,255,190,0.20)'
+                              : 'rgba(255,132,132,0.20)'
+                          }
+                        >
+                          {isWinner ? 'Win' : 'Loss'}
+                        </Pill>
+                        <Pill muted>vs {opponent}</Pill>
                       </div>
 
-                      {row.score ? <Pill muted>{row.score}</Pill> : null}
+                      <div
+                        style={{
+                          fontSize: 12,
+                          fontWeight: 800,
+                          color: 'rgba(220,232,255,0.56)',
+                        }}
+                      >
+                        {formatDate(row.match_date || row.scheduled_date)}
+                      </div>
                     </div>
 
                     <div
                       style={{
-                        fontSize: 16,
+                        fontSize: 15,
                         fontWeight: 800,
                         color: '#eef6ff',
-                        marginBottom: 6,
                       }}
                     >
-                      vs {opponent || '-'}
-                    </div>
-
-                    <div
-                      style={{
-                        fontSize: 13,
-                        color: 'rgba(220,232,255,0.66)',
-                      }}
-                    >
-                      {row.winner
-                        ? `${row.winner} defeated ${getLoserName(row)}`
-                        : `${row.challenger} vs ${row.opponent}`}
+                      {row.score || '-'}
                     </div>
                   </div>
                 )
@@ -1844,22 +1835,74 @@ function PlayerProfileDrawer({
   )
 }
 
+const labelStyle = {
+  display: 'block',
+  fontSize: 11,
+  fontWeight: 800,
+  letterSpacing: '0.16em',
+  textTransform: 'uppercase',
+  color: 'rgba(220,232,255,0.60)',
+  marginBottom: 10,
+}
+
+const inputStyle = {
+  width: '100%',
+  height: 52,
+  borderRadius: 16,
+  border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(243,244,246,0.96)',
+  color: '#111827',
+  padding: '0 14px',
+  outline: 'none',
+  fontSize: 15,
+  boxSizing: 'border-box',
+}
+
+const buttonStyle = {
+  minHeight: 52,
+  padding: '0 18px',
+  borderRadius: 16,
+  border: '1px solid rgba(174,242,255,0.24)',
+  background:
+    'linear-gradient(180deg, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.07) 100%)',
+  color: '#c9f7ff',
+  fontSize: 15,
+  fontWeight: 900,
+  cursor: 'pointer',
+  boxShadow: '0 12px 28px rgba(0,0,0,0.18), 0 0 18px rgba(174,242,255,0.08)',
+}
+
+const modalOverlayStyle = {
+  position: 'fixed',
+  inset: 0,
+  background: 'rgba(0,0,0,0.62)',
+  zIndex: 1000,
+  display: 'grid',
+  placeItems: 'center',
+  padding: 16,
+  backdropFilter: 'blur(5px)',
+  WebkitBackdropFilter: 'blur(5px)',
+}
+
+const scoreInputStyle = {
+  width: '100%',
+  height: 46,
+  borderRadius: 14,
+  border: '1px solid rgba(255,255,255,0.12)',
+  background: 'rgba(243,244,246,0.96)',
+  color: '#111827',
+  padding: '0 12px',
+  outline: 'none',
+  fontSize: 18,
+  fontWeight: 800,
+  textAlign: 'center',
+  boxSizing: 'border-box',
+}
+
 export default function MatchCenterPage() {
   const [feedRows, setFeedRows] = useState([])
   const [rankingRows, setRankingRows] = useState([])
   const [loading, setLoading] = useState(true)
-  const [submittingChallenge, setSubmittingChallenge] = useState(false)
-  const [selectedMatch, setSelectedMatch] = useState(null)
-  const [selectedPlayer, setSelectedPlayer] = useState(null)
-  const [resultForm, setResultForm] = useState(getDefaultScoreForm())
-  const [submittingResult, setSubmittingResult] = useState(false)
-  const [cancellingRow, setCancellingRow] = useState(null)
-  const [toast, setToast] = useState(null)
-
-  const [activeQuery, setActiveQuery] = useState('')
-  const [completedQuery, setCompletedQuery] = useState('')
-  const [activeView, setActiveView] = useState('all')
-  const [completedView, setCompletedView] = useState('all')
 
   const [challengeForm, setChallengeForm] = useState({
     challenger: '',
@@ -1869,40 +1912,29 @@ export default function MatchCenterPage() {
     match_date: '',
   })
 
-  useEffect(() => {
-    if (!toast) return
-    const timer = setTimeout(() => setToast(null), 2600)
-    return () => clearTimeout(timer)
-  }, [toast])
+  const [submittingChallenge, setSubmittingChallenge] = useState(false)
+  const [selectedMatch, setSelectedMatch] = useState(null)
+  const [resultForm, setResultForm] = useState(getDefaultScoreForm())
+  const [submittingResult, setSubmittingResult] = useState(false)
+  const [cancellingChallengeId, setCancellingChallengeId] = useState(null)
 
-  useEffect(() => {
-    function handleEscape(e) {
-      if (e.key !== 'Escape') return
-      if (selectedMatch) {
-        setSelectedMatch(null)
-        setResultForm(getDefaultScoreForm())
-        return
-      }
-      if (selectedPlayer) {
-        setSelectedPlayer(null)
-      }
-    }
+  const [activeQuery, setActiveQuery] = useState('')
+  const [completedQuery, setCompletedQuery] = useState('')
+  const [activeView, setActiveView] = useState('all')
+  const [completedView, setCompletedView] = useState('all')
 
-    window.addEventListener('keydown', handleEscape)
-    return () => window.removeEventListener('keydown', handleEscape)
-  }, [selectedMatch, selectedPlayer])
+  const [selectedPlayer, setSelectedPlayer] = useState(null)
+  const [toast, setToast] = useState(null)
 
   function showToast(message, type = 'success') {
     setToast({ message, type })
   }
 
-  function getPlayerProfile(name) {
-    return rankingRows.find((row) => normalizeUpper(row.player) === normalizeUpper(name))
-  }
-
-  function getPlayerPhotoUrl(name) {
-    return getPlayerProfile(name)?.photo_url || ''
-  }
+  useEffect(() => {
+    if (!toast) return
+    const timer = setTimeout(() => setToast(null), 2500)
+    return () => clearTimeout(timer)
+  }, [toast])
 
   async function loadData() {
     try {
@@ -1922,7 +1954,7 @@ export default function MatchCenterPage() {
       console.error('Failed to load Match Center data:', err)
       setFeedRows([])
       setRankingRows([])
-      showToast('Failed to load Match Center data', 'error')
+      showToast('Failed to load data', 'error')
     } finally {
       setLoading(false)
     }
@@ -1932,101 +1964,84 @@ export default function MatchCenterPage() {
     loadData()
   }, [])
 
-  const activeChallenges = useMemo(() => {
-    return sortActiveRows(feedRows.filter(isActive))
-  }, [feedRows])
+  function getPlayerPhotoUrl(playerName) {
+    const row = rankingRows.find((item) => normalizeUpper(item.player) === normalizeUpper(playerName))
+    return row?.photo_url || ''
+  }
 
-  const completedChallenges = useMemo(() => {
-    return sortCompletedRows(feedRows.filter((row) => isCompleted(row) || isArchived(row)))
-  }, [feedRows])
+  const activeChallenges = useMemo(
+    () => sortActiveRows(feedRows.filter(isActive)),
+    [feedRows]
+  )
 
-  const latestCompletedSummary = useMemo(() => {
-    const latest = completedChallenges[0]
-    if (!latest) return 'No recent result yet'
-    return `${latest.winner || 'Winner'} def. ${getLoserName(latest)}`
-  }, [completedChallenges])
-
-  const builtScore = useMemo(() => {
-    const relevantSets = resultForm.useThirdSet ? resultForm.sets : resultForm.sets.slice(0, 2)
-    return buildScoreFromSets(relevantSets)
-  }, [resultForm])
-
-  const selectedPlayerProfile = useMemo(() => {
-    if (!selectedPlayer) return null
-    return getPlayerProfile(selectedPlayer) || null
-  }, [selectedPlayer, rankingRows])
-
-  const selectedPlayerStats = useMemo(() => {
-    if (!selectedPlayer) return { wins: 0, active: 0, completed: 0 }
-
-    const related = feedRows.filter(
-      (row) =>
-        normalizeUpper(row.challenger) === normalizeUpper(selectedPlayer) ||
-        normalizeUpper(row.opponent) === normalizeUpper(selectedPlayer)
-    )
-
-    const wins = related.filter(
-      (row) => normalizeUpper(row.winner) === normalizeUpper(selectedPlayer)
-    ).length
-
-    const active = related.filter(isActive).length
-    const completed = related.filter((row) => isCompleted(row) || isArchived(row)).length
-
-    return { wins, active, completed }
-  }, [selectedPlayer, feedRows])
-
-  const selectedPlayerRecentMatches = useMemo(() => {
-    if (!selectedPlayer) return []
-
-    return [...feedRows]
-      .filter(
-        (row) =>
-          normalizeUpper(row.challenger) === normalizeUpper(selectedPlayer) ||
-          normalizeUpper(row.opponent) === normalizeUpper(selectedPlayer)
-      )
-      .sort((a, b) => {
-        const da = safeDateValue(a.match_date)
-        const db = safeDateValue(b.match_date)
-        if (da && db) return db - da
-        if (da) return -1
-        if (db) return 1
-        return 0
-      })
-      .slice(0, 6)
-  }, [selectedPlayer, feedRows])
+  const completedChallenges = useMemo(
+    () => sortCompletedRows(feedRows.filter((row) => isArchived(row) || isCompleted(row)).filter((row) => row.winner || row.score)),
+    [feedRows]
+  )
 
   const filteredActiveChallenges = useMemo(() => {
     return activeChallenges.filter((row) => {
       if (!matchesSearch(row, activeQuery)) return false
-      if (activeView === 'scheduled') return normalizeUpper(row.status) === 'SCHEDULED'
-      if (activeView === 'pending') return normalizeUpper(row.status) === 'PENDING'
+      if (activeView === 'scheduled') return Boolean(normalizeText(row.match_date || row.scheduled_date))
+      if (activeView === 'pending') return normalizeUpper(row.approval || row.status) === 'PENDING'
       return true
     })
   }, [activeChallenges, activeQuery, activeView])
 
   const filteredCompletedChallenges = useMemo(() => {
-    let rows = completedChallenges.filter((row) => matchesSearch(row, completedQuery))
-    if (completedView === 'recent') rows = rows.slice(0, 5)
-    return rows
+    const base = completedChallenges.filter((row) => matchesSearch(row, completedQuery))
+    if (completedView === 'recent') return base.slice(0, 5)
+    return base
   }, [completedChallenges, completedQuery, completedView])
 
-  function applyScorePreset(preset) {
-    setResultForm((prev) => applyPresetToScoreForm(preset, prev.winner))
-  }
+  const latestCompletedSummary = useMemo(
+    () => getLatestWinnerText(completedChallenges),
+    [completedChallenges]
+  )
 
-  function updateSetValue(index, field, value) {
-    setResultForm((prev) => {
-      const nextSets = [...prev.sets]
-      nextSets[index] = {
-        ...nextSets[index],
-        [field]: value,
+  const playerStatsMap = useMemo(() => {
+    const map = {}
+    PLAYERS.forEach((p) => {
+      map[p.name] = { wins: 0, active: 0, completed: 0 }
+    })
+
+    feedRows.forEach((row) => {
+      const challenger = row.challenger
+      const opponent = row.opponent
+
+      if (challenger && !map[challenger]) map[challenger] = { wins: 0, active: 0, completed: 0 }
+      if (opponent && !map[opponent]) map[opponent] = { wins: 0, active: 0, completed: 0 }
+
+      if (isActive(row)) {
+        if (challenger) map[challenger].active += 1
+        if (opponent) map[opponent].active += 1
       }
-      return {
-        ...prev,
-        sets: nextSets,
+
+      if (row.winner) {
+        if (row.winner && map[row.winner]) map[row.winner].wins += 1
+        if (challenger) map[challenger].completed += 1
+        if (opponent) map[opponent].completed += 1
       }
     })
-  }
+
+    return map
+  }, [feedRows])
+
+  const selectedPlayerProfile = useMemo(() => {
+    if (!selectedPlayer) return null
+    return rankingRows.find((row) => normalizeUpper(row.player) === normalizeUpper(selectedPlayer)) || null
+  }, [rankingRows, selectedPlayer])
+
+  const selectedPlayerRecentMatches = useMemo(() => {
+    if (!selectedPlayer) return []
+    return completedChallenges.filter(
+      (row) =>
+        normalizeUpper(row.challenger) === normalizeUpper(selectedPlayer) ||
+        normalizeUpper(row.opponent) === normalizeUpper(selectedPlayer)
+    )
+  }, [completedChallenges, selectedPlayer])
+
+  const builtScore = useMemo(() => buildScoreFromSets(resultForm.sets), [resultForm.sets])
 
   async function handleChallengeSubmit(e) {
     e.preventDefault()
@@ -2043,19 +2058,23 @@ export default function MatchCenterPage() {
 
       const payload = {
         action: 'submit_challenge',
+        challenge_id:
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `challenge-${Date.now()}`,
         challenger: challengeForm.challenger,
         challenger_rank: challengeForm.challenger_rank,
         opponent: challengeForm.opponent,
         opponent_rank: challengeForm.opponent_rank,
+        scheduled_date: challengeForm.match_date,
         match_date: challengeForm.match_date,
-        deadline: '',
-        eligible: 'YES',
         approval: 'PENDING',
         status: 'ACTIVE',
         winner: '',
         score: '',
         active: 'YES',
         archived: 'NO',
+        notes: '',
       }
 
       const res = await fetch('/api/submit', {
@@ -2097,8 +2116,8 @@ export default function MatchCenterPage() {
     setSubmittingResult(true)
 
     try {
-      if (!selectedMatch.source_row) {
-        throw new Error('Missing source_row from ChallengeFeed')
+      if (!selectedMatch.challenge_id) {
+        throw new Error('Missing challenge_id from ChallengeFeed')
       }
 
       if (!resultForm.winner) {
@@ -2126,9 +2145,13 @@ export default function MatchCenterPage() {
 
       const payload = {
         action: 'update_challenge_result',
-        source_row: Number(selectedMatch.source_row),
+        challenge_id: String(selectedMatch.challenge_id),
         winner: resultForm.winner,
         score,
+        status: 'COMPLETE',
+        active: 'NO',
+        archived: 'YES',
+        match_date: selectedMatch.match_date || selectedMatch.scheduled_date || '',
       }
 
       const res = await fetch('/api/submit', {
@@ -2142,21 +2165,6 @@ export default function MatchCenterPage() {
       if (!data.success) {
         throw new Error(data.error || data.raw || 'Failed to submit result')
       }
-
-      setFeedRows((prev) =>
-        prev.map((row) => {
-          if (String(row.source_row) !== String(payload.source_row)) return row
-
-          return {
-            ...row,
-            winner: payload.winner,
-            score: payload.score,
-            status: 'Completed',
-            active: 'Inactive',
-            archived: 'Yes',
-          }
-        })
-      )
 
       setSelectedMatch(null)
       setResultForm(getDefaultScoreForm())
@@ -2176,8 +2184,8 @@ export default function MatchCenterPage() {
 
   async function handleCancelChallenge(row) {
     try {
-      if (!row?.source_row) {
-        throw new Error('Missing source_row for this challenge')
+      if (!row?.challenge_id) {
+        throw new Error('Missing challenge_id from ChallengeFeed')
       }
 
       const confirmed = window.confirm(
@@ -2186,39 +2194,24 @@ export default function MatchCenterPage() {
 
       if (!confirmed) return
 
-      setCancellingRow(String(row.source_row))
+      setCancellingChallengeId(String(row.challenge_id))
 
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'cancel_challenge',
-          source_row: Number(row.source_row),
+          challenge_id: String(row.challenge_id),
         }),
       })
 
       const data = await res.json()
 
-      if (!res.ok || !data.success) {
+      if (!data.success) {
         throw new Error(data.error || data.raw || 'Failed to cancel challenge')
       }
 
-      setFeedRows((prev) =>
-        prev.map((item) => {
-          if (String(item.source_row) !== String(row.source_row)) return item
-
-          return {
-            ...item,
-            status: 'Cancelled',
-            active: 'NO',
-            archived: 'YES',
-            winner: '',
-            score: '',
-          }
-        })
-      )
-
-      if (selectedMatch && String(selectedMatch.source_row) === String(row.source_row)) {
+      if (selectedMatch && String(selectedMatch.challenge_id) === String(row.challenge_id)) {
         setSelectedMatch(null)
         setResultForm(getDefaultScoreForm())
       }
@@ -2232,11 +2225,9 @@ export default function MatchCenterPage() {
       console.error('Cancel challenge failed:', err)
       showToast(err.message || 'Failed to cancel challenge', 'error')
     } finally {
-      setCancellingRow(null)
+      setCancellingChallengeId(null)
     }
   }
-
-  const latestWinnerText = getLatestWinnerText(completedChallenges)
 
   return (
     <>
@@ -2246,96 +2237,57 @@ export default function MatchCenterPage() {
           100% { background-position: -200% 0; }
         }
 
-        @keyframes fadeInUp {
-          from {
-            opacity: 0;
-            transform: translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
+        @keyframes fadeRise {
+          0% { opacity: 0; transform: translateY(14px); }
+          100% { opacity: 1; transform: translateY(0); }
         }
 
         @keyframes modalFade {
-          from { opacity: 0; }
-          to { opacity: 1; }
+          0% { opacity: 0; }
+          100% { opacity: 1; }
         }
 
         @keyframes modalScale {
-          from {
-            opacity: 0;
-            transform: scale(0.97) translateY(8px);
-          }
-          to {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-          }
+          0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         @keyframes drawerSlide {
-          from {
-            opacity: 0;
-            transform: translateX(22px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          0% { opacity: 0; transform: translateX(24px); }
+          100% { opacity: 1; transform: translateX(0); }
         }
 
         @keyframes pulseDot {
-          0% { transform: scale(0.92); opacity: 0.7; }
-          50% { transform: scale(1.08); opacity: 1; }
-          100% { transform: scale(0.92); opacity: 0.7; }
+          0% { transform: scale(0.9); opacity: 0.6; }
+          50% { transform: scale(1.15); opacity: 1; }
+          100% { transform: scale(0.9); opacity: 0.6; }
         }
 
         .fade-in {
-          animation: fadeInUp 0.28s ease;
+          animation: fadeRise 0.55s ease both;
         }
 
         .interactive-card {
-          transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+          transition: transform 0.16s ease, box-shadow 0.16s ease, border-color 0.16s ease;
+          -webkit-tap-highlight-color: transparent;
         }
 
         .interactive-card:hover {
-          transform: translateY(-3px);
-        }
-
-        .active-card:hover {
-          border-color: rgba(132, 216, 255, 0.34) !important;
-          box-shadow: 0 18px 36px rgba(0,0,0,0.24), 0 0 28px rgba(56,189,248,0.10) !important;
-        }
-
-        .completed-card:hover {
-          border-color: rgba(255,255,255,0.14) !important;
-          box-shadow: 0 16px 32px rgba(0,0,0,0.22) !important;
-        }
-
-        .photo-hover:hover {
-          transform: scale(1.02);
-        }
-
-        .glass-section {
-          transition: box-shadow 0.2s ease, border-color 0.2s ease;
-        }
-
-        .glass-section:hover {
-          border-color: rgba(255,255,255,0.12);
+          transform: translateY(-1px);
         }
 
         .skeleton-card,
-        .skeleton-block,
         .skeleton-line,
-        .skeleton-pill {
+        .skeleton-pill,
+        .skeleton-block {
           background: linear-gradient(
             90deg,
-            rgba(255,255,255,0.06) 0%,
-            rgba(255,255,255,0.12) 35%,
-            rgba(255,255,255,0.06) 70%
+            rgba(255,255,255,0.05) 0%,
+            rgba(255,255,255,0.10) 50%,
+            rgba(255,255,255,0.05) 100%
           );
           background-size: 200% 100%;
-          animation: shimmer 1.3s linear infinite;
+          animation: shimmer 1.25s linear infinite;
         }
 
         .skeleton-line {
@@ -2499,11 +2451,11 @@ export default function MatchCenterPage() {
               <h1
                 className="match-center-title"
                 style={{
-                  fontSize: 50,
+                  fontSize: 52,
                   fontWeight: 900,
                   letterSpacing: '-0.04em',
                   margin: 0,
-                  lineHeight: 0.95,
+                  lineHeight: 0.94,
                 }}
               >
                 Match Center
@@ -2531,7 +2483,7 @@ export default function MatchCenterPage() {
                   '0 12px 30px rgba(0,0,0,0.22), inset 0 1px 0 rgba(255,255,255,0.18)',
               }}
             >
-              ← Back to Live Rankings
+              Live Rankings →
             </a>
           </div>
 
@@ -2540,7 +2492,7 @@ export default function MatchCenterPage() {
               height: 1,
               background:
                 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(168,240,255,0.18) 22%, rgba(255,255,255,0.08) 50%, rgba(168,240,255,0.18) 78%, rgba(255,255,255,0) 100%)',
-              marginBottom: 24,
+              marginBottom: 26,
             }}
           />
 
@@ -2548,27 +2500,78 @@ export default function MatchCenterPage() {
             className="hero-stats-grid fade-in"
             style={{
               display: 'grid',
-              gridTemplateColumns: '1.2fr repeat(3, minmax(0, 1fr))',
-              gap: 12,
-              marginBottom: 28,
+              gridTemplateColumns: '1.35fr 1fr',
+              gap: 16,
+              marginBottom: 26,
             }}
           >
-            <MetaBox
-              label="Latest Winner"
-              value={latestWinnerText}
-              accent="rgba(168,240,255,0.10)"
-            />
-            <MetaBox label="Feed Rows" value={String(feedRows.length)} />
-            <MetaBox label="Active Challenges" value={String(activeChallenges.length)} />
-            <MetaBox label="Completed Matches" value={String(completedChallenges.length)} />
+            <div
+              style={{
+                borderRadius: 28,
+                padding: 22,
+                background:
+                  'linear-gradient(180deg, rgba(18,42,78,0.86) 0%, rgba(10,22,41,0.92) 100%)',
+                border: '1px solid rgba(168,240,255,0.12)',
+                boxShadow: '0 18px 44px rgba(0,0,0,0.18), 0 0 36px rgba(56,189,248,0.08)',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  fontWeight: 800,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                  color: 'rgba(174,242,255,0.74)',
+                  marginBottom: 10,
+                }}
+              >
+                Center Court Overview
+              </div>
+
+              <div
+                style={{
+                  fontSize: 28,
+                  fontWeight: 900,
+                  lineHeight: 1.05,
+                  color: '#eef6ff',
+                  marginBottom: 10,
+                  letterSpacing: '-0.03em',
+                }}
+              >
+                Active challenges: {activeChallenges.length}
+              </div>
+
+              <div
+                style={{
+                  fontSize: 15,
+                  lineHeight: 1.55,
+                  color: 'rgba(220,232,255,0.72)',
+                }}
+              >
+                Submit challenges, enter results, and cancel active matchups if someone accidentally entered the wrong players.
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: 12,
+              }}
+            >
+              <MetaBox label="Players" value={String(PLAYERS.length)} />
+              <MetaBox label="Active" value={String(activeChallenges.length)} />
+              <MetaBox label="Completed" value={String(completedChallenges.length)} />
+              <MetaBox label="Latest Winner" value={completedChallenges[0]?.winner || '—'} />
+            </div>
           </div>
 
           <div style={{ display: 'grid', gap: 24 }}>
             <SectionCard
               title="Submit Challenge"
-              subtitle="Choose challenger, opponent, and scheduled date."
-              accent="rgba(168,240,255,0.10)"
-              zIndex={30}
+              subtitle="Create a new ladder challenge matchup."
+              accent="rgba(174,242,255,0.08)"
+              zIndex={12}
             >
               <form onSubmit={handleChallengeSubmit}>
                 <div
@@ -2696,7 +2699,7 @@ export default function MatchCenterPage() {
               </div>
 
               {loading ? (
-                <div style={listStyle}>
+                <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2].map((i) => (
                     <ChallengeSkeleton key={i} />
                   ))}
@@ -2711,17 +2714,17 @@ export default function MatchCenterPage() {
                   }
                 />
               ) : (
-                <div style={listStyle}>
+                <div style={{ display: 'grid', gap: 14 }}>
                   {filteredActiveChallenges.map((row, index) => (
                     <ActiveMatchCard
-                      key={`active-${index}`}
+                      key={`active-${row.challenge_id || index}`}
                       row={row}
                       onClick={() => {
                         setSelectedMatch(row)
                         setResultForm(getDefaultScoreForm())
                       }}
                       onCancel={() => handleCancelChallenge(row)}
-                      cancelling={cancellingRow === String(row.source_row)}
+                      cancelling={cancellingChallengeId === String(row.challenge_id)}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
                       onPlayerClick={setSelectedPlayer}
                     />
@@ -2773,7 +2776,7 @@ export default function MatchCenterPage() {
               </div>
 
               {loading ? (
-                <div style={listStyle}>
+                <div style={{ display: 'grid', gap: 14 }}>
                   {[1, 2].map((i) => (
                     <CompletedSkeleton key={i} />
                   ))}
@@ -2788,10 +2791,10 @@ export default function MatchCenterPage() {
                   }
                 />
               ) : (
-                <div style={listStyle}>
+                <div style={{ display: 'grid', gap: 14 }}>
                   {filteredCompletedChallenges.map((row, index) => (
                     <CompletedMatchCard
-                      key={`completed-${index}`}
+                      key={`completed-${row.challenge_id || index}`}
                       row={row}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
                       onPlayerClick={setSelectedPlayer}
@@ -2808,477 +2811,62 @@ export default function MatchCenterPage() {
             <div
               className="modal-card-anim"
               style={{
-                ...modalStyle,
+                width: '100%',
                 maxWidth: 1020,
+                background:
+                  'linear-gradient(180deg, rgba(10,23,43,0.985) 0%, rgba(7,17,32,0.995) 100%)',
+                border: '1px solid rgba(174,242,255,0.16)',
+                borderRadius: 30,
+                boxShadow: '0 20px 60px rgba(0,0,0,0.38)',
+                padding: 20,
+                maxHeight: '90vh',
+                overflowY: 'auto',
               }}
             >
               <div
                 style={{
                   display: 'flex',
                   justifyContent: 'space-between',
-                  gap: 12,
                   alignItems: 'center',
+                  gap: 12,
                   marginBottom: 18,
-                  flexWrap: 'wrap',
                 }}
               >
                 <div>
-                  <h3 style={{ fontSize: 28, fontWeight: 900, margin: 0, letterSpacing: '-0.02em' }}>
-                    Enter Match Result
-                  </h3>
                   <div
                     style={{
-                      marginTop: 6,
-                      fontSize: 14,
-                      color: 'rgba(220,232,255,0.68)',
-                    }}
-                  >
-                    Structured result entry with live preview
-                  </div>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <Pill muted>Row: {selectedMatch.source_row || 'missing'}</Pill>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedMatch(null)
-                      setResultForm(getDefaultScoreForm())
-                    }}
-                    className="interactive-card"
-                    style={{
-                      width: 42,
-                      height: 42,
-                      borderRadius: 14,
-                      border: '1px solid rgba(255,255,255,0.12)',
-                      background: 'rgba(255,255,255,0.05)',
-                      color: '#eef6ff',
-                      fontSize: 18,
-                      fontWeight: 900,
-                      cursor: 'pointer',
-                    }}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-
-              <div
-                style={{
-                  borderRadius: 20,
-                  padding: 16,
-                  background: 'rgba(255,255,255,0.04)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  marginBottom: 18,
-                }}
-              >
-                <div
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: '1fr auto 1fr',
-                    gap: 16,
-                    alignItems: 'center',
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-                    <PlayerPhoto
-                      name={selectedMatch.challenger}
-                      photoUrl={getPlayerPhotoUrl(selectedMatch.challenger)}
-                      size={54}
-                      borderColor="rgba(255,255,255,0.16)"
-                    />
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 17, fontWeight: 850, color: '#eef6ff' }}>
-                        {selectedMatch.challenger}
-                      </div>
-                      <div style={{ marginTop: 4 }}>
-                        <RankChip rank={rankByName(selectedMatch.challenger)} />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div
-                    style={{
-                      fontSize: 15,
-                      fontWeight: 900,
-                      letterSpacing: '0.18em',
+                      fontSize: 12,
+                      fontWeight: 800,
+                      letterSpacing: '0.16em',
                       textTransform: 'uppercase',
-                      color: 'rgba(220,232,255,0.72)',
+                      color: 'rgba(174,242,255,0.70)',
+                      marginBottom: 8,
                     }}
                   >
-                    VS
+                    Enter Result
                   </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, justifyContent: 'flex-end', minWidth: 0 }}>
-                    <div style={{ minWidth: 0, textAlign: 'right' }}>
-                      <div style={{ fontSize: 17, fontWeight: 850, color: '#eef6ff' }}>
-                        {selectedMatch.opponent}
-                      </div>
-                      <div style={{ marginTop: 4, display: 'flex', justifyContent: 'flex-end' }}>
-                        <RankChip rank={rankByName(selectedMatch.opponent)} />
-                      </div>
-                    </div>
-                    <PlayerPhoto
-                      name={selectedMatch.opponent}
-                      photoUrl={getPlayerPhotoUrl(selectedMatch.opponent)}
-                      size={54}
-                      borderColor="rgba(255,255,255,0.16)"
-                    />
+                  <div
+                    style={{
+                      fontSize: 26,
+                      fontWeight: 900,
+                      color: '#eef6ff',
+                      lineHeight: 1.02,
+                    }}
+                  >
+                    {selectedMatch.challenger} vs {selectedMatch.opponent}
                   </div>
                 </div>
-              </div>
 
-              <form onSubmit={handleResultSubmit}>
-                <div
-                  className="score-entry-layout"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'minmax(320px, 1fr) minmax(320px, 1fr)',
-                    gap: 18,
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedMatch(null)
+                    setResultForm(getDefaultScoreForm())
                   }}
-                >
-                  <div style={{ display: 'grid', gap: 16 }}>
-                    <PlayerPicker
-                      label="Winner"
-                      value={resultForm.winner}
-                      onChange={(value) =>
-                        setResultForm((prev) => ({ ...prev, winner: value }))
-                      }
-                      players={[
-                        {
-                          name: selectedMatch.challenger,
-                          rank: rankByName(selectedMatch.challenger),
-                        },
-                        {
-                          name: selectedMatch.opponent,
-                          rank: rankByName(selectedMatch.opponent),
-                        },
-                      ]}
-                      getPlayerPhotoUrl={getPlayerPhotoUrl}
-                    />
-
-                    <div
-                      style={{
-                        borderRadius: 20,
-                        padding: 16,
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 800,
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          color: 'rgba(220,232,255,0.58)',
-                          marginBottom: 12,
-                        }}
-                      >
-                        Quick Score Presets
-                      </div>
-
-                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                        <ScorePresetButton onClick={() => applyScorePreset([[6, 0], [6, 0]])}>
-                          6-0, 6-0
-                        </ScorePresetButton>
-                        <ScorePresetButton onClick={() => applyScorePreset([[6, 3], [6, 4]])}>
-                          6-3, 6-4
-                        </ScorePresetButton>
-                        <ScorePresetButton onClick={() => applyScorePreset([[7, 5], [6, 4]])}>
-                          7-5, 6-4
-                        </ScorePresetButton>
-                        <ScorePresetButton onClick={() => applyScorePreset([[6, 4], [3, 6], [6, 2]])}>
-                          6-4, 3-6, 6-2
-                        </ScorePresetButton>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 20,
-                        padding: 16,
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 800,
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          color: 'rgba(220,232,255,0.58)',
-                          marginBottom: 12,
-                        }}
-                      >
-                        Set-by-Set Score
-                      </div>
-
-                      <div style={{ display: 'grid', gap: 12 }}>
-                        <ScoreSetInput
-                          label="Set 1"
-                          setData={resultForm.sets[0]}
-                          onChange={(field, value) => updateSetValue(0, field, value)}
-                        />
-
-                        <ScoreSetInput
-                          label="Set 2"
-                          setData={resultForm.sets[1]}
-                          onChange={(field, value) => updateSetValue(1, field, value)}
-                        />
-
-                        <div
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'space-between',
-                            gap: 12,
-                            marginTop: 2,
-                          }}
-                        >
-                          <div
-                            style={{
-                              fontSize: 13,
-                              fontWeight: 700,
-                              color: 'rgba(220,232,255,0.76)',
-                            }}
-                          >
-                            Add third set
-                          </div>
-
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setResultForm((prev) => ({
-                                ...prev,
-                                useThirdSet: !prev.useThirdSet,
-                                sets: !prev.useThirdSet
-                                  ? prev.sets
-                                  : [prev.sets[0], prev.sets[1], { ...EMPTY_SET }],
-                              }))
-                            }
-                            className="interactive-card"
-                            style={{
-                              minWidth: 86,
-                              height: 38,
-                              borderRadius: 999,
-                              border: '1px solid rgba(255,255,255,0.12)',
-                              background: resultForm.useThirdSet
-                                ? 'rgba(174,242,255,0.14)'
-                                : 'rgba(255,255,255,0.05)',
-                              color: resultForm.useThirdSet ? '#c9f7ff' : '#dce8ff',
-                              fontWeight: 800,
-                              cursor: 'pointer',
-                            }}
-                          >
-                            {resultForm.useThirdSet ? 'On' : 'Off'}
-                          </button>
-                        </div>
-
-                        <ScoreSetInput
-                          label="Set 3"
-                          setData={resultForm.sets[2]}
-                          onChange={(field, value) => updateSetValue(2, field, value)}
-                          disabled={!resultForm.useThirdSet}
-                        />
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        borderRadius: 20,
-                        padding: 16,
-                        background: 'rgba(255,255,255,0.04)',
-                        border: '1px solid rgba(255,255,255,0.08)',
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontSize: 11,
-                          fontWeight: 800,
-                          letterSpacing: '0.14em',
-                          textTransform: 'uppercase',
-                          color: 'rgba(220,232,255,0.58)',
-                          marginBottom: 10,
-                        }}
-                      >
-                        Final Score String
-                      </div>
-
-                      <div
-                        style={{
-                          fontSize: 18,
-                          fontWeight: 850,
-                          color: '#eef6ff',
-                        }}
-                      >
-                        {builtScore || '—'}
-                      </div>
-                    </div>
-
-                    <div style={{ display: 'grid', gap: 12 }}>
-                      <button
-                        type="submit"
-                        style={buttonStyle}
-                        disabled={submittingResult}
-                        className="interactive-card"
-                      >
-                        {submittingResult ? 'Saving...' : 'Save Result'}
-                      </button>
-
-                      <button
-                        type="button"
-                        style={secondaryButtonStyle}
-                        onClick={() => {
-                          setSelectedMatch(null)
-                          setResultForm(getDefaultScoreForm())
-                        }}
-                        className="interactive-card"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-
-                  <div>
-                    <ScorePreviewCard
-                      match={selectedMatch}
-                      winner={resultForm.winner}
-                      score={builtScore}
-                      getPlayerPhotoUrl={getPlayerPhotoUrl}
-                    />
-                  </div>
-                </div>
-              </form>
-            </div>
-          </div>
-        ) : null}
-
-        <PlayerProfileDrawer
-          playerName={selectedPlayer}
-          profile={selectedPlayerProfile}
-          stats={selectedPlayerStats}
-          recentMatches={selectedPlayerRecentMatches}
-          onClose={() => setSelectedPlayer(null)}
-        />
-      </div>
-    </>
-  )
-}
-
-const scorePanelOuterStyle = {
-  minWidth: 250,
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-}
-
-const scorePanelInnerStyle = {
-  width: '100%',
-  maxWidth: 290,
-  borderRadius: 20,
-  padding: '14px 16px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.10)',
-}
-
-const scoreTitleStyle = {
-  fontSize: 11,
-  fontWeight: 800,
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase',
-  color: 'rgba(220,232,255,0.56)',
-  marginBottom: 12,
-  textAlign: 'center',
-}
-
-const labelStyle = {
-  display: 'block',
-  marginBottom: 8,
-  fontSize: 12,
-  fontWeight: 800,
-  letterSpacing: '0.14em',
-  textTransform: 'uppercase',
-  color: 'rgba(220,232,255,0.72)',
-}
-
-const inputStyle = {
-  width: '100%',
-  height: 58,
-  borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.12)',
-  outline: 'none',
-  padding: '0 18px',
-  fontSize: 17,
-  background: 'rgba(243,244,246,0.96)',
-  color: '#111827',
-  boxSizing: 'border-box',
-}
-
-const scoreInputStyle = {
-  width: '100%',
-  height: 48,
-  borderRadius: 14,
-  border: '1px solid rgba(255,255,255,0.12)',
-  outline: 'none',
-  textAlign: 'center',
-  fontSize: 20,
-  fontWeight: 900,
-  background: 'rgba(243,244,246,0.96)',
-  color: '#111827',
-  boxSizing: 'border-box',
-}
-
-const buttonStyle = {
-  width: '100%',
-  height: 58,
-  borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.08)',
-  fontSize: 18,
-  fontWeight: 850,
-  background: '#dbe7f7',
-  color: '#182235',
-  cursor: 'pointer',
-  boxShadow: '0 12px 24px rgba(0,0,0,0.18)',
-}
-
-const secondaryButtonStyle = {
-  width: '100%',
-  height: 58,
-  borderRadius: 18,
-  border: '1px solid rgba(255,255,255,0.18)',
-  fontSize: 17,
-  fontWeight: 750,
-  background: 'rgba(255,255,255,0.04)',
-  color: 'white',
-  cursor: 'pointer',
-}
-
-const listStyle = {
-  display: 'grid',
-  gap: 16,
-}
-
-const modalOverlayStyle = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.60)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  padding: 16,
-  zIndex: 1000,
-  backdropFilter: 'blur(6px)',
-  WebkitBackdropFilter: 'blur(6px)',
-}
-
-const modalStyle = {
-  width: '100%',
-  background:
-    'linear-gradient(180deg, rgba(15,34,63,0.96) 0%, rgba(10,23,43,0.98) 100%)',
-  border: '1px solid rgba(91,171,255,0.24)',
-  borderRadius: 26,
-  padding: 24,
-  boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-}
+                  className="interactive-card"
+                  style={{
+                    width: 42,
+                    height: 42,
+                    borderRadius: 14,
+                    border: '1px solid rgba(255,255,255,0.12)',
+                    background: 'rgba(255,255,
