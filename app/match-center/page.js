@@ -581,7 +581,14 @@ function ActiveLiveDot() {
   )
 }
 
-function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
+function ActiveMatchCard({
+  row,
+  onClick,
+  onCancel,
+  cancelling,
+  getPlayerPhotoUrl,
+  onPlayerClick,
+}) {
   const challengerRank = row.challenger_rank || rankByName(row.challenger)
   const opponentRank = row.opponent_rank || rankByName(row.opponent)
   const challengerTheme = getRankTheme(challengerRank)
@@ -816,30 +823,58 @@ function ActiveMatchCard({ row, onClick, getPlayerPhotoUrl, onPlayerClick }) {
           <Pill muted>📅 {formatDate(row.match_date) || '-'}</Pill>
         </div>
 
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onClick()
-          }}
-          className="interactive-card"
-          style={{
-            minHeight: 48,
-            padding: '0 18px',
-            borderRadius: 14,
-            border: '1px solid rgba(174,242,255,0.24)',
-            background:
-              'linear-gradient(180deg, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.07) 100%)',
-            color: '#c9f7ff',
-            fontSize: 14,
-            fontWeight: 900,
-            cursor: 'pointer',
-            boxShadow: '0 12px 28px rgba(0,0,0,0.18), 0 0 18px rgba(174,242,255,0.08)',
-            whiteSpace: 'nowrap',
-          }}
-        >
-          Enter Result
-        </button>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onClick()
+            }}
+            className="interactive-card"
+            style={{
+              minHeight: 48,
+              padding: '0 18px',
+              borderRadius: 14,
+              border: '1px solid rgba(174,242,255,0.24)',
+              background:
+                'linear-gradient(180deg, rgba(174,242,255,0.16) 0%, rgba(174,242,255,0.07) 100%)',
+              color: '#c9f7ff',
+              fontSize: 14,
+              fontWeight: 900,
+              cursor: 'pointer',
+              boxShadow: '0 12px 28px rgba(0,0,0,0.18), 0 0 18px rgba(174,242,255,0.08)',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Enter Result
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation()
+              onCancel()
+            }}
+            disabled={cancelling}
+            className="interactive-card"
+            style={{
+              minHeight: 48,
+              padding: '0 18px',
+              borderRadius: 14,
+              border: '1px solid rgba(255,132,132,0.22)',
+              background:
+                'linear-gradient(180deg, rgba(92,38,38,0.92) 0%, rgba(48,20,20,0.98) 100%)',
+              color: '#ffd8d8',
+              fontSize: 14,
+              fontWeight: 900,
+              cursor: cancelling ? 'not-allowed' : 'pointer',
+              opacity: cancelling ? 0.7 : 1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {cancelling ? 'Cancelling...' : 'Cancel Challenge'}
+          </button>
+        </div>
       </div>
     </div>
   )
@@ -1818,6 +1853,7 @@ export default function MatchCenterPage() {
   const [selectedPlayer, setSelectedPlayer] = useState(null)
   const [resultForm, setResultForm] = useState(getDefaultScoreForm())
   const [submittingResult, setSubmittingResult] = useState(false)
+  const [cancellingRow, setCancellingRow] = useState(null)
   const [toast, setToast] = useState(null)
 
   const [activeQuery, setActiveQuery] = useState('')
@@ -1974,6 +2010,24 @@ export default function MatchCenterPage() {
     return rows
   }, [completedChallenges, completedQuery, completedView])
 
+  function applyScorePreset(preset) {
+    setResultForm((prev) => applyPresetToScoreForm(preset, prev.winner))
+  }
+
+  function updateSetValue(index, field, value) {
+    setResultForm((prev) => {
+      const nextSets = [...prev.sets]
+      nextSets[index] = {
+        ...nextSets[index],
+        [field]: value,
+      }
+      return {
+        ...prev,
+        sets: nextSets,
+      }
+    })
+  }
+
   async function handleChallengeSubmit(e) {
     e.preventDefault()
     setSubmittingChallenge(true)
@@ -2117,6 +2171,68 @@ export default function MatchCenterPage() {
       showToast(err.message || 'Failed to submit result', 'error')
     } finally {
       setSubmittingResult(false)
+    }
+  }
+
+  async function handleCancelChallenge(row) {
+    try {
+      if (!row?.source_row) {
+        throw new Error('Missing source_row for this challenge')
+      }
+
+      const confirmed = window.confirm(
+        `Cancel the active challenge:\n\n${row.challenger} vs ${row.opponent}?`
+      )
+
+      if (!confirmed) return
+
+      setCancellingRow(String(row.source_row))
+
+      const res = await fetch('/api/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'cancel_challenge',
+          source_row: Number(row.source_row),
+        }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || data.raw || 'Failed to cancel challenge')
+      }
+
+      setFeedRows((prev) =>
+        prev.map((item) => {
+          if (String(item.source_row) !== String(row.source_row)) return item
+
+          return {
+            ...item,
+            status: 'Cancelled',
+            active: 'NO',
+            archived: 'YES',
+            winner: '',
+            score: '',
+          }
+        })
+      )
+
+      if (selectedMatch && String(selectedMatch.source_row) === String(row.source_row)) {
+        setSelectedMatch(null)
+        setResultForm(getDefaultScoreForm())
+      }
+
+      showToast('Challenge cancelled successfully', 'success')
+
+      setTimeout(() => {
+        loadData()
+      }, 250)
+    } catch (err) {
+      console.error('Cancel challenge failed:', err)
+      showToast(err.message || 'Failed to cancel challenge', 'error')
+    } finally {
+      setCancellingRow(null)
     }
   }
 
@@ -2604,6 +2720,8 @@ export default function MatchCenterPage() {
                         setSelectedMatch(row)
                         setResultForm(getDefaultScoreForm())
                       }}
+                      onCancel={() => handleCancelChallenge(row)}
+                      cancelling={cancellingRow === String(row.source_row)}
                       getPlayerPhotoUrl={getPlayerPhotoUrl}
                       onPlayerClick={setSelectedPlayer}
                     />
@@ -3163,4 +3281,4 @@ const modalStyle = {
   borderRadius: 26,
   padding: 24,
   boxShadow: '0 20px 60px rgba(0,0,0,0.35)',
-              }
+}
