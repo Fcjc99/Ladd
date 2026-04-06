@@ -234,8 +234,9 @@ function SignatureChampionMark() {
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 8,
-        padding: '8px 12px',
+        justifyContent: 'center',
+        width: 34,
+        height: 34,
         borderRadius: 999,
         background:
           'linear-gradient(180deg, rgba(174,242,255,0.14) 0%, rgba(255,255,255,0.05) 100%)',
@@ -245,23 +246,12 @@ function SignatureChampionMark() {
     >
       <span
         style={{
-          fontSize: 13,
+          fontSize: 15,
           lineHeight: 1,
           filter: 'drop-shadow(0 0 8px rgba(246,213,111,0.28))',
         }}
       >
         👑
-      </span>
-      <span
-        style={{
-          fontSize: 11,
-          fontWeight: 900,
-          letterSpacing: '0.18em',
-          textTransform: 'uppercase',
-          color: '#dffcff',
-        }}
-      >
-        Champion Crest
       </span>
     </div>
   )
@@ -320,20 +310,27 @@ function ChallengeMapCard({ title, players, emptyText }) {
                 border: '1px solid rgba(255,255,255,0.06)',
               }}
             >
-              <div
-                style={{
-                  fontSize: 15,
-                  fontWeight: 800,
-                  color: '#eef6ff',
-                }}
-              >
-                {item.player}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+                <RankBadge rank={item.rank} />
+                <div
+                  style={{
+                    fontSize: 15,
+                    fontWeight: 800,
+                    color: '#eef6ff',
+                    minWidth: 0,
+                  }}
+                >
+                  {item.player}
+                </div>
               </div>
               <div
                 style={{
-                  fontSize: 12,
+                  fontSize: 11,
                   fontWeight: 900,
-                  color: 'rgba(220,232,255,0.70)',
+                  color: 'rgba(220,232,255,0.56)',
+                  letterSpacing: '0.06em',
+                  textTransform: 'uppercase',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 #{item.rank}
@@ -346,15 +343,17 @@ function ChallengeMapCard({ title, players, emptyText }) {
   )
 }
 
-function ExternalMatchCard({ item }) {
+function ExternalMatchCard({ item, onClick }) {
   return (
     <div
       className="outside-match-card"
+      onClick={onClick}
       style={{
         borderRadius: 16,
         padding: 14,
         background: 'rgba(255,255,255,0.03)',
         border: '1px solid rgba(255,255,255,0.06)',
+        cursor: 'pointer',
       }}
     >
       <div
@@ -743,6 +742,7 @@ function PlayerDetailDrawer({
     result: 'WIN',
   })
   const [saving, setSaving] = useState(false)
+  const [editingEntryId, setEditingEntryId] = useState(null)
   const [saveMessage, setSaveMessage] = useState('')
 
   useEffect(() => {
@@ -753,6 +753,7 @@ function PlayerDetailDrawer({
       set_score: '',
       result: 'WIN',
     })
+    setEditingEntryId(null)
     setSaveMessage('')
   }, [player])
 
@@ -778,6 +779,29 @@ function PlayerDetailDrawer({
     })
 
   const externalRecord = getExternalRecord(playerExternalMatches)
+  const activeChallengeCount = canChallenge.length + canBeChallengedBy.length
+
+  function startEditingMatch(item) {
+    setEditingEntryId(item.entry_id || null)
+    setForm({
+      match_date: item.match_date || '',
+      team_name: item.team_name || '',
+      opponent_name: item.opponent_name || '',
+      set_score: item.set_score || '',
+      result: item.result || 'WIN',
+    })
+  }
+
+  function cancelEditingMatch() {
+    setEditingEntryId(null)
+    setForm({
+      match_date: '',
+      team_name: '',
+      opponent_name: '',
+      set_score: '',
+      result: 'WIN',
+    })
+  }
 
   async function handleSaveExternalMatch(e) {
     e.preventDefault()
@@ -789,11 +813,14 @@ function PlayerDetailDrawer({
 
       setSaving(true)
 
+      const action = editingEntryId ? 'update_external_match_log' : 'external_match_log'
+
       const res = await fetch('/api/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          action: 'external_match_log',
+          action,
+          entry_id: editingEntryId,
           player: row.player,
           match_date: form.match_date,
           team_name: form.team_name,
@@ -817,7 +844,9 @@ function PlayerDetailDrawer({
         result: 'WIN',
       })
 
-      setSaveMessage('Outside match saved')
+      const wasEditing = Boolean(editingEntryId)
+      setEditingEntryId(null)
+      setSaveMessage(wasEditing ? 'Outside match updated' : 'Outside match saved')
       setTimeout(() => setSaveMessage(''), 2200)
 
       if (onExternalMatchSaved) await onExternalMatchSaved()
@@ -938,6 +967,9 @@ function PlayerDetailDrawer({
               <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
                 <RankBadge rank={row.rank} />
                 <MoveChip move={row.move} />
+                {activeChallengeCount ? (
+                  <RecordPill label="Live" value={`${activeChallengeCount}`} />
+                ) : null}
               </div>
             </div>
           </div>
@@ -1020,27 +1052,76 @@ function PlayerDetailDrawer({
         >
           <div
             style={{
-              fontSize: 12,
-              fontWeight: 800,
-              letterSpacing: '0.16em',
-              textTransform: 'uppercase',
-              color: 'rgba(220,232,255,0.62)',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: 12,
               marginBottom: 14,
             }}
           >
-            Log Outside Match
+            <div
+              style={{
+                fontSize: 12,
+                fontWeight: 800,
+                letterSpacing: '0.16em',
+                textTransform: 'uppercase',
+                color: 'rgba(220,232,255,0.62)',
+              }}
+            >
+              {editingEntryId ? 'Edit Outside Match' : 'Log Outside Match'}
+            </div>
+
+            {editingEntryId ? (
+              <button
+                type="button"
+                onClick={cancelEditingMatch}
+                style={{
+                  height: 32,
+                  padding: '0 12px',
+                  borderRadius: 999,
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  background: 'rgba(255,255,255,0.05)',
+                  color: '#eef6ff',
+                  fontSize: 12,
+                  fontWeight: 800,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+            ) : null}
           </div>
 
           <form onSubmit={handleSaveExternalMatch}>
             <div style={{ display: 'grid', gap: 12 }}>
-              <DrawerInput
-                label="Date"
-                type="date"
-                value={form.match_date}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, match_date: e.target.value }))
-                }
-              />
+              <div
+                style={{
+                  display: 'grid',
+                  gap: 12,
+                  gridTemplateColumns: '1fr 1fr',
+                }}
+              >
+                <DrawerInput
+                  label="Date"
+                  type="date"
+                  value={form.match_date}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, match_date: e.target.value }))
+                  }
+                />
+
+                <DrawerSelect
+                  label="Result"
+                  value={form.result}
+                  onChange={(e) =>
+                    setForm((prev) => ({ ...prev, result: e.target.value }))
+                  }
+                  options={[
+                    { label: 'Win', value: 'WIN' },
+                    { label: 'Loss', value: 'LOSS' },
+                  ]}
+                />
+              </div>
 
               <DrawerInput
                 label="Team Name"
@@ -1069,18 +1150,6 @@ function PlayerDetailDrawer({
                 }
               />
 
-              <DrawerSelect
-                label="Result"
-                value={form.result}
-                onChange={(e) =>
-                  setForm((prev) => ({ ...prev, result: e.target.value }))
-                }
-                options={[
-                  { label: 'Win', value: 'WIN' },
-                  { label: 'Loss', value: 'LOSS' },
-                ]}
-              />
-
               <button
                 type="submit"
                 disabled={saving}
@@ -1099,7 +1168,7 @@ function PlayerDetailDrawer({
                   filter: saving ? 'saturate(0.8)' : 'none',
                 }}
               >
-                {saving ? 'Saving...' : 'Save Outside Match'}
+                {saving ? 'Saving...' : editingEntryId ? 'Update Outside Match' : 'Save Outside Match'}
               </button>
             </div>
           </form>
@@ -1145,8 +1214,9 @@ function PlayerDetailDrawer({
             <div style={{ display: 'grid', gap: 12 }}>
               {playerExternalMatches.map((item, index) => (
                 <ExternalMatchCard
-                  key={`${item.player}-${item.match_date}-${item.opponent_name}-${index}`}
+                  key={item.entry_id || `${item.player}-${item.match_date}-${index}`}
                   item={item}
+                  onClick={() => startEditingMatch(item)}
                 />
               ))}
             </div>
