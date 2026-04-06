@@ -2042,7 +2042,7 @@ export default function MatchCenterPage() {
       }
 
       const payload = {
-        action: 'challenge',
+        action: 'submit_challenge',
         challenger: challengeForm.challenger,
         challenger_rank: challengeForm.challenger_rank,
         opponent: challengeForm.opponent,
@@ -2125,7 +2125,7 @@ export default function MatchCenterPage() {
       }
 
       const payload = {
-        action: 'complete_match',
+        action: 'update_challenge_result',
         source_row: Number(selectedMatch.source_row),
         winner: resultForm.winner,
         score,
