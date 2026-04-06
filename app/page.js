@@ -224,8 +224,7 @@ function getTierLabel(rank) {
 function getExternalRecord(matches) {
   const wins = matches.filter((m) => normalizeUpper(m.result) === 'WIN').length
   const losses = matches.filter((m) => normalizeUpper(m.result) === 'LOSS').length
-  const total = wins + losses
-  const pct = total ? Math.round((wins / total) * 100) : 0
+  const pct = wins + losses ? Math.round((wins / (wins + losses)) * 100) : 0
   return { wins, losses, pct }
 }
 
@@ -271,6 +270,7 @@ function SignatureChampionMark() {
 function ChallengeMapCard({ title, players, emptyText }) {
   return (
     <div
+      className="drawer-section-card"
       style={{
         borderRadius: 18,
         padding: 14,
@@ -296,6 +296,10 @@ function ChallengeMapCard({ title, players, emptyText }) {
           style={{
             fontSize: 14,
             color: 'rgba(220,232,255,0.68)',
+            borderRadius: 14,
+            padding: '12px 12px',
+            background: 'rgba(255,255,255,0.03)',
+            border: '1px dashed rgba(255,255,255,0.10)',
           }}
         >
           {emptyText}
@@ -345,6 +349,7 @@ function ChallengeMapCard({ title, players, emptyText }) {
 function ExternalMatchCard({ item }) {
   return (
     <div
+      className="outside-match-card"
       style={{
         borderRadius: 16,
         padding: 14,
@@ -364,9 +369,11 @@ function ExternalMatchCard({ item }) {
       >
         <div
           style={{
-            fontSize: 14,
+            fontSize: 12,
             fontWeight: 800,
-            color: '#eef6ff',
+            color: 'rgba(220,232,255,0.66)',
+            letterSpacing: '0.04em',
+            textTransform: 'uppercase',
           }}
         >
           {formatDate(item.match_date)}
@@ -374,13 +381,14 @@ function ExternalMatchCard({ item }) {
 
         <div
           style={{
-            fontSize: 12,
-            fontWeight: 900,
-            color: '#dffcff',
-            padding: '6px 10px',
+            fontSize: 13,
+            fontWeight: 950,
+            color: '#eefcff',
+            padding: '7px 12px',
             borderRadius: 999,
-            background: 'rgba(174,242,255,0.08)',
-            border: '1px solid rgba(174,242,255,0.16)',
+            background: 'rgba(174,242,255,0.10)',
+            border: '1px solid rgba(174,242,255,0.20)',
+            boxShadow: '0 8px 16px rgba(0,0,0,0.14)',
           }}
         >
           {item.set_score || '—'}
@@ -402,21 +410,24 @@ function ExternalMatchCard({ item }) {
 
       <div
         style={{
-          fontSize: 14,
-          color: 'rgba(220,232,255,0.76)',
+          fontSize: 15,
+          color: '#eef6ff',
+          fontWeight: 800,
           marginBottom: 6,
+          lineHeight: 1.25,
         }}
       >
-        <strong style={{ color: '#eef6ff' }}>Team:</strong> {item.team_name || '—'}
+        {item.team_name || '—'}
       </div>
 
       <div
         style={{
           fontSize: 14,
           color: 'rgba(220,232,255,0.76)',
+          lineHeight: 1.25,
         }}
       >
-        <strong style={{ color: '#eef6ff' }}>Opponent:</strong> {item.opponent_name || '—'}
+        vs {item.opponent_name || '—'}
       </div>
     </div>
   )
@@ -732,6 +743,7 @@ function PlayerDetailDrawer({
     result: 'WIN',
   })
   const [saving, setSaving] = useState(false)
+  const [saveMessage, setSaveMessage] = useState('')
 
   useEffect(() => {
     setForm({
@@ -741,6 +753,7 @@ function PlayerDetailDrawer({
       set_score: '',
       result: 'WIN',
     })
+    setSaveMessage('')
   }, [player])
 
   if (!player) return null
@@ -804,6 +817,9 @@ function PlayerDetailDrawer({
         result: 'WIN',
       })
 
+      setSaveMessage('Outside match saved')
+      setTimeout(() => setSaveMessage(''), 2200)
+
       if (onExternalMatchSaved) await onExternalMatchSaved()
     } catch (err) {
       alert(err.message || 'Failed to save outside match')
@@ -827,7 +843,7 @@ function PlayerDetailDrawer({
       }}
     >
       <div
-        className="fade-in"
+        className="fade-in player-drawer-panel"
         onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
@@ -838,7 +854,7 @@ function PlayerDetailDrawer({
             'linear-gradient(180deg, rgba(10,23,43,0.985) 0%, rgba(7,17,32,0.995) 100%)',
           borderLeft: `1px solid ${theme.border}`,
           boxShadow: '-20px 0 60px rgba(0,0,0,0.35)',
-          padding: 20,
+          padding: 18,
         }}
       >
         <div
@@ -882,6 +898,7 @@ function PlayerDetailDrawer({
         </div>
 
         <div
+          className="drawer-section-card"
           style={{
             borderRadius: 24,
             padding: 18,
@@ -943,7 +960,16 @@ function PlayerDetailDrawer({
           </div>
         </div>
 
-        <div style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
+        <div
+          style={{
+            height: 1,
+            margin: '6px 0 16px',
+            background:
+              'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(174,242,255,0.18) 50%, rgba(255,255,255,0) 100%)',
+          }}
+        />
+
+        <div className="drawer-tight-stack" style={{ display: 'grid', gap: 14, marginBottom: 16 }}>
           <ChallengeMapCard
             title="Players This Rank Can Challenge"
             players={canChallenge}
@@ -957,6 +983,33 @@ function PlayerDetailDrawer({
         </div>
 
         <div
+          style={{
+            height: 1,
+            margin: '0 0 16px',
+            background:
+              'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0) 100%)',
+          }}
+        />
+
+        {saveMessage ? (
+          <div
+            style={{
+              borderRadius: 16,
+              padding: '12px 14px',
+              marginBottom: 16,
+              background: 'rgba(41,84,54,0.22)',
+              border: '1px solid rgba(132,255,172,0.22)',
+              color: '#d8ffe4',
+              fontSize: 14,
+              fontWeight: 800,
+            }}
+          >
+            {saveMessage}
+          </div>
+        ) : null}
+
+        <div
+          className="drawer-section-card"
           style={{
             borderRadius: 20,
             padding: 16,
@@ -1042,7 +1095,8 @@ function PlayerDetailDrawer({
                   fontSize: 15,
                   fontWeight: 900,
                   cursor: saving ? 'not-allowed' : 'pointer',
-                  opacity: saving ? 0.7 : 1,
+                  opacity: saving ? 0.72 : 1,
+                  filter: saving ? 'saturate(0.8)' : 'none',
                 }}
               >
                 {saving ? 'Saving...' : 'Save Outside Match'}
@@ -1052,6 +1106,7 @@ function PlayerDetailDrawer({
         </div>
 
         <div
+          className="drawer-section-card"
           style={{
             borderRadius: 20,
             padding: 16,
@@ -1075,11 +1130,16 @@ function PlayerDetailDrawer({
           {playerExternalMatches.length === 0 ? (
             <div
               style={{
+                borderRadius: 16,
+                padding: 16,
+                background: 'rgba(255,255,255,0.03)',
+                border: '1px dashed rgba(255,255,255,0.12)',
+                color: 'rgba(220,232,255,0.70)',
                 fontSize: 14,
-                color: 'rgba(220,232,255,0.68)',
+                lineHeight: 1.4,
               }}
             >
-              No outside matches logged yet.
+              No outside matches logged yet. Use the form above to add results played outside the ladder.
             </div>
           ) : (
             <div style={{ display: 'grid', gap: 12 }}>
@@ -2078,7 +2138,35 @@ export default function LiveRankingPage() {
           }
 
           .podium-card-1 .leader-name {
-            font-size: 50px !important;
+            font-size: 44px !important;
+          }
+
+          .podium-mobile-rank1 {
+            margin-bottom: 4px !important;
+          }
+
+          .podium-mobile-rank2,
+          .podium-mobile-rank3 {
+            opacity: 0.98;
+          }
+
+          .player-drawer-panel {
+            max-width: 100% !important;
+            padding: 14px !important;
+          }
+
+          .drawer-section-card {
+            padding: 14px !important;
+            border-radius: 18px !important;
+          }
+
+          .drawer-tight-stack {
+            gap: 10px !important;
+          }
+
+          .outside-match-card {
+            padding: 12px !important;
+            border-radius: 14px !important;
           }
 
           .hero-spotlight-behind-photo {
@@ -2469,6 +2557,18 @@ export default function LiveRankingPage() {
               )}
             </section>
 
+            <div
+              className="fade-in"
+              style={{
+                animationDelay: '0.40s',
+                height: 1,
+                background:
+                  'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(246,213,111,0.16) 25%, rgba(174,242,255,0.18) 50%, rgba(221,230,240,0.16) 75%, rgba(255,255,255,0) 100%)',
+                marginTop: -8,
+                marginBottom: -8,
+              }}
+            />
+
             <section
               className="fade-in"
               style={{
@@ -2477,8 +2577,8 @@ export default function LiveRankingPage() {
                 borderRadius: 28,
                 padding: '18px 14px 8px',
                 background:
-                  'linear-gradient(180deg, rgba(210,150,103,0.08) 0%, rgba(210,150,103,0.02) 48%, rgba(255,255,255,0.00) 100%)',
-                border: '1px solid rgba(210,150,103,0.12)',
+                  'linear-gradient(180deg, rgba(210,150,103,0.10) 0%, rgba(210,150,103,0.03) 52%, rgba(255,255,255,0.00) 100%)',
+                border: '1px solid rgba(210,150,103,0.16)',
                 boxShadow: '0 18px 34px rgba(210,150,103,0.05)',
               }}
             >
